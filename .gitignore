@@ -4,6 +4,7 @@ luac.out
 # TIC-80 folders
 .local/
 archive/
+*.gif
 
 # luarocks build files
 *.src.rock

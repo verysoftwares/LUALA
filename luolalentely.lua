@@ -7,6 +7,8 @@ cos=math.cos
 sin=math.sin
 pi=math.pi
 fmt=string.format
+ins=table.insert
+rem=table.remove
 t=0
 x=96+10
 y=24+48
@@ -14,6 +16,8 @@ a=pi/2
 grav=0.2
 cam={x=0,y=0}
 old_cam={x=0,y=0}	
+
+shots={}
 
 function update()
 	--cls(0)
@@ -34,6 +38,7 @@ function update()
 	if btn(1) then x=x+cos(a); y=y+sin(a); dx=cos(a); dy=sin(a) end
 	if btn(2) then a=a-0.1; da=-0.1 end
 	if btn(3) then a=a+0.1; da=0.1 end
+	if btnp(4) then ins(shots,{x=x-3,y=y-3,dx=cos(a+pi)*3,dy=sin(a+pi)*3}) end
 
 	y=y+grav
 	dy=dy+grav
@@ -75,6 +80,37 @@ function update()
 	end
 
 	end
+	
+	for i=#shots,1,-1 do
+			local sh=shots[i]
+			if sh.oldpos then
+					for lx=0,7 do for ly=0,7 do
+							if sprpix(32,lx,ly)~=0 then
+									local p=pixels[posstr(sh.oldpos.x+lx,sh.oldpos.y+ly)]
+									if not p then
+											pix(-old_cam.x+sh.oldpos.x+lx,-old_cam.y+sh.oldpos.y+ly,0)
+									else pix(-old_cam.x+sh.oldpos.x+lx,-old_cam.y+sh.oldpos.y+ly,p) end
+							end
+					end end
+			end
+	end
+	for i=#shots,1,-1 do
+			local sh=shots[i]
+			sh.x=sh.x+sh.dx; sh.y=sh.y+sh.dy
+			sh.oldpos={x=sh.x,y=sh.y}
+			local hit=false
+			for lx=0,7 do for ly=0,7 do
+					if sprpix(32,lx,ly)~=0 and is_solid(pixels[posstr(sh.x+lx,sh.y+ly)]) then
+							pix(-cam.x+sh.x+lx,-cam.y+sh.y+ly,1)
+							pixels[posstr(sh.x+lx,sh.y+ly)]=1
+							hit=true
+					end
+			end end
+			if not hit then
+			spr(32,sh.x-cam.x,sh.y-cam.y,0)
+			else rem(shots,i) end
+	end
+
 	points={{-cam.x+x-cos(a)*8,-cam.y+y-sin(a)*8},
          {-cam.x+x-cos(a-2*pi/3-0.3)*11,-cam.y+y-sin(a-2*pi/3-0.3)*11},
 									{-cam.x+x+cos(a)*4,-cam.y+y+4*sin(a)},
@@ -123,7 +159,7 @@ function load()
 				while not pixels[posstr(rx,ry)] do
 				ry=ry+1
 				end
-				if pixels[posstr(rx,ry)]==2 or oob(rx,ry-16) then trace('bad spawn, rerolling'); goto attempt end
+				if pixels[posstr(rx,ry)]==2 or oob(rx,ry-16) or is_solid(pixels[posstr(rx,ry-16)]) then trace('bad spawn, rerolling'); goto attempt end
 				spr(64,rx-12,ry-6,0,1,0,0,3,1)
 				for x=rx-12,rx+12 do for y=ry-6,ry do
 				if pix(x,y)~=0 then pixels[posstr(x,y)]=pix(x,y) end
@@ -225,6 +261,10 @@ end
 
 function oob(x,y)
 		return x<0 or y<0 or x>=240*2 or y>=136*2
+end
+
+function is_solid(px)
+		return px==13 or px==14 or px==15
 end
 
 -- my lua implementation of Perlin noise
