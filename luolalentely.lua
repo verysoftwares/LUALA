@@ -23,45 +23,16 @@ shots={}
 function update()
 	--cls(0)
 
-	shipprocess()
+		shipprocess()
 	--spr(1+t%60//30*2,x,y,14,3,0,0,2,2)
 	--print("HELLO WORLD!",84,84)
+		environprocess()
+		
+		shipdraw()
 	
-	for i=#shots,1,-1 do
-			local sh=shots[i]
-			if sh.oldpos then
-					for lx=0,7 do for ly=0,7 do
-							--if sprpix(32,lx,ly)~=0 then
-									local p=pixels[posstr(sh.oldpos.x+lx,sh.oldpos.y+ly)]
-									if not p then
-											pix(-old_cam.sx+math.floor(sh.oldpos.x+lx),-old_cam.sy+math.floor(sh.oldpos.y+ly),0)
-									else pix(-old_cam.sx+sh.oldpos.x+lx,-old_cam.sy+sh.oldpos.y+ly,p) end
-							--end
-					end end
-			end
-	end
-	for i=#shots,1,-1 do
-			local sh=shots[i]
-			sh.x=sh.x+sh.dx; sh.y=sh.y+sh.dy
-			sh.oldpos={x=sh.x,y=sh.y}
-			local hit=false
-			for lx=0,7 do for ly=0,7 do
-					if sprpix(32,lx,ly)~=0 and is_solid(pixels[posstr(sh.x+lx,sh.y+ly)]) then
-							pix(-cam.sx+sh.x+lx,-cam.sy+sh.y+ly,1)
-							pixels[posstr(sh.x+lx,sh.y+ly)]=1
-							hit=true
-					end
-			end end
-			if not hit then
-			spr(32,sh.x-cam.sx,sh.y-cam.sy,0)
-			else rem(shots,i) end
-	end
+		--cam.sx=x-240/2; cam.sy=y-136/2
 	
-	shipdraw()
-
-	--cam.sx=x-240/2; cam.sy=y-136/2
-
-	t=t+1
+		t=t+1
 end
 
 ships={}
@@ -83,8 +54,8 @@ function shipprocess()
 		end end
 		
 		s.dx=0; s.dy=0; s.da=0
-		if btn((j-1)*8) then s.x=s.x-cos(s.a); s.y=s.y-sin(s.a); dx=-cos(a); dy=-sin(a) end
-		if btn((j-1)*8+1) then s.x=s.x+cos(s.a); s.y=s.y+sin(s.a); dx=cos(a); dy=sin(a) end
+		if btn((j-1)*8) then s.x=s.x-cos(s.a); s.y=s.y-sin(s.a); s.dx=-cos(s.a); s.dy=-sin(s.a) end
+		if btn((j-1)*8+1) then s.x=s.x+cos(s.a); s.y=s.y+sin(s.a); s.dx=cos(s.a); s.dy=sin(s.a) end
 		if btn((j-1)*8+2) then s.a=s.a-0.1; s.da=-0.1 end
 		if btn((j-1)*8+3) then s.a=s.a+0.1; s.da=0.1 end
 		if btnp((j-1)*8+4) then ins(shots,{x=s.x-3,y=s.y-3,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3}) end
@@ -100,9 +71,9 @@ function shipprocess()
 		if hit==2 or hit==3 or hit==4 then
 				transition(j,s,-cam.sx+s.x,-cam.sy+s.y)
 		end
-		forcetransition(j,s,-cam.sx+x,-cam.sy+y)
+		forcetransition(j,s,-cam.sx+s.x,-cam.sy+s.y)
 		
-		local points={{-cam.sx+s.x-cos(s.a)*8,-cam.sy+s.y-sin(s.a)*8},
+		local points={--{-cam.sx+s.x-cos(s.a)*8,-cam.sy+s.y-sin(s.a)*8},
 		              {-cam.sx+s.x-cos(s.a-2*pi/3-0.3)*11,-cam.sy+s.y-sin(s.a-2*pi/3-0.3)*11},
 																--{-cam.sx+x+cos(a)*4,-cam.sy+y+4*sin(a)},
 																{-cam.sx+s.x-cos(s.a+2*pi/3+0.3)*11,-cam.sy+s.y-sin(s.a+2*pi/3+0.3)*11}}	
@@ -116,21 +87,61 @@ function shipprocess()
 	
 		end
 
+		end
+end
+
+function environprocess()
 		-- flashing transitions
-		-- these have to be tied to the ship
 		for x=0,240*2-1 do for y=136-2,136-1+2 do
 			if pixels[posstr(x,y)]==2 then
-				pix(x-cam.sx,y-cam.sy,2+(t*0.2)%3)
+				for j,s in ipairs(ships) do
+				pix(x-cams[j].sx,y-cams[j].sy,2+(t*0.2)%3)
+				end
 			end
 		end end
 		for x=240-2,240-1+2 do for y=0,136*2-1 do
 			if pixels[posstr(x,y)]==2 then
-				pix(x-cam.sx,y-cam.sy,2+(t*0.2)%3)
+				for j,s in ipairs(ships) do
+				pix(x-cams[j].sx,y-cams[j].sy,2+(t*0.2)%3)
+				end
 			end
 		end end
-
-
+		for i=#shots,1,-1 do
+				local sh=shots[i]
+				if sh.oldpos then
+						for lx=0,7 do for ly=0,7 do
+								--if sprpix(32,lx,ly)~=0 then
+										local p=pixels[posstr(sh.oldpos.x+lx,sh.oldpos.y+ly)]
+										for j,s in ipairs(ships) do
+										if not p then
+												pix(-old_cams[j].sx+math.floor(sh.oldpos.x+lx),-old_cams[j].sy+math.floor(sh.oldpos.y+ly),0)
+										else pix(-old_cams[j].sx+sh.oldpos.x+lx,-old_cams[j].sy+sh.oldpos.y+ly,p) end
+										end
+								--end
+						end end
+				end
 		end
+		for i=#shots,1,-1 do
+				local sh=shots[i]
+				sh.x=sh.x+sh.dx; sh.y=sh.y+sh.dy
+				sh.oldpos={x=sh.x,y=sh.y}
+				local hit=false
+				for lx=0,7 do for ly=0,7 do
+						if sprpix(32,lx,ly)~=0 and is_solid(pixels[posstr(sh.x+lx,sh.y+ly)]) then
+								for j,s in ipairs(ships) do
+								pix(-cams[j].sx+sh.x+lx,-cams[j].sy+sh.y+ly,1)
+								end
+								pixels[posstr(sh.x+lx,sh.y+ly)]=1
+								hit=true
+						end
+				end end
+				if not hit then
+				for j,s in ipairs(ships) do
+				spr(32,sh.x-cams[j].sx,sh.y-cams[j].sy,0)
+				end
+				else rem(shots,i) end
+		end
+		
 end
 
 function shipdraw()
@@ -169,25 +180,15 @@ function load()
 
 		if py==136*2-1 then
 				cls(0)
+
+				ships[1]=create_base(0,240-1,0,136-1)
+
 				for x=0,240-1 do for y=0,136-1 do
 						if pixels[posstr(x,y)] then
 								pix(x,y,pixels[posstr(x,y)])
 						end
 				end end				
-				::attempt::
-				local rx,ry=math.random(0,240-1),math.random(0,136-1)
-				while pixels[posstr(rx,ry)] do
-				rx,ry=math.random(0,240-1),math.random(0,136-1)
-				end
-				while not pixels[posstr(rx,ry)] do
-				ry=ry+1
-				end
-				if pixels[posstr(rx,ry)]==2 or oob(rx,ry-16) or is_solid(pixels[posstr(rx,ry-16)]) then trace('bad spawn, rerolling'); goto attempt end
-				spr(64,rx-12,ry-6,0,1,0,0,3,1)
-				for x=rx-12,rx+12 do for y=ry-6,ry do
-				if pix(x,y)~=0 then pixels[posstr(x,y)]=pix(x,y) end
-				end end
-				ships[1]={x=rx,y=ry-16,a=pi/2}
+
 				TIC=update; trace('Generation complete.')
 				return
 		end
@@ -228,6 +229,28 @@ function load()
 		print(fmt('Generating map %d...',seed),240/2-tw/2,136/2+12)
 		rectb(8,136/2-2,240-20+4,12,13)
 		rect(10,136/2,py/(136*2-1)*(240-20),8,6)
+end
+
+function create_base(minx,maxx,miny,maxy)
+		--cls(0)
+		local rx,ry=math.random(minx,maxx),math.random(miny,maxy)
+		while pixels[posstr(rx,ry)] do
+		rx,ry=math.random(minx,maxx),math.random(miny,maxy)
+		end
+		while not pixels[posstr(rx,ry)] do
+		ry=ry+1
+		end
+		if pixels[posstr(rx,ry)]==2 or oob(rx,ry-16) or is_solid(pixels[posstr(rx,ry-16)]) then trace('bad spawn, rerolling'); return create_base(minx,maxx,miny,maxy) end
+		--spr(64,rx-12-minx,ry-6-miny,0,1,0,0,3,1)
+		for x=0,24-1 do for y=2,8-1 do
+		--if pix(x-minx,y-miny)~=0 then pixels[posstr(x,y)]=pix(x,y) end
+		local sp= sprpix(64+math.floor(x/8),x%8,y)
+		if sp~=0 then
+				pixels[posstr(rx-12+x,ry-6+y-2)]=sp
+		end
+		end end
+		local newship={x=rx,y=ry-16,a=pi/2}
+		return newship
 end
 
 TIC=load
