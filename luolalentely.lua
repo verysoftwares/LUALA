@@ -156,44 +156,28 @@ TIC=load
 
 function transition(tx,ty)
 		if ty>=134 and ty<136 and dy>0 then
-				cls(0)
 				cam.y=cam.y+136
-				for x=cam.x,cam.x+240-1 do for y=136,136*2-1 do
-						if pixels[posstr(x,y)] then
-								pix(x-cam.x,y-cam.y,pixels[posstr(x,y)])
-						end
-				end end
 				trans=true
 		end
 		if ty>=0 and ty<2 and dy<0 then
-				cls(0)
 				cam.y=cam.y-136
-				for x=cam.x,cam.x+240-1 do for y=0,136-1 do
-						if pixels[posstr(x,y)] then
-								pix(x-cam.x,y-cam.y,pixels[posstr(x,y)])
-						end
-				end end
 				trans=true
 		end
 		if tx>=238 and tx<240 and dx>0 then
-				cls(0)
 				cam.x=cam.x+240
-				for x=240,240*2-1 do for y=cam.y,cam.y+136-1 do
-						if pixels[posstr(x,y)] then
-								pix(x-cam.x,y-cam.y,pixels[posstr(x,y)])
-						end
-				end end
 				trans=true
 		end
 		if tx>=0 and tx<2 and dx<0 then
-				cls(0)
 				cam.x=cam.x-240
-				for x=0,240-1 do for y=cam.y,cam.y+136-1 do
+				trans=true
+		end
+		if trans then
+				cls(0)
+				for x=cam.x,cam.x+240-1 do for y=cam.y,cam.y+136-1 do
 						if pixels[posstr(x,y)] then
 								pix(x-cam.x,y-cam.y,pixels[posstr(x,y)])
 						end
 				end end
-				trans=true
 		end
 end
 
