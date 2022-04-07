@@ -50,6 +50,7 @@ function update()
 			transition(-cam.x+x,-cam.y+y)
 	end
 	forcetransition(-cam.x+x,-cam.y+y)
+	
 	local points={--{-cam.x+x-cos(a)*8,-cam.y+y-sin(a)*8},
 	              {-cam.x+x-cos(a-2*pi/3-0.3)*11,-cam.y+y-sin(a-2*pi/3-0.3)*11},
 															--{-cam.x+x+cos(a)*4,-cam.y+y+4*sin(a)},
@@ -111,7 +112,7 @@ function load()
 				while not pixels[posstr(rx,ry)] do
 				ry=ry+1
 				end
-				if pixels[posstr(rx,ry)]==2 then trace('bad spawn, rerolling'); goto attempt end
+				if pixels[posstr(rx,ry)]==2 or oob(rx,ry-16) then trace('bad spawn, rerolling'); goto attempt end
 				spr(64,rx-12,ry-6,0,1,0,0,3,1)
 				for x=rx-12,rx+12 do for y=ry-6,ry do
 				if pix(x,y)~=0 then pixels[posstr(x,y)]=pix(x,y) end
