@@ -49,6 +49,7 @@ function update()
 	if hit==2 or hit==3 or hit==4 then
 			transition(-cam.x+x,-cam.y+y)
 	end
+	forcetransition(-cam.x+x,-cam.y+y)
 	local points={--{-cam.x+x-cos(a)*8,-cam.y+y-sin(a)*8},
 	              {-cam.x+x-cos(a-2*pi/3-0.3)*11,-cam.y+y-sin(a-2*pi/3-0.3)*11},
 															--{-cam.x+x+cos(a)*4,-cam.y+y+4*sin(a)},
@@ -174,8 +175,37 @@ function transition(tx,ty)
 		if trans then
 				cls(0)
 				for x=cam.x,cam.x+240-1 do for y=cam.y,cam.y+136-1 do
-						if pixels[posstr(x,y)] then
-								pix(x-cam.x,y-cam.y,pixels[posstr(x,y)])
+						local p=pixels[posstr(x,y)]
+						if p then
+								pix(x-cam.x,y-cam.y,p)
+						end
+				end end
+		end
+end
+
+function forcetransition(tx,ty)
+		if ty>=136 and dy>0 then
+				cam.y=cam.y+136
+				trans=true
+		end
+		if ty<0 and dy<0 then
+				cam.y=cam.y-136
+				trans=true
+		end
+		if tx>=240 and dx>0 then
+				cam.x=cam.x+240
+				trans=true
+		end
+		if tx<0 and dx<0 then
+				cam.x=cam.x-240
+				trans=true
+		end
+		if trans then
+				cls(0)
+				for x=cam.x,cam.x+240-1 do for y=cam.y,cam.y+136-1 do
+						local p=pixels[posstr(x,y)]
+						if p then
+								pix(x-cam.x,y-cam.y,p)
 						end
 				end end
 		end
