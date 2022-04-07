@@ -85,12 +85,12 @@ function update()
 			local sh=shots[i]
 			if sh.oldpos then
 					for lx=0,7 do for ly=0,7 do
-							if sprpix(32,lx,ly)~=0 then
+							--if sprpix(32,lx,ly)~=0 then
 									local p=pixels[posstr(sh.oldpos.x+lx,sh.oldpos.y+ly)]
 									if not p then
 											pix(-old_cam.x+sh.oldpos.x+lx,-old_cam.y+sh.oldpos.y+ly,0)
 									else pix(-old_cam.x+sh.oldpos.x+lx,-old_cam.y+sh.oldpos.y+ly,p) end
-							end
+							--end
 					end end
 			end
 	end
