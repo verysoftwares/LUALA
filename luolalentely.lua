@@ -14,33 +14,80 @@ x=96+10
 y=24+48
 a=pi/2
 grav=0.2
-cams={{sx=0,sy=0},{sx=240,sy=136}}
-old_cams={}
-for i=1,4 do old_cams[i]={sx=0,sy=0} end
 
 shots={}
 
 function update()
 	--cls(0)
-
-		shipprocess()
+		for j=1,#ships do
+		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+		--clear_ship_trails(j)
+		--shipprocess(j)
+		--environprocess(j)		
+		shipdraw(j)
+		end
+	
 	--spr(1+t%60//30*2,x,y,14,3,0,0,2,2)
 	--print("HELLO WORLD!",84,84)
-		environprocess()
-		
-		shipdraw()
-	
 		--cam.sx=x-240/2; cam.sy=y-136/2
 	
 		t=t+1
 end
 
+function cam_init(j)
+		if j==1 then 
+				if #ships==2 then
+						--for i=0,3 do line(240/2-2+i,0,240/2-2+i,136,8) end
+						cams={{sx=0,sy=0,ax=0,ay=0,aw=240/2-2,ah=136},
+					 	     {sx=240,sy=136,ax=240/2+2,ay=0,aw=240/2-2,ah=136}}
+				elseif #ships==3 then
+						--for i=0,3 do line(240/2-2+i,0,240/2-2+i,136/2-2,8) end
+						--for i=0,3 do line(0,136/2-2+i,240,136/2-2+i,8) end
+						cams={{sx=0,sy=0,ax=0,ay=0,aw=240/2-2,ah=136/2-2},
+					 	     {sx=240,sy=136,ax=240/2+2,ay=0,aw=240/2-2,ah=136/2-2},
+												{sx=240,sy=0,ax=240/2-2-(240/2-2)/2,ay=136/2+2,aw=240/2-2,ah=136/2-2}}
+				end
+		end
+		
+		old_cams={}
+		for i=1,4 do old_cams[i]={sx=0,sy=0} end
+
+		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+		cls(0)
+		cams[j].x=ships[j].x-cams[j].aw/2
+		if cams[j].x<cams[j].sx then
+				cams[j].x=cams[j].sx
+		end
+		if cams[j].x>=cams[j].sx+240-cams[j].aw then
+				cams[j].x=cams[j].sx+240-cams[j].aw
+		end
+		if #ships==2 then
+		cams[j].y=ships[j].y-136/2
+		elseif #ships==3 then
+		cams[j].y=ships[j].y-(136/2)/2
+		end
+		if cams[j].y<cams[j].sy then
+				cams[j].y=cams[j].sy
+		end
+		if cams[j].y>=cams[j].sy+136-cams[j].ah then
+				cams[j].y=cams[j].sy+136-cams[j].ah
+		end
+		for x=0,240/2-2-1 do for y=0,136-1 do
+				local p=pixels[posstr(cams[j].sx+(cams[j].x-cams[j].sx)+x,cams[j].sy+(cams[j].y-cams[j].sy)+y)]
+				if p then
+						pix(cams[j].ax+x,cams[j].ay+y,p)
+				end
+		end end		
+		
+end
+
 ships={}
 
-function shipprocess()
-		for j,s in ipairs(ships) do
+function clear_ship_trails(j)
+		local s=ships[j]
 		local cam=cams[j]
 		local old_cam=old_cams[j]
+
 		if not s.trans then
 		line(-old_cam.sx+s.x-cos(s.a)*8,-old_cam.sy+s.y-sin(s.a)*8,-old_cam.sx+s.x-cos(s.a-2*pi/3-0.3)*11,-old_cam.sy+s.y-sin(s.a-2*pi/3-0.3)*11,0)
 		line(-old_cam.sx+s.x-cos(s.a-2*pi/3-0.3)*11,-old_cam.sy+s.y-sin(s.a-2*pi/3-0.3)*11,-old_cam.sx+s.x+cos(s.a)*4,-old_cam.sy+s.y+4*sin(s.a),0)
@@ -53,6 +100,13 @@ function shipprocess()
 						pix(bx-cam.sx,by-cam.sy,p)
 				end
 		end end
+		
+end
+
+function shipprocess(j)
+		local s=ships[j]
+		local cam=cams[j]
+		local old_cam=old_cams[j]
 		
 		s.dx=0; s.dy=0; s.da=0
 		if btn((j-1)*8) then s.x=s.x-cos(s.a); s.y=s.y-sin(s.a); s.dx=-cos(s.a); s.dy=-sin(s.a) end
@@ -87,24 +141,18 @@ function shipprocess()
 		end
 	
 		end
-
-		end
 end
 
-function environprocess()
+function environprocess(j)
 		-- flashing transitions
 		for x=0,240*2-1 do for y=136-2,136-1+2 do
 			if pixels[posstr(x,y)]==2 then
-				for j,s in ipairs(ships) do
 				pix(x-cams[j].sx,y-cams[j].sy,2+(t*0.2)%3)
-				end
 			end
 		end end
 		for x=240-2,240-1+2 do for y=0,136*2-1 do
 			if pixels[posstr(x,y)]==2 then
-				for j,s in ipairs(ships) do
 				pix(x-cams[j].sx,y-cams[j].sy,2+(t*0.2)%3)
-				end
 			end
 		end end
 		for i=#shots,1,-1 do
@@ -113,11 +161,9 @@ function environprocess()
 						for lx=0,7 do for ly=0,7 do
 								--if sprpix(32,lx,ly)~=0 then
 										local p=pixels[posstr(sh.oldpos.x+lx,sh.oldpos.y+ly)]
-										for j,s in ipairs(ships) do
 										if not p then
 												pix(-old_cams[j].sx+math.floor(sh.oldpos.x+lx),-old_cams[j].sy+math.floor(sh.oldpos.y+ly),0)
 										else pix(-old_cams[j].sx+sh.oldpos.x+lx,-old_cams[j].sy+sh.oldpos.y+ly,p) end
-										end
 								--end
 						end end
 				end
@@ -129,29 +175,25 @@ function environprocess()
 				local hit=false
 				for lx=0,7 do for ly=0,7 do
 						if sprpix(32,lx,ly)~=0 and is_solid(pixels[posstr(sh.x+lx,sh.y+ly)]) then
-								for j,s in ipairs(ships) do
 								pix(-cams[j].sx+sh.x+lx,-cams[j].sy+sh.y+ly,1)
-								end
 								pixels[posstr(sh.x+lx,sh.y+ly)]=1
 								hit=true
 						end
 				end end
 				if not hit then
-				for j,s in ipairs(ships) do
 				spr(32,sh.x-cams[j].sx,sh.y-cams[j].sy,0)
-				end
 				else rem(shots,i) end
 		end
 		
 end
 
-function shipdraw()
-		for j,s in ipairs(ships) do
+function shipdraw(j)
+		local s=ships[j]
 		local cam=cams[j]
-		points={{-cam.sx+s.x-cos(s.a)*8,-cam.sy+s.y-sin(s.a)*8},
-	         {-cam.sx+s.x-cos(s.a-2*pi/3-0.3)*11,-cam.sy+s.y-sin(s.a-2*pi/3-0.3)*11},
-										{-cam.sx+s.x+cos(s.a)*4,-cam.sy+s.y+4*sin(s.a)},
-										{-cam.sx+s.x-cos(s.a+2*pi/3+0.3)*11,-cam.sy+s.y-sin(s.a+2*pi/3+0.3)*11}}
+		points={{s.x-cos(s.a)*8,s.y-sin(s.a)*8},
+	         {s.x-cos(s.a-2*pi/3-0.3)*11,s.y-sin(s.a-2*pi/3-0.3)*11},
+										{s.x+cos(s.a)*4,s.y+4*sin(s.a)},
+										{s.x-cos(s.a+2*pi/3+0.3)*11,s.y-sin(s.a+2*pi/3+0.3)*11}}
 		old_cams[j]={sx=cam.sx, sy=cam.sy}	
 		--[[for i,v in ipairs(points) do
 				if pix(v[1],v[2])==2 then
@@ -162,11 +204,10 @@ function shipdraw()
 		if not s.trans then
 		for i,v in ipairs(points) do
 				if i<#points then
-				line(v[1],v[2],points[i+1][1],points[i+1][2],13)
+				line(cams[j].ax+v[1]-cams[j].x,cams[j].ay+v[2]-cams[j].y,cams[j].ax+points[i+1][1]-cams[j].x,cams[j].ay+points[i+1][2]-cams[j].y,13)
 				else
-				line(v[1],v[2],points[1][1],points[1][2],13)
+				line(cams[j].ax+v[1]-cams[j].x,cams[j].ay+v[2]-cams[j].y,cams[j].ax+points[1][1]-cams[j].x,cams[j].ay+points[1][2]-cams[j].y,13)
 				end
-		end
 		end
 		end
 end
@@ -182,14 +223,13 @@ function load()
 		if py==136*2-1 then
 				cls(0)
 
-				ships[1]=create_base(0,240-1,0,136-1)
-				ships[2]=create_base(240,240*2-1,136,136*2-1)
+				ships[1]=create_base(1,0,240-1,0,136-1)
+				ships[2]=create_base(2,240,240*2-1,136,136*2-1)
+				ships[3]=create_base(2,240,240*2-1,0,136-1)
 
-				for x=0,240-1 do for y=0,136-1 do
-						if pixels[posstr(x,y)] then
-								pix(x,y,pixels[posstr(x,y)])
-						end
-				end end				
+				cam_init(1)	
+				cam_init(2)
+				cam_init(3)
 
 				TIC=update; trace('Generation complete.')
 				return
@@ -233,7 +273,7 @@ function load()
 		rect(10,136/2,py/(136*2-1)*(240-20),8,6)
 end
 
-function create_base(minx,maxx,miny,maxy)
+function create_base(j,minx,maxx,miny,maxy)
 		--cls(0)
 		local rx,ry=math.random(minx,maxx),math.random(miny,maxy)
 		while pixels[posstr(rx,ry)] do
@@ -242,7 +282,7 @@ function create_base(minx,maxx,miny,maxy)
 		while not pixels[posstr(rx,ry)] do
 		ry=ry+1
 		end
-		if pixels[posstr(rx,ry)]==2 or oob(rx,ry-16) or is_solid(pixels[posstr(rx,ry-16)]) then trace('bad spawn, rerolling'); return create_base(minx,maxx,miny,maxy) end
+		if pixels[posstr(rx,ry)]==2 or oob(rx,ry-16) or is_solid(pixels[posstr(rx,ry-16)]) then trace('bad spawn, rerolling'); return create_base(j,minx,maxx,miny,maxy) end
 		--spr(64,rx-12-minx,ry-6-miny,0,1,0,0,3,1)
 		for x=0,24-1 do for y=2,8-1 do
 		--if pix(x-minx,y-miny)~=0 then pixels[posstr(x,y)]=pix(x,y) end
@@ -251,6 +291,7 @@ function create_base(minx,maxx,miny,maxy)
 				pixels[posstr(rx-12+x,ry-6+y-2)]=sp
 		end
 		end end
+		--cams[j].sx=minx; cams[j].sy=miny
 		local newship={x=rx,y=ry-16,a=pi/2}
 		return newship
 end
