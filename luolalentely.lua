@@ -41,6 +41,17 @@ function update()
 	--spr(1+t%60//30*2,x,y,14,3,0,0,2,2)
 	--print("HELLO WORLD!",84,84)
 
+	for x=0,240*2-1 do for y=136-2,136-1+2 do
+		if pixels[posstr(x,y)]==2 then
+			pix(x-cam.x,y-cam.y,2+(t*0.2)%3)
+		end
+	end end
+	for x=240-2,240-1+2 do for y=0,136*2-1 do
+		if pixels[posstr(x,y)]==2 then
+			pix(x-cam.x,y-cam.y,2+(t*0.2)%3)
+		end
+	end end
+
 	local hit=pix(-cam.x+x,-cam.y+y)
 	-- walls
 	if hit==13 or hit==14 or hit==15 or oob(x,y) then
