@@ -67,7 +67,7 @@ function update()
 	end
 	forcetransition(-cam.x+x,-cam.y+y)
 	
-	local points={--{-cam.x+x-cos(a)*8,-cam.y+y-sin(a)*8},
+	local points={{-cam.x+x-cos(a)*8,-cam.y+y-sin(a)*8},
 	              {-cam.x+x-cos(a-2*pi/3-0.3)*11,-cam.y+y-sin(a-2*pi/3-0.3)*11},
 															--{-cam.x+x+cos(a)*4,-cam.y+y+4*sin(a)},
 															{-cam.x+x-cos(a+2*pi/3+0.3)*11,-cam.y+y-sin(a+2*pi/3+0.3)*11}}	
@@ -88,7 +88,7 @@ function update()
 							--if sprpix(32,lx,ly)~=0 then
 									local p=pixels[posstr(sh.oldpos.x+lx,sh.oldpos.y+ly)]
 									if not p then
-											pix(-old_cam.x+sh.oldpos.x+lx,-old_cam.y+sh.oldpos.y+ly,0)
+											pix(-old_cam.x+math.floor(sh.oldpos.x+lx),-old_cam.y+math.floor(sh.oldpos.y+ly),0)
 									else pix(-old_cam.x+sh.oldpos.x+lx,-old_cam.y+sh.oldpos.y+ly,p) end
 							--end
 					end end
@@ -173,12 +173,18 @@ function load()
 			if (y>=134 and y<136) or (y>=136 and y<138) or (x>=238 and x<240) or (x>=240 and x<242) then pixels[posstr(x,y)]=2 end
 			if perlin(x*0.015,y*0.015,seed)>0.45 then
 					pixels[posstr(x,y)]=15
-					--pix(x,y,14)
-			end		
+			end
+			if perlin(x*0.015,y*0.015,seed)>0.475 then
+					if (x+y)%2==0 then pixels[posstr(x,y)]=15
+					else pixels[posstr(x,y)]=14 end
+			end
 			if perlin(x*0.015,y*0.015,seed)>0.5 then
 					pixels[posstr(x,y)]=14
-					--pix(x,y,14)
 			end
+			--[[if perlin(x*0.015,y*0.015,seed)>0.525 then
+					if (x+y)%2==0 then pixels[posstr(x,y)]=14
+					else pixels[posstr(x,y)]=13 end
+			end]]
 			if perlin(x*0.015,y*0.015,seed)>0.55 then
 					pixels[posstr(x,y)]=13
 					--pix(x,y,14)
