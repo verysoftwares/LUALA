@@ -340,6 +340,13 @@ end
         return tonumber(x),tonumber(y)
     end
 
+function sprpix(sprno,px,py)
+		local byte= peek(0x4000 + 32*sprno + py*4 + px/2)
+		if px%2==1 then byte=(byte&0xf0)>>4 
+		else byte=byte&0x0f end
+		return byte
+end
+
 -- <TILES>
 -- 001:eccccccccc888888caaaaaaaca888888cacccccccacc0ccccacc0ccccacc0ccc
 -- 002:ccccceee8888cceeaaaa0cee888a0ceeccca0ccc0cca0c0c0cca0c0c0cca0c0c
