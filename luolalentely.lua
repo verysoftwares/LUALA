@@ -21,8 +21,8 @@ function update()
 	--cls(0)
 		for j=1,#ships do
 		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
-		--clear_ship_trails(j)
-		--shipprocess(j)
+		clear_ship_trails(j)
+		shipprocess(j)
 		--environprocess(j)		
 		shipdraw(j)
 		end
@@ -53,7 +53,23 @@ function cam_init(j)
 		for i=1,4 do old_cams[i]={sx=0,sy=0} end
 
 		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+
+		render(j)		
+		
+end
+
+function render()
 		cls(0)
+		camerafollow(j)
+		for x=0,cams[j].aw-1 do for y=0,cams[j].ah-1 do
+				local p=pixels[posstr(cams[j].sx+(cams[j].x-cams[j].sx)+x,cams[j].sy+(cams[j].y-cams[j].sy)+y)]
+				if p then
+						pix(cams[j].ax+x,cams[j].ay+y,p)
+				end
+		end end
+end
+
+function camerafollow(j)
 		cams[j].x=ships[j].x-cams[j].aw/2
 		if cams[j].x<cams[j].sx then
 				cams[j].x=cams[j].sx
@@ -61,24 +77,13 @@ function cam_init(j)
 		if cams[j].x>=cams[j].sx+240-cams[j].aw then
 				cams[j].x=cams[j].sx+240-cams[j].aw
 		end
-		if #ships==2 then
-		cams[j].y=ships[j].y-136/2
-		elseif #ships==3 then
-		cams[j].y=ships[j].y-(136/2)/2
-		end
+		cams[j].y=ships[j].y-cams[j].ah/2
 		if cams[j].y<cams[j].sy then
 				cams[j].y=cams[j].sy
 		end
 		if cams[j].y>=cams[j].sy+136-cams[j].ah then
 				cams[j].y=cams[j].sy+136-cams[j].ah
 		end
-		for x=0,240/2-2-1 do for y=0,136-1 do
-				local p=pixels[posstr(cams[j].sx+(cams[j].x-cams[j].sx)+x,cams[j].sy+(cams[j].y-cams[j].sy)+y)]
-				if p then
-						pix(cams[j].ax+x,cams[j].ay+y,p)
-				end
-		end end		
-		
 end
 
 ships={}
@@ -89,15 +94,15 @@ function clear_ship_trails(j)
 		local old_cam=old_cams[j]
 
 		if not s.trans then
-		line(-old_cam.sx+s.x-cos(s.a)*8,-old_cam.sy+s.y-sin(s.a)*8,-old_cam.sx+s.x-cos(s.a-2*pi/3-0.3)*11,-old_cam.sy+s.y-sin(s.a-2*pi/3-0.3)*11,0)
-		line(-old_cam.sx+s.x-cos(s.a-2*pi/3-0.3)*11,-old_cam.sy+s.y-sin(s.a-2*pi/3-0.3)*11,-old_cam.sx+s.x+cos(s.a)*4,-old_cam.sy+s.y+4*sin(s.a),0)
-		line(-old_cam.sx+s.x+cos(s.a)*4,-old_cam.sy+s.y+4*sin(s.a),-old_cam.sx+s.x-cos(s.a+2*pi/3+0.3)*11,-old_cam.sy+s.y-sin(s.a+2*pi/3+0.3)*11,0)
-		line(-old_cam.sx+s.x-cos(s.a+2*pi/3+0.3)*11,-old_cam.sy+s.y-sin(s.a+2*pi/3+0.3)*11,-old_cam.sx+s.x-cos(s.a)*8,-old_cam.sy+s.y-sin(s.a)*8,0)
+		line(cam.ax-cam.x+s.x-cos(s.a)*8,cam.ay-cam.y+s.y-sin(s.a)*8,cam.ax-cam.x+s.x-cos(s.a-2*pi/3-0.3)*11,cam.ay-cam.y+s.y-sin(s.a-2*pi/3-0.3)*11,0)
+		line(cam.ax-cam.x+s.x-cos(s.a-2*pi/3-0.3)*11,cam.ay-cam.y+s.y-sin(s.a-2*pi/3-0.3)*11,cam.ax-cam.x+s.x+cos(s.a)*4,cam.ay-cam.y+s.y+4*sin(s.a),0)
+		line(cam.ax-cam.x+s.x+cos(s.a)*4,cam.ay-cam.y+s.y+4*sin(s.a),cam.ax-cam.x+s.x-cos(s.a+2*pi/3+0.3)*11,cam.ay-cam.y+s.y-sin(s.a+2*pi/3+0.3)*11,0)
+		line(cam.ax-cam.x+s.x-cos(s.a+2*pi/3+0.3)*11,cam.ay-cam.y+s.y-sin(s.a+2*pi/3+0.3)*11,cam.ax-cam.x+s.x-cos(s.a)*8,cam.ay-cam.y+s.y-sin(s.a)*8,0)
 		else s.trans=nil end
 		for bx=s.x-12,s.x+12 do for by=s.y-12,s.y+12 do
 				local p=pixels[posstr(bx,by)]
 				if p then
-						pix(bx-cam.sx,by-cam.sy,p)
+						pix(cam.ax+bx-cam.x,cam.ay+by-cam.y,p)
 				end
 		end end
 		
@@ -118,7 +123,7 @@ function shipprocess(j)
 		s.y=s.y+grav
 		s.dy=s.dy+grav
 
-		local hit=pix(-cam.sx+s.x,-cam.sy+s.y)
+		local hit=pix(cam.ax+s.x-cam.x,cam.ay+s.y-cam.y)
 		-- walls
 		if hit==13 or hit==14 or hit==15 or oob(s.x,s.y) then
 				s.y=s.y-s.dy; s.x=s.x-s.dx; --a=a-da
@@ -129,12 +134,12 @@ function shipprocess(j)
 		forcetransition(j,s,-cam.sx+s.x,-cam.sy+s.y)
 		
 		local points={--{-cam.sx+s.x-cos(s.a)*8,-cam.sy+s.y-sin(s.a)*8},
-		              {-cam.sx+s.x-cos(s.a-2*pi/3-0.3)*11,-cam.sy+s.y-sin(s.a-2*pi/3-0.3)*11},
+		              {s.x-cos(s.a-2*pi/3-0.3)*11,s.y-sin(s.a-2*pi/3-0.3)*11},
 																--{-cam.sx+x+cos(a)*4,-cam.sy+y+4*sin(a)},
-																{-cam.sx+s.x-cos(s.a+2*pi/3+0.3)*11,-cam.sy+s.y-sin(s.a+2*pi/3+0.3)*11}}	
+																{s.x-cos(s.a+2*pi/3+0.3)*11,s.y-sin(s.a+2*pi/3+0.3)*11}}	
 		for i,v in ipairs(points) do
 		-- base
-		local hit=pix(v[1],v[2])
+		local hit=pix(cam.ax+v[1]-cam.x,cam.ay+v[2]-cam.y)
 		if hit==5 or hit==6 or hit==7 or hit==12 then
 				s.y=s.y-s.dy; s.x=s.x-s.dx; s.a=s.a-s.da
 				break
@@ -316,13 +321,7 @@ function transition(j,s,tx,ty)
 				s.trans=true
 		end
 		if s.trans then
-				cls(0)
-				for x=cams[j].sx,cams[j].sx+240-1 do for y=cams[j].sy,cams[j].sy+136-1 do
-						local p=pixels[posstr(x,y)]
-						if p then
-								pix(x-cams[j].sx,y-cams[j].sy,p)
-						end
-				end end
+				render(j)		
 		end
 end
 
@@ -344,13 +343,7 @@ function forcetransition(j,s,tx,ty)
 				s.trans=true
 		end
 		if s.trans then
-				cls(0)
-				for x=cams[j].sx,cams[j].sx+240-1 do for y=cams[j].sy,cams[j].sy+136-1 do
-						local p=pixels[posstr(x,y)]
-						if p then
-								pix(x-cams[j].sx,y-cams[j].sy,p)
-						end
-				end end
+				render(j)
 		end
 end
 
