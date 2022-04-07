@@ -35,8 +35,10 @@ function update()
 end
 
 function cam_init(j)
-		if j==1 then 
-				if #ships==2 then
+		if j==1 and not cams then 
+				if #ships==1 then
+						cams={{sx=0,sy=0,ax=0,ay=0,aw=240,ah=136}}
+				elseif #ships==2 then
 						--for i=0,3 do line(240/2-2+i,0,240/2-2+i,136,8) end
 						cams={{sx=0,sy=0,ax=0,ay=0,aw=240/2-2,ah=136},
 					 	     {sx=240,sy=136,ax=240/2+2,ay=0,aw=240/2-2,ah=136}}
@@ -46,19 +48,24 @@ function cam_init(j)
 						cams={{sx=0,sy=0,ax=0,ay=0,aw=240/2-2,ah=136/2-2},
 					 	     {sx=240,sy=136,ax=240/2+2,ay=0,aw=240/2-2,ah=136/2-2},
 												{sx=240,sy=0,ax=240/2-2-(240/2-2)/2,ay=136/2+2,aw=240/2-2,ah=136/2-2}}
+				elseif #ships==4 then
+						cams={{sx=0,sy=0,ax=0,ay=0,aw=240/2-2,ah=136/2-2},
+            {sx=240,sy=136,ax=240/2+2,ay=0,aw=240/2-2,ah=136/2-2},
+            {sx=240,sy=0,ax=0,ay=136/2+2,aw=240/2-2,ah=136/2-2},
+            {sx=0,sy=136,ax=240/2+2,ay=136/2+2,aw=240/2-2,ah=136/2-2}}
 				end
+				old_cams={}
+				for i=1,4 do old_cams[i]={sx=0,sy=0} end
 		end
 		
-		old_cams={}
-		for i=1,4 do old_cams[i]={sx=0,sy=0} end
-
-		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
-
-		render(j)		
+		
+		renderwindow(j)		
 		
 end
 
-function render()
+function renderwindow(j)
+		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+
 		cls(0)
 		camerafollow(j)
 		for x=0,cams[j].aw-1 do for y=0,cams[j].ah-1 do
@@ -230,11 +237,12 @@ function load()
 
 				ships[1]=create_base(1,0,240-1,0,136-1)
 				ships[2]=create_base(2,240,240*2-1,136,136*2-1)
-				ships[3]=create_base(2,240,240*2-1,0,136-1)
+				ships[3]=create_base(3,240,240*2-1,0,136-1)
+				ships[4]=create_base(4,0,240-1,136,136*2-1)
 
-				cam_init(1)	
-				cam_init(2)
-				cam_init(3)
+				for j=1,4 do
+				cam_init(j)	
+				end
 
 				TIC=update; trace('Generation complete.')
 				return
@@ -321,7 +329,7 @@ function transition(j,s,tx,ty)
 				s.trans=true
 		end
 		if s.trans then
-				render(j)		
+				renderwindow(j)		
 		end
 end
 
@@ -343,7 +351,7 @@ function forcetransition(j,s,tx,ty)
 				s.trans=true
 		end
 		if s.trans then
-				render(j)
+				renderwindow(j)
 		end
 end
 
