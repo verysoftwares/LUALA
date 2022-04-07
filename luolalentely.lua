@@ -43,7 +43,7 @@ function update()
 
 	local hit=pix(-cam.x+x,-cam.y+y)
 	-- walls
-	if hit==13 or hit==14 or hit==15 then
+	if hit==13 or hit==14 or hit==15 or oob(x,y) then
 			y=y-dy; x=x-dx; --a=a-da
 	end
 	if hit==2 or hit==3 or hit==4 then
@@ -195,6 +195,10 @@ function transition(tx,ty)
 				end end
 				trans=true
 		end
+end
+
+function oob(x,y)
+		return x<0 or y<0 or x>=240*2 or y>=136*2
 end
 
 -- my lua implementation of Perlin noise
