@@ -23,6 +23,7 @@ function update()
 		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 		clear_ship_trails(j)
 		shipprocess(j)
+		renderwindow(j)
 		--environprocess(j)		
 		shipdraw(j)
 		end
@@ -200,7 +201,7 @@ function environprocess(j)
 end
 
 function shipdraw(j)
-		local s=ships[j]
+		for k,s in ipairs(ships) do
 		local cam=cams[j]
 		points={{s.x-cos(s.a)*8,s.y-sin(s.a)*8},
 	         {s.x-cos(s.a-2*pi/3-0.3)*11,s.y-sin(s.a-2*pi/3-0.3)*11},
@@ -221,6 +222,8 @@ function shipdraw(j)
 				line(cams[j].ax+v[1]-cams[j].x,cams[j].ay+v[2]-cams[j].y,cams[j].ax+points[1][1]-cams[j].x,cams[j].ay+points[1][2]-cams[j].y,13)
 				end
 		end
+		end
+		
 		end
 end
 
