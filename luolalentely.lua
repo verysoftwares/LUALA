@@ -14,72 +14,18 @@ x=96+10
 y=24+48
 a=pi/2
 grav=0.2
-cam={x=0,y=0}
-old_cam={x=0,y=0}	
+cams={}
+old_cams={}
+for i=1,4 do cams[i]={sx=0,sy=0}; old_cams[i]={sx=0,sy=0} end
 
 shots={}
 
 function update()
 	--cls(0)
-	if not trans then
-	line(-old_cam.x+x-cos(a)*8,-old_cam.y+y-sin(a)*8,-old_cam.x+x-cos(a-2*pi/3-0.3)*11,-old_cam.y+y-sin(a-2*pi/3-0.3)*11,0)
-	line(-old_cam.x+x-cos(a-2*pi/3-0.3)*11,-old_cam.y+y-sin(a-2*pi/3-0.3)*11,-old_cam.x+x+cos(a)*4,-old_cam.y+y+4*sin(a),0)
-	line(-old_cam.x+x+cos(a)*4,-old_cam.y+y+4*sin(a),-old_cam.x+x-cos(a+2*pi/3+0.3)*11,-old_cam.y+y-sin(a+2*pi/3+0.3)*11,0)
-	line(-old_cam.x+x-cos(a+2*pi/3+0.3)*11,-old_cam.y+y-sin(a+2*pi/3+0.3)*11,-old_cam.x+x-cos(a)*8,-old_cam.y+y-sin(a)*8,0)
-	else trans=nil end
-	for bx=x-12,x+12 do for by=y-12,y+12 do
-			if pixels[posstr(bx,by)] then
-					pix(bx-cam.x,by-cam.y,pixels[posstr(bx,by)])
-			end
-	end end
-	
-	dx=0; dy=0; da=0
-	if btn(0) then x=x-cos(a); y=y-sin(a); dx=-cos(a); dy=-sin(a) end
-	if btn(1) then x=x+cos(a); y=y+sin(a); dx=cos(a); dy=sin(a) end
-	if btn(2) then a=a-0.1; da=-0.1 end
-	if btn(3) then a=a+0.1; da=0.1 end
-	if btnp(4) then ins(shots,{x=x-3,y=y-3,dx=cos(a+pi)*3,dy=sin(a+pi)*3}) end
 
-	y=y+grav
-	dy=dy+grav
-
+	shipprocess()
 	--spr(1+t%60//30*2,x,y,14,3,0,0,2,2)
 	--print("HELLO WORLD!",84,84)
-
-	for x=0,240*2-1 do for y=136-2,136-1+2 do
-		if pixels[posstr(x,y)]==2 then
-			pix(x-cam.x,y-cam.y,2+(t*0.2)%3)
-		end
-	end end
-	for x=240-2,240-1+2 do for y=0,136*2-1 do
-		if pixels[posstr(x,y)]==2 then
-			pix(x-cam.x,y-cam.y,2+(t*0.2)%3)
-		end
-	end end
-
-	local hit=pix(-cam.x+x,-cam.y+y)
-	-- walls
-	if hit==13 or hit==14 or hit==15 or oob(x,y) then
-			y=y-dy; x=x-dx; --a=a-da
-	end
-	if hit==2 or hit==3 or hit==4 then
-			transition(-cam.x+x,-cam.y+y)
-	end
-	forcetransition(-cam.x+x,-cam.y+y)
-	
-	local points={{-cam.x+x-cos(a)*8,-cam.y+y-sin(a)*8},
-	              {-cam.x+x-cos(a-2*pi/3-0.3)*11,-cam.y+y-sin(a-2*pi/3-0.3)*11},
-															--{-cam.x+x+cos(a)*4,-cam.y+y+4*sin(a)},
-															{-cam.x+x-cos(a+2*pi/3+0.3)*11,-cam.y+y-sin(a+2*pi/3+0.3)*11}}	
-	for i,v in ipairs(points) do
-	-- base
-	local hit=pix(v[1],v[2])
-	if hit==5 or hit==6 or hit==7 or hit==12 then
-			y=y-dy; x=x-dx; a=a-da
-			break
-	end
-
-	end
 	
 	for i=#shots,1,-1 do
 			local sh=shots[i]
@@ -88,8 +34,8 @@ function update()
 							--if sprpix(32,lx,ly)~=0 then
 									local p=pixels[posstr(sh.oldpos.x+lx,sh.oldpos.y+ly)]
 									if not p then
-											pix(-old_cam.x+math.floor(sh.oldpos.x+lx),-old_cam.y+math.floor(sh.oldpos.y+ly),0)
-									else pix(-old_cam.x+sh.oldpos.x+lx,-old_cam.y+sh.oldpos.y+ly,p) end
+											pix(-old_cam.sx+math.floor(sh.oldpos.x+lx),-old_cam.sy+math.floor(sh.oldpos.y+ly),0)
+									else pix(-old_cam.sx+sh.oldpos.x+lx,-old_cam.sy+sh.oldpos.y+ly,p) end
 							--end
 					end end
 			end
@@ -101,39 +47,116 @@ function update()
 			local hit=false
 			for lx=0,7 do for ly=0,7 do
 					if sprpix(32,lx,ly)~=0 and is_solid(pixels[posstr(sh.x+lx,sh.y+ly)]) then
-							pix(-cam.x+sh.x+lx,-cam.y+sh.y+ly,1)
+							pix(-cam.sx+sh.x+lx,-cam.sy+sh.y+ly,1)
 							pixels[posstr(sh.x+lx,sh.y+ly)]=1
 							hit=true
 					end
 			end end
 			if not hit then
-			spr(32,sh.x-cam.x,sh.y-cam.y,0)
+			spr(32,sh.x-cam.sx,sh.y-cam.sy,0)
 			else rem(shots,i) end
 	end
+	
+	shipdraw()
 
-	points={{-cam.x+x-cos(a)*8,-cam.y+y-sin(a)*8},
-         {-cam.x+x-cos(a-2*pi/3-0.3)*11,-cam.y+y-sin(a-2*pi/3-0.3)*11},
-									{-cam.x+x+cos(a)*4,-cam.y+y+4*sin(a)},
-									{-cam.x+x-cos(a+2*pi/3+0.3)*11,-cam.y+y-sin(a+2*pi/3+0.3)*11}}
-	old_cam={x=cam.x, y=cam.y}	
-	--[[for i,v in ipairs(points) do
-			if pix(v[1],v[2])==2 then
-					transition(v[1],v[2])
-					break
-			end
-	end]]
-	if not trans then
-	for i,v in ipairs(points) do
-			if i<#points then
-			line(v[1],v[2],points[i+1][1],points[i+1][2],13)
-			else
-			line(v[1],v[2],points[1][1],points[1][2],13)
-			end
-	end
-	end
-	--cam.x=x-240/2; cam.y=y-136/2
+	--cam.sx=x-240/2; cam.sy=y-136/2
 
 	t=t+1
+end
+
+ships={}
+
+function shipprocess()
+		for j,s in ipairs(ships) do
+		local cam=cams[j]
+		local old_cam=old_cams[j]
+		if not s.trans then
+		line(-old_cam.sx+s.x-cos(s.a)*8,-old_cam.sy+s.y-sin(s.a)*8,-old_cam.sx+s.x-cos(s.a-2*pi/3-0.3)*11,-old_cam.sy+s.y-sin(s.a-2*pi/3-0.3)*11,0)
+		line(-old_cam.sx+s.x-cos(s.a-2*pi/3-0.3)*11,-old_cam.sy+s.y-sin(s.a-2*pi/3-0.3)*11,-old_cam.sx+s.x+cos(s.a)*4,-old_cam.sy+s.y+4*sin(s.a),0)
+		line(-old_cam.sx+s.x+cos(s.a)*4,-old_cam.sy+s.y+4*sin(s.a),-old_cam.sx+s.x-cos(s.a+2*pi/3+0.3)*11,-old_cam.sy+s.y-sin(s.a+2*pi/3+0.3)*11,0)
+		line(-old_cam.sx+s.x-cos(s.a+2*pi/3+0.3)*11,-old_cam.sy+s.y-sin(s.a+2*pi/3+0.3)*11,-old_cam.sx+s.x-cos(s.a)*8,-old_cam.sy+s.y-sin(s.a)*8,0)
+		else s.trans=nil end
+		for bx=s.x-12,s.x+12 do for by=s.y-12,s.y+12 do
+				if pixels[posstr(bx,by)] then
+						pix(bx-cam.sx,by-cam.sy,pixels[posstr(bx,by)])
+				end
+		end end
+		
+		s.dx=0; s.dy=0; s.da=0
+		if btn((j-1)*8) then s.x=s.x-cos(s.a); s.y=s.y-sin(s.a); dx=-cos(a); dy=-sin(a) end
+		if btn((j-1)*8+1) then s.x=s.x+cos(s.a); s.y=s.y+sin(s.a); dx=cos(a); dy=sin(a) end
+		if btn((j-1)*8+2) then s.a=s.a-0.1; s.da=-0.1 end
+		if btn((j-1)*8+3) then s.a=s.a+0.1; s.da=0.1 end
+		if btnp((j-1)*8+4) then ins(shots,{x=s.x-3,y=s.y-3,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3}) end
+	
+		s.y=s.y+grav
+		s.dy=s.dy+grav
+
+		local hit=pix(-cam.sx+s.x,-cam.sy+s.y)
+		-- walls
+		if hit==13 or hit==14 or hit==15 or oob(s.x,s.y) then
+				s.y=s.y-s.dy; s.x=s.x-s.dx; --a=a-da
+		end
+		if hit==2 or hit==3 or hit==4 then
+				transition(j,s,-cam.sx+s.x,-cam.sy+s.y)
+		end
+		forcetransition(j,s,-cam.sx+x,-cam.sy+y)
+		
+		local points={{-cam.sx+s.x-cos(s.a)*8,-cam.sy+s.y-sin(s.a)*8},
+		              {-cam.sx+s.x-cos(s.a-2*pi/3-0.3)*11,-cam.sy+s.y-sin(s.a-2*pi/3-0.3)*11},
+																--{-cam.sx+x+cos(a)*4,-cam.sy+y+4*sin(a)},
+																{-cam.sx+s.x-cos(s.a+2*pi/3+0.3)*11,-cam.sy+s.y-sin(s.a+2*pi/3+0.3)*11}}	
+		for i,v in ipairs(points) do
+		-- base
+		local hit=pix(v[1],v[2])
+		if hit==5 or hit==6 or hit==7 or hit==12 then
+				s.y=s.y-s.dy; s.x=s.x-s.dx; s.a=s.a-s.da
+				break
+		end
+	
+		end
+
+		-- flashing transitions
+		-- these have to be tied to the ship
+		for x=0,240*2-1 do for y=136-2,136-1+2 do
+			if pixels[posstr(x,y)]==2 then
+				pix(x-cam.sx,y-cam.sy,2+(t*0.2)%3)
+			end
+		end end
+		for x=240-2,240-1+2 do for y=0,136*2-1 do
+			if pixels[posstr(x,y)]==2 then
+				pix(x-cam.sx,y-cam.sy,2+(t*0.2)%3)
+			end
+		end end
+
+
+		end
+end
+
+function shipdraw()
+		for j,s in ipairs(ships) do
+		local cam=cams[j]
+		points={{-cam.sx+s.x-cos(s.a)*8,-cam.sy+s.y-sin(s.a)*8},
+	         {-cam.sx+s.x-cos(s.a-2*pi/3-0.3)*11,-cam.sy+s.y-sin(s.a-2*pi/3-0.3)*11},
+										{-cam.sx+s.x+cos(s.a)*4,-cam.sy+s.y+4*sin(s.a)},
+										{-cam.sx+s.x-cos(s.a+2*pi/3+0.3)*11,-cam.sy+s.y-sin(s.a+2*pi/3+0.3)*11}}
+		old_cams[j]={sx=cam.sx, sy=cam.sy}	
+		--[[for i,v in ipairs(points) do
+				if pix(v[1],v[2])==2 then
+						transition(v[1],v[2])
+						break
+				end
+		end]]
+		if not s.trans then
+		for i,v in ipairs(points) do
+				if i<#points then
+				line(v[1],v[2],points[i+1][1],points[i+1][2],13)
+				else
+				line(v[1],v[2],points[1][1],points[1][2],13)
+				end
+		end
+		end
+		end
 end
 
 pixels={}
@@ -164,7 +187,7 @@ function load()
 				for x=rx-12,rx+12 do for y=ry-6,ry do
 				if pix(x,y)~=0 then pixels[posstr(x,y)]=pix(x,y) end
 				end end
-				x=rx; y=ry-16
+				ships[1]={x=rx,y=ry-16,a=pi/2}
 				TIC=update; trace('Generation complete.')
 				return
 		end
@@ -209,57 +232,57 @@ end
 
 TIC=load
 
-function transition(tx,ty)
-		if ty>=134 and ty<136 and dy>0 then
-				cam.y=cam.y+136
-				trans=true
+function transition(j,s,tx,ty)
+		if ty>=134 and ty<136 and s.dy>0 then
+				cams[j].sy=cams[j].sy+136
+				s.trans=true
 		end
-		if ty>=0 and ty<2 and dy<0 then
-				cam.y=cam.y-136
-				trans=true
+		if ty>=0 and ty<2 and s.dy<0 then
+				cams[j].sy=cams[j].sy-136
+				s.trans=true
 		end
-		if tx>=238 and tx<240 and dx>0 then
-				cam.x=cam.x+240
-				trans=true
+		if tx>=238 and tx<240 and s.dx>0 then
+				cams[j].sx=cams[j].sx+240
+				s.trans=true
 		end
-		if tx>=0 and tx<2 and dx<0 then
-				cam.x=cam.x-240
-				trans=true
+		if tx>=0 and tx<2 and s.dx<0 then
+				cams[j].sx=cams[j].sx-240
+				s.trans=true
 		end
-		if trans then
+		if s.trans then
 				cls(0)
-				for x=cam.x,cam.x+240-1 do for y=cam.y,cam.y+136-1 do
+				for x=cams[j].sx,cams[j].sx+240-1 do for y=cams[j].sy,cams[j].sy+136-1 do
 						local p=pixels[posstr(x,y)]
 						if p then
-								pix(x-cam.x,y-cam.y,p)
+								pix(x-cams[j].sx,y-cams[j].sy,p)
 						end
 				end end
 		end
 end
 
-function forcetransition(tx,ty)
-		if ty>=136 and dy>0 then
-				cam.y=cam.y+136
-				trans=true
+function forcetransition(j,s,tx,ty)
+		if ty>=136 and s.dy>0 then
+				cams[j].sy=cams[j].sy+136
+				s.trans=true
 		end
-		if ty<0 and dy<0 then
-				cam.y=cam.y-136
-				trans=true
+		if ty<0 and s.dy<0 then
+				cams[j].sy=cams[j].sy-136
+				s.trans=true
 		end
-		if tx>=240 and dx>0 then
-				cam.x=cam.x+240
-				trans=true
+		if tx>=240 and s.dx>0 then
+				cams[j].sx=cams[j].sx+240
+				s.trans=true
 		end
-		if tx<0 and dx<0 then
-				cam.x=cam.x-240
-				trans=true
+		if tx<0 and s.dx<0 then
+				cams[j].sx=cams[j].sx-240
+				s.trans=true
 		end
-		if trans then
+		if s.trans then
 				cls(0)
-				for x=cam.x,cam.x+240-1 do for y=cam.y,cam.y+136-1 do
+				for x=cams[j].sx,cams[j].sx+240-1 do for y=cams[j].sy,cams[j].sy+136-1 do
 						local p=pixels[posstr(x,y)]
 						if p then
-								pix(x-cam.x,y-cam.y,p)
+								pix(x-cams[j].sx,y-cams[j].sy,p)
 						end
 				end end
 		end
