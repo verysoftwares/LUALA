@@ -14,9 +14,9 @@ x=96+10
 y=24+48
 a=pi/2
 grav=0.2
-cams={}
+cams={{sx=0,sy=0},{sx=240,sy=136}}
 old_cams={}
-for i=1,4 do cams[i]={sx=0,sy=0}; old_cams[i]={sx=0,sy=0} end
+for i=1,4 do old_cams[i]={sx=0,sy=0} end
 
 shots={}
 
@@ -48,8 +48,9 @@ function shipprocess()
 		line(-old_cam.sx+s.x-cos(s.a+2*pi/3+0.3)*11,-old_cam.sy+s.y-sin(s.a+2*pi/3+0.3)*11,-old_cam.sx+s.x-cos(s.a)*8,-old_cam.sy+s.y-sin(s.a)*8,0)
 		else s.trans=nil end
 		for bx=s.x-12,s.x+12 do for by=s.y-12,s.y+12 do
-				if pixels[posstr(bx,by)] then
-						pix(bx-cam.sx,by-cam.sy,pixels[posstr(bx,by)])
+				local p=pixels[posstr(bx,by)]
+				if p then
+						pix(bx-cam.sx,by-cam.sy,p)
 				end
 		end end
 		
@@ -182,6 +183,7 @@ function load()
 				cls(0)
 
 				ships[1]=create_base(0,240-1,0,136-1)
+				ships[2]=create_base(240,240*2-1,136,136*2-1)
 
 				for x=0,240-1 do for y=0,136-1 do
 						if pixels[posstr(x,y)] then
