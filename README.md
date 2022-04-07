@@ -1,2 +1,2 @@
 # LUALA
- local multiplayer cave flier game
+ local multiplayer cave flier game for TIC-80
