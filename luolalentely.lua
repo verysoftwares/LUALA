@@ -23,7 +23,12 @@ function update()
 		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 		clear_ship_trails(j)
 		shipprocess(j)
-		renderwindow(j)
+		--renderwindow(j)
+		old_cams[j]={sx=cams[j].sx, sy=cams[j].sy, x=cams[j].x, y=cams[j].y}
+		camerafollow(j)
+		if cams[j].x~=old_cams[j].x or cams[j].y~=old_cams[j].y then
+				nudgescreen(j,old_cams[j].x-cams[j].x,old_cams[j].y-cams[j].y)
+		end
 		--environprocess(j)		
 		shipdraw(j)
 		end
@@ -31,8 +36,60 @@ function update()
 	--spr(1+t%60//30*2,x,y,14,3,0,0,2,2)
 	--print("HELLO WORLD!",84,84)
 		--cam.sx=x-240/2; cam.sy=y-136/2
+		--memcpy(3*120+cams[2].ax/2-1,cams[2].ax/2,cams[2].aw/2)
 	
 		t=t+1
+end
+
+function nudgescreen(j,dx,dy)
+		if dx==-2 then
+				for i=0,cams[j].ah-1 do
+						memcpy((cams[j].ay+i)*120+cams[j].ax/2,(cams[j].ay+i)*120+cams[j].ax/2+1,cams[j].aw/2-1)
+				end
+				for x=cams[j].aw-2,cams[j].aw-1 do
+				for y=0,cams[j].ah-1 do
+						local p= pixels[posstr(cams[j].x+x,cams[j].y+y)]
+						if p then pix(cams[j].ax+x,cams[j].ay+y,p)
+						else pix(cams[j].ax+x,cams[j].ay+y,0) end
+				end
+				end
+		end
+		if dx==2 then
+				for i=0,cams[j].ah-1 do
+						memcpy((cams[j].ay+i)*120+cams[j].ax/2+1,(cams[j].ay+i)*120+cams[j].ax/2,cams[j].aw/2-1)
+				end
+				for x=0,1 do
+				for y=0,cams[j].ah-1 do
+						local p= pixels[posstr(cams[j].x+x,cams[j].y+y)]
+						if p then pix(cams[j].ax+x,cams[j].ay+y,p)
+						else pix(cams[j].ax+x,cams[j].ay+y,0) end
+				end
+				end
+		end
+		if dy==-1 then
+				for i=1,cams[j].ah-1 do
+						memcpy((cams[j].ay+i-1)*120+cams[j].ax/2,(cams[j].ay+i)*120+cams[j].ax/2,cams[j].aw/2)
+				end
+				for x=0,cams[j].aw-1 do
+				for y=cams[j].ah-1,cams[j].ah-1 do
+						local p= pixels[posstr(cams[j].x+x,cams[j].y+y)]
+						if p then pix(cams[j].ax+x,cams[j].ay+y,p)
+						else pix(cams[j].ax+x,cams[j].ay+y,0) end
+				end
+				end
+		end
+		if dy==1 then
+				for i=cams[j].ah-2,0,-1 do
+						memcpy((cams[j].ay+i+1)*120+cams[j].ax/2,(cams[j].ay+i)*120+cams[j].ax/2,cams[j].aw/2)
+				end
+				for x=0,cams[j].aw-1 do
+				for y=0,0 do
+						local p= pixels[posstr(cams[j].x+x,cams[j].y+y)]
+						if p then pix(cams[j].ax+x,cams[j].ay+y,p)
+						else pix(cams[j].ax+x,cams[j].ay+y,0) end
+				end
+				end
+		end
 end
 
 function cam_init(j)
@@ -70,7 +127,7 @@ function renderwindow(j)
 		cls(0)
 		camerafollow(j)
 		for x=0,cams[j].aw-1 do for y=0,cams[j].ah-1 do
-				local p=pixels[posstr(cams[j].sx+(cams[j].x-cams[j].sx)+x,cams[j].sy+(cams[j].y-cams[j].sy)+y)]
+				local p=pixels[posstr(cams[j].x+x,cams[j].y+y)]
 				if p then
 						pix(cams[j].ax+x,cams[j].ay+y,p)
 				end
@@ -79,6 +136,7 @@ end
 
 function camerafollow(j)
 		cams[j].x=ships[j].x-cams[j].aw/2
+		cams[j].x=cams[j].x-cams[j].x%2
 		if cams[j].x<cams[j].sx then
 				cams[j].x=cams[j].sx
 		end
@@ -86,6 +144,8 @@ function camerafollow(j)
 				cams[j].x=cams[j].sx+240-cams[j].aw
 		end
 		cams[j].y=ships[j].y-cams[j].ah/2
+		cams[j].y=math.floor(cams[j].y)
+		--cams[j].y=cams[j].y-cams[j].y%2
 		if cams[j].y<cams[j].sy then
 				cams[j].y=cams[j].sy
 		end
@@ -107,7 +167,7 @@ function clear_ship_trails(j)
 		line(cam.ax-cam.x+s.x+cos(s.a)*4,cam.ay-cam.y+s.y+4*sin(s.a),cam.ax-cam.x+s.x-cos(s.a+2*pi/3+0.3)*11,cam.ay-cam.y+s.y-sin(s.a+2*pi/3+0.3)*11,0)
 		line(cam.ax-cam.x+s.x-cos(s.a+2*pi/3+0.3)*11,cam.ay-cam.y+s.y-sin(s.a+2*pi/3+0.3)*11,cam.ax-cam.x+s.x-cos(s.a)*8,cam.ay-cam.y+s.y-sin(s.a)*8,0)
 		else s.trans=nil end
-		for bx=s.x-12,s.x+12 do for by=s.y-12,s.y+12 do
+		for bx=math.floor(s.x-12),math.floor(s.x+12) do for by=math.floor(s.y-12),math.floor(s.y+12) do
 				local p=pixels[posstr(bx,by)]
 				if p then
 						pix(cam.ax+bx-cam.x,cam.ay+by-cam.y,p)
@@ -154,6 +214,8 @@ function shipprocess(j)
 		end
 	
 		end
+
+		--old_cams[j]={sx=cam.sx, sy=cam.sy, x=cam.x, y=cam.y}
 end
 
 function environprocess(j)
@@ -207,7 +269,6 @@ function shipdraw(j)
 	         {s.x-cos(s.a-2*pi/3-0.3)*11,s.y-sin(s.a-2*pi/3-0.3)*11},
 										{s.x+cos(s.a)*4,s.y+4*sin(s.a)},
 										{s.x-cos(s.a+2*pi/3+0.3)*11,s.y-sin(s.a+2*pi/3+0.3)*11}}
-		old_cams[j]={sx=cam.sx, sy=cam.sy}	
 		--[[for i,v in ipairs(points) do
 				if pix(v[1],v[2])==2 then
 						transition(v[1],v[2])
@@ -252,7 +313,7 @@ function load()
 		end
 		
 		for x=px,math.min(px+64,240*2-1) do for y=py,math.min(py+64,136*2-1) do 
-			if (y>=134 and y<136) or (y>=136 and y<138) or (x>=238 and x<240) or (x>=240 and x<242) then pixels[posstr(x,y)]=2 end
+			if (y>=134 and y<138) or (x>=238 and x<242) then pixels[posstr(x,y)]=2 end
 			if perlin(x*0.015,y*0.015,seed)>0.45 then
 					pixels[posstr(x,y)]=15
 			end
@@ -295,10 +356,10 @@ function create_base(j,minx,maxx,miny,maxy)
 		while pixels[posstr(rx,ry)] do
 		rx,ry=math.random(minx,maxx),math.random(miny,maxy)
 		end
-		while not pixels[posstr(rx,ry)] do
+		while not pixels[posstr(rx,ry)] and not oob(rx,ry) do
 		ry=ry+1
 		end
-		if pixels[posstr(rx,ry)]==2 or oob(rx,ry-16) or is_solid(pixels[posstr(rx,ry-16)]) then trace('bad spawn, rerolling'); return create_base(j,minx,maxx,miny,maxy) end
+		if pixels[posstr(rx,ry)]==2 or oob(rx,ry) or oob(rx,ry-16) or is_solid(pixels[posstr(rx,ry-16)]) then trace('bad spawn, rerolling'); return create_base(j,minx,maxx,miny,maxy) end
 		--spr(64,rx-12-minx,ry-6-miny,0,1,0,0,3,1)
 		for x=0,24-1 do for y=2,8-1 do
 		--if pix(x-minx,y-miny)~=0 then pixels[posstr(x,y)]=pix(x,y) end
@@ -366,7 +427,7 @@ function is_solid(px)
 		return px==13 or px==14 or px==15
 end
 
--- my lua implementation of Perlin noise
+-- my Lua implementation of Perlin noise
 -- from August 2019.
 
 function perlin(x,y,z)
