@@ -24,15 +24,7 @@ function update()
 		clear_ship_trails(j)
 		shipprocess(j)
 		--renderwindow(j)
-		old_cams[j]={sx=cams[j].sx, sy=cams[j].sy, x=cams[j].x, y=cams[j].y}
-		camerafollow(j,'x')
-		if cams[j].x~=old_cams[j].x then
-				nudgescreen(j,old_cams[j].x-cams[j].x,0)
-		end
-		camerafollow(j,'y')
-		if cams[j].y~=old_cams[j].y then
-				nudgescreen(j,0,old_cams[j].y-cams[j].y)
-		end
+		cam_nudge(j)
 		--environprocess(j)		
 		shipdraw(j)
 		end
@@ -45,7 +37,19 @@ function update()
 		t=t+1
 end
 
-function nudgescreen(j,dx,dy)
+function cam_nudge(j)
+		old_cams[j]={sx=cams[j].sx, sy=cams[j].sy, x=cams[j].x, y=cams[j].y}
+		camerafollow(j,'x')
+		if cams[j].x~=old_cams[j].x then
+				nudgewindow(j,old_cams[j].x-cams[j].x,0)
+		end
+		camerafollow(j,'y')
+		if cams[j].y~=old_cams[j].y then
+				nudgewindow(j,0,old_cams[j].y-cams[j].y)
+		end
+end
+
+function nudgewindow(j,dx,dy)
 		if not (dx==-2 or dx==2 or dx==0) or not (dy==1 or dy==-1 or dy==0 or dy==-2) then
 		trace(fmt('%d,%d',dx,dy))
 		end
