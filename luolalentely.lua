@@ -69,24 +69,12 @@ function nudgescreen(j,dx,dy)
 				end
 				end
 		end
-		if dy==-1 then
-				for i=1,cams[j].ah-1 do
-						memcpy((cams[j].ay+i-1)*120+cams[j].ax/2,(cams[j].ay+i)*120+cams[j].ax/2,cams[j].aw/2)
+		if dy==-1 or dy==-2 then
+				for i=-dy,cams[j].ah-1 do
+						memcpy((cams[j].ay+i+dy)*120+cams[j].ax/2,(cams[j].ay+i)*120+cams[j].ax/2,cams[j].aw/2)
 				end
 				for x=0,cams[j].aw-1 do
-				for y=cams[j].ah-1,cams[j].ah-1 do
-						local p= pixels[posstr(cams[j].x+x,cams[j].y+y)]
-						if p then pix(cams[j].ax+x,cams[j].ay+y,p)
-						else pix(cams[j].ax+x,cams[j].ay+y,0) end
-				end
-				end
-		end
-		if dy==-2 then
-				for i=2,cams[j].ah-1 do
-						memcpy((cams[j].ay+i-2)*120+cams[j].ax/2,(cams[j].ay+i)*120+cams[j].ax/2,cams[j].aw/2)
-				end
-				for x=0,cams[j].aw-1 do
-				for y=cams[j].ah-2,cams[j].ah-1 do
+				for y=cams[j].ah+dy,cams[j].ah-1 do
 						local p= pixels[posstr(cams[j].x+x,cams[j].y+y)]
 						if p then pix(cams[j].ax+x,cams[j].ay+y,p)
 						else pix(cams[j].ax+x,cams[j].ay+y,0) end
