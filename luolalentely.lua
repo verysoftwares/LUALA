@@ -42,6 +42,9 @@ function update()
 end
 
 function nudgescreen(j,dx,dy)
+		if not (dx==-2 or dx==2 or dx==0) or not (dy==1 or dy==-1 or dy==0) then
+		trace(fmt('%d,%d',dx,dy))
+		end
 		if dx==-2 then
 				for i=0,cams[j].ah-1 do
 						memcpy((cams[j].ay+i)*120+cams[j].ax/2,(cams[j].ay+i)*120+cams[j].ax/2+1,cams[j].aw/2-1)
@@ -72,6 +75,18 @@ function nudgescreen(j,dx,dy)
 				end
 				for x=0,cams[j].aw-1 do
 				for y=cams[j].ah-1,cams[j].ah-1 do
+						local p= pixels[posstr(cams[j].x+x,cams[j].y+y)]
+						if p then pix(cams[j].ax+x,cams[j].ay+y,p)
+						else pix(cams[j].ax+x,cams[j].ay+y,0) end
+				end
+				end
+		end
+		if dy==-2 then
+				for i=2,cams[j].ah-1 do
+						memcpy((cams[j].ay+i-2)*120+cams[j].ax/2,(cams[j].ay+i)*120+cams[j].ax/2,cams[j].aw/2)
+				end
+				for x=0,cams[j].aw-1 do
+				for y=cams[j].ah-2,cams[j].ah-1 do
 						local p= pixels[posstr(cams[j].x+x,cams[j].y+y)]
 						if p then pix(cams[j].ax+x,cams[j].ay+y,p)
 						else pix(cams[j].ax+x,cams[j].ay+y,0) end
@@ -113,12 +128,12 @@ function cam_init(j)
             {sx=0,sy=136,ax=240/2+2,ay=136/2+2,aw=240/2-2,ah=136/2-2}}
 				end
 				old_cams={}
-				for i=1,4 do old_cams[i]={sx=0,sy=0} end
 		end
 		
 		
 		renderwindow(j)		
-		
+
+		old_cams[j]={sx=cams[j].sx,sy=cams[j].sy,x=cams[j].x,y=cams[j].y}
 end
 
 function renderwindow(j)
@@ -157,7 +172,7 @@ end
 ships={}
 
 function clear_ship_trails(j)
-		local s=ships[j]
+		for k,s in ipairs(ships) do
 		local cam=cams[j]
 		local old_cam=old_cams[j]
 
@@ -173,14 +188,15 @@ function clear_ship_trails(j)
 						pix(cam.ax+bx-cam.x,cam.ay+by-cam.y,p)
 				end
 		end end
-		
+		end
 end
 
 function shipprocess(j)
 		local s=ships[j]
 		local cam=cams[j]
 		local old_cam=old_cams[j]
-		
+
+		s.oldx=s.x; s.oldy=s.y		
 		s.dx=0; s.dy=0; s.da=0
 		if btn((j-1)*8) then s.x=s.x-cos(s.a); s.y=s.y-sin(s.a); s.dx=-cos(s.a); s.dy=-sin(s.a) end
 		if btn((j-1)*8+1) then s.x=s.x+cos(s.a); s.y=s.y+sin(s.a); s.dx=cos(s.a); s.dy=sin(s.a) end
@@ -369,7 +385,7 @@ function create_base(j,minx,maxx,miny,maxy)
 		end
 		end end
 		--cams[j].sx=minx; cams[j].sy=miny
-		local newship={x=rx,y=ry-16,a=pi/2}
+		local newship={x=rx,y=ry-16,a=pi/2,oldx=rx,oldy=ry}
 		return newship
 end
 
