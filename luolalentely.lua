@@ -25,9 +25,13 @@ function update()
 		shipprocess(j)
 		--renderwindow(j)
 		old_cams[j]={sx=cams[j].sx, sy=cams[j].sy, x=cams[j].x, y=cams[j].y}
-		camerafollow(j)
-		if cams[j].x~=old_cams[j].x or cams[j].y~=old_cams[j].y then
-				nudgescreen(j,old_cams[j].x-cams[j].x,old_cams[j].y-cams[j].y)
+		camerafollow(j,'x')
+		if cams[j].x~=old_cams[j].x then
+				nudgescreen(j,old_cams[j].x-cams[j].x,0)
+		end
+		camerafollow(j,'y')
+		if cams[j].y~=old_cams[j].y then
+				nudgescreen(j,0,old_cams[j].y-cams[j].y)
 		end
 		--environprocess(j)		
 		shipdraw(j)
@@ -137,7 +141,8 @@ function renderwindow(j)
 		end end
 end
 
-function camerafollow(j)
+function camerafollow(j,dir)
+		if (not dir) or dir=='x' then
 		cams[j].x=ships[j].x-cams[j].aw/2
 		cams[j].x=cams[j].x-cams[j].x%2
 		cams[j].x=math.floor(cams[j].x)
@@ -147,6 +152,8 @@ function camerafollow(j)
 		if cams[j].x>=cams[j].sx+240-cams[j].aw then
 				cams[j].x=cams[j].sx+240-cams[j].aw
 		end
+		end
+		if (not dir) or dir=='y' then
 		cams[j].y=ships[j].y-cams[j].ah/2
 		cams[j].y=math.floor(cams[j].y)
 		--cams[j].y=cams[j].y-cams[j].y%2
@@ -155,6 +162,7 @@ function camerafollow(j)
 		end
 		if cams[j].y>=cams[j].sy+136-cams[j].ah then
 				cams[j].y=cams[j].sy+136-cams[j].ah
+		end
 		end
 end
 
