@@ -42,7 +42,7 @@ function update()
 end
 
 function nudgescreen(j,dx,dy)
-		if not (dx==-2 or dx==2 or dx==0) or not (dy==1 or dy==-1 or dy==0) then
+		if not (dx==-2 or dx==2 or dx==0) or not (dy==1 or dy==-1 or dy==0 or dy==-2) then
 		trace(fmt('%d,%d',dx,dy))
 		end
 		if dx==-2 then
@@ -152,6 +152,7 @@ end
 function camerafollow(j)
 		cams[j].x=ships[j].x-cams[j].aw/2
 		cams[j].x=cams[j].x-cams[j].x%2
+		cams[j].x=math.floor(cams[j].x)
 		if cams[j].x<cams[j].sx then
 				cams[j].x=cams[j].sx
 		end
