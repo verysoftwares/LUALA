@@ -208,7 +208,7 @@ function shipprocess(j)
 		s.y=s.y+grav
 		s.dy=s.dy+grav
 
-		local hit=pix(cam.ax+s.x-cam.x,cam.ay+s.y-cam.y)
+		local hit=pixels[posstr(s.x,s.y)]--pix(cam.ax+s.x-cam.x,cam.ay+s.y-cam.y)
 		-- walls
 		if hit==13 or hit==14 or hit==15 or oob(s.x,s.y) then
 				s.y=s.y-s.dy; s.x=s.x-s.dx; --a=a-da
