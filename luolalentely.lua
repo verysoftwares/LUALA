@@ -277,7 +277,7 @@ function shipprocess(j)
 		end
 		
 		if s.healing then 
-				if (s.healing-t)%12==0 then
+				if (t-s.healing)%12==0 then
 				s.hp=s.hp+1
 				if s.hp>30 then s.hp=30 end
 				end
