@@ -16,6 +16,7 @@ a=pi/2
 grav=0.2
 
 shots={}
+fadeouts={}
 
 function update()
 	--cls(0)
@@ -46,6 +47,8 @@ function update()
 		for j=#ships,1,-1 do
 				local s=ships[j]
 				if s.gone then 
+				ins(fadeouts,cams[j])
+				fadeouts[#fadeouts].prog=0
 				rem(ships,j); rem(cams,j); rem(old_cams,j) 
 				
 				for j2,s2 in ipairs(ships) do
@@ -58,6 +61,20 @@ function update()
 				end
 
 				end
+		end
+		
+		for i=#fadeouts,1,-1 do
+				local f=fadeouts[i]
+				clip(f.ax,f.ay,f.aw,f.ah)
+				for x=0,f.aw-1 do for y=math.max(f.ah-f.prog-20,0),f.ah-f.prog do
+						if pix(f.ax+x,f.ay+y)==0 then
+								pix(f.ax+x,f.ay+y,2)
+						end
+				end end
+				if f.prog>f.ah then
+						rem(fadeouts,i)
+				end
+				f.prog=f.prog+20
 		end
 	--spr(1+t%60//30*2,x,y,14,3,0,0,2,2)
 	--print("HELLO WORLD!",84,84)
