@@ -44,3 +44,5 @@ archive/
 *.x86_64
 *.hex
 
+LUALA-mac
+LUALA-linux
