@@ -27,9 +27,12 @@ function update()
 		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 		shipprocess(j)
 		--renderwindow(j)
-		cam_nudge(j)
+		cameraprocess(j)
 		end
-		--environprocess(j)		
+
+		clip()
+		environprocess()		
+		
 		for j=1,#ships do
 		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 		shipdraw(j)
@@ -43,7 +46,7 @@ function update()
 		t=t+1
 end
 
-function cam_nudge(j)
+function cameraprocess(j)
 		old_cams[j]={sx=cams[j].sx, sy=cams[j].sy, x=cams[j].x, y=cams[j].y}
 		camerafollow(j,'x')
 		if cams[j].x~=old_cams[j].x then
@@ -219,6 +222,8 @@ function shipprocess(j)
 		if hit==13 or hit==14 or hit==15 or oob(s.x,s.y) then
 				s.y=s.y-s.dy; s.x=s.x-s.dx; --a=a-da
 		end
+		
+		hit=pix(cam.ax+s.x-cam.x,cam.ay+s.y-cam.y)
 		if hit==2 or hit==3 or hit==4 then
 				transition(j,s,-cam.sx+s.x,-cam.sy+s.y)
 		end
@@ -241,45 +246,76 @@ function shipprocess(j)
 		--old_cams[j]={sx=cam.sx, sy=cam.sy, x=cam.x, y=cam.y}
 end
 
-function environprocess(j)
+function environprocess()
 		-- flashing transitions
-		for x=0,240*2-1 do for y=136-2,136-1+2 do
+		for j,s in ipairs(ships) do
+		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+
+		if cams[j].x==cams[j].sx then
+				for x=cams[j].x,cams[j].x+1 do for y=cams[j].y,cams[j].y+cams[j].ah-1 do
+					if pixels[posstr(x,y)]==2 then
+							pix(cams[j].ax+x-cams[j].x,cams[j].ay+y-cams[j].y,2+(t*0.2)%3)		
+					end
+				end end
+		end
+		--[[for x=0,240*2-1 do for y=136-2,136-1+2 do
 			if pixels[posstr(x,y)]==2 then
-				pix(x-cams[j].sx,y-cams[j].sy,2+(t*0.2)%3)
+				pix(cams[j].ax+x-cams[j].x,cams[j].ay+y-cams[j].y,2+(t*0.2)%3)
 			end
 		end end
 		for x=240-2,240-1+2 do for y=0,136*2-1 do
 			if pixels[posstr(x,y)]==2 then
-				pix(x-cams[j].sx,y-cams[j].sy,2+(t*0.2)%3)
+				pix(cams[j].ax+x-cams[j].x,cams[j].ay+y-cams[j].y,2+(t*0.2)%3)
 			end
-		end end
+		end end]]
+		end
+		clip()
+				
 		for i=#shots,1,-1 do
 				local sh=shots[i]
 				if sh.oldpos then
 						for lx=0,7 do for ly=0,7 do
 								--if sprpix(32,lx,ly)~=0 then
 										local p=pixels[posstr(sh.oldpos.x+lx,sh.oldpos.y+ly)]
+
+										for j,s in ipairs(ships) do
+										clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 										if not p then
-												pix(-old_cams[j].sx+math.floor(sh.oldpos.x+lx),-old_cams[j].sy+math.floor(sh.oldpos.y+ly),0)
-										else pix(-old_cams[j].sx+sh.oldpos.x+lx,-old_cams[j].sy+sh.oldpos.y+ly,p) end
+												pix(cams[j].ax-cams[j].x+math.floor(sh.oldpos.x+lx),cams[j].ay-cams[j].y+math.floor(sh.oldpos.y+ly),0)
+										else pix(cams[j].ax-cams[j].x+sh.oldpos.x+lx,cams[j].ay-cams[j].y+sh.oldpos.y+ly,p) end
+										end
+										clip()
 								--end
 						end end
+						if oob(sh.oldpos.x,sh.oldpos.y) then
+								rem(shots,i)
+						end
 				end
 		end
 		for i=#shots,1,-1 do
 				local sh=shots[i]
 				sh.x=sh.x+sh.dx; sh.y=sh.y+sh.dy
 				sh.oldpos={x=sh.x,y=sh.y}
-				local hit=false
+				local hits=0
 				for lx=0,7 do for ly=0,7 do
 						if sprpix(32,lx,ly)~=0 and is_solid(pixels[posstr(sh.x+lx,sh.y+ly)]) then
-								pix(-cams[j].sx+sh.x+lx,-cams[j].sy+sh.y+ly,1)
+
+								for j,s in ipairs(ships) do
+								clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+								pix(cams[j].ax-cams[j].x+sh.x+lx,cams[j].ay-cams[j].y+sh.y+ly,1)
+								end
+								clip()
+								
 								pixels[posstr(sh.x+lx,sh.y+ly)]=1
-								hit=true
+								hits=hits+1
 						end
 				end end
-				if not hit then
-				spr(32,sh.x-cams[j].sx,sh.y-cams[j].sy,0)
+				if hits<=3 then
+				for j,s in ipairs(ships) do
+				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+				spr(32,cams[j].ax+sh.x-cams[j].x,cams[j].ay+sh.y-cams[j].y,0)
+				end
+				clip()
 				else rem(shots,i) end
 		end
 		
