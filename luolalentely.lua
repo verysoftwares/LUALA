@@ -260,6 +260,18 @@ function clear_ship_trails(j)
 				else pix(x,y,0) end
 		end end
 		end
+		
+		if alerts[j] then
+				for x=cam.ax,cam.ax+cam.aw-1 do for y=cam.ay,cam.ay+6-1 do
+						local p=pixels[posstr(x-cam.ax+cam.x,y-cam.ay+cam.y)]
+						if p then
+								pix(x,y,p)
+						else pix(x,y,0) end
+				end end
+				alerts[j].t=alerts[j].t-1
+				if alerts[j].t==0 then rem(alerts[j].msgs,1); if #alerts[j].msgs==0 then alerts[j]=nil else alerts[j].t=160 end end
+		end
+
 end
 
 function shipprocess(j)
@@ -489,6 +501,16 @@ function UIdraw(j)
 		local rw=s.hp/30*(cam.aw-8)
 		rect(cam.ax+4,cam.ay+cam.ah-1-4,rw,2,6)
 		
+		if alerts[j] then
+				local c=2
+				if alerts[j].t<20 or alerts[j].t>160-20 then c=1 end
+
+				rect(cam.ax,cam.ay,cam.aw,6,c)
+				local tw=print(alerts[j].msgs[1],0,-6,4,false,1,true)
+				print(alerts[j].msgs[1],cam.ax+cam.aw/2-tw/2,cam.ay,4,false,1,true)
+
+		end
+		
 end
 
 pixels={}
@@ -632,6 +654,7 @@ function transition(j,s,tx,ty)
 				s.trans=true
 		end
 		if s.trans then
+				transalert(j)
 				renderwindow(j)		
 		end
 end
@@ -654,8 +677,26 @@ function forcetransition(j,s,tx,ty)
 				s.trans=true
 		end
 		if s.trans then
+				transalert(j)
 				renderwindow(j)
 		end
+end
+
+function transalert(j)
+		for i,s in ipairs(ships) do
+				if i~=j then
+						if cams[j].sx==cams[i].sx and cams[j].sy==cams[i].sy then
+								alert(i,'Enemy detected nearby!')
+						end
+				end
+		end
+end
+
+alerts={}
+
+function alert(j,msg)
+		if alerts[j] then if alerts[j].msgs[#alerts[j].msgs]~=msg then ins(alerts[j].msgs,msg) end
+		else	alerts[j]={msgs={msg},t=160} end
 end
 
 function oob(x,y)
