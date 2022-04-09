@@ -281,7 +281,7 @@ function shipprocess(j)
 				s.hp=s.hp+1
 				if s.hp>30 then s.hp=30 end
 				end
-				if math.floor(s.oldy)~=math.floor(s.y) then
+				if math.floor(s.oldy)~=math.floor(s.y) or math.floor(s.oldx)~=math.floor(s.x) then
 						s.healing=nil
 				end
 		end
@@ -452,7 +452,7 @@ function UIdraw(j)
 end
 
 pixels={}
-local seed=89828907--math.random(120948087)
+local seed=math.random(120948087)--89828907
 trace(seed)
 
 function load()
@@ -463,12 +463,13 @@ function load()
 				cls(0)
 
 				ships[1]=create_base(1,0,240-1,0,136-1)
-				ships[2]=create_base(2,240,240*2-1,136,136*2-1)
-				ships[3]=create_base(3,240,240*2-1,0,136-1)
-				ships[4]=create_base(4,0,240-1,136,136*2-1)
+				if players>=2 then ships[2]=create_base(2,240,240*2-1,136,136*2-1) end
+				if players>=3 then ships[3]=create_base(3,240,240*2-1,0,136-1) end
+				if players>=4 then ships[4]=create_base(4,0,240-1,136,136*2-1) end
 
 				for j=1,4 do
-				cam_init(j)	
+				if j>players then break end
+				cam_init(j)
 				end
 
 				TIC=update; trace('Generation complete.')
@@ -536,7 +537,39 @@ function create_base(j,minx,maxx,miny,maxy)
 		return newship
 end
 
-TIC=load
+cycle={i=1}
+
+function mainmenu()
+		cls(0)
+		print('LUALA',180-40-40,40-20,3,false,4,false)
+		print('Version 1c',180-40-40+40+2,40+4*6-20,13,false,1,true)
+
+		if btnp(0) or btnp(2) then cycle.i=cycle.i-1; if cycle.i<1 then cycle.i=4 end end
+		if btnp(1) or btnp(3) then cycle.i=cycle.i+1; if cycle.i>4 then cycle.i=1 end end
+
+		if btnp(4) then players=cycle.i; TIC=load end
+
+		for i=1,4 do
+				local msg
+				if i==1 then msg='Solo (Practice)'
+				else msg=fmt('%d players',i) end
+				print(msg,40+(i-1)*50,60+(i-1)*20,8+(t*0.3)%8)
+				
+				if i==1 then 
+				local pulse=(t*0.3)%7
+				if pulse>4 then pulse=7-pulse end
+				rect(5+(cycle.i-1)*50,60+(cycle.i-1)*20-7,31,19,1+pulse) 
+				end
+				
+				if i==1 then rectb(5+(i-1)*50,60+(i-1)*20-7,31,19,13) end
+				if i==2 then rectb(5+(i-1)*50,60+(i-1)*20-7,31,19,13); rectb(5+(i-1)*50,60+(i-1)*20-7,16,19,13) end
+				if i==3 then rectb(5+(i-1)*50,60+(i-1)*20-7,31,10,13); rectb(5+(i-1)*50,60+(i-1)*20-7,16,10,13); rectb(5+(i-1)*50+8,60+(i-1)*20-7+9,16,10,13) end
+				if i==4 then rectb(5+(i-1)*50,60+(i-1)*20-7,31,10,13); rectb(5+(i-1)*50,60+(i-1)*20-7,16,10,13); rectb(5+(i-1)*50,60+(i-1)*20-7+9,31,10,13); rectb(5+(i-1)*50,60+(i-1)*20-7+9,16,10,13) end
+		end
+		t=t+1
+end
+
+TIC=mainmenu
 
 function transition(j,s,tx,ty)
 		if ty>=134 and ty<136 and s.dy>0 then
