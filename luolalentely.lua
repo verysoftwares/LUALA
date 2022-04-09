@@ -555,7 +555,9 @@ function mainmenu()
 				local msg
 				if i==1 then msg='Solo (Practice)'
 				else msg=fmt('%d players',i) end
-				print(msg,40+(i-1)*50,60+(i-1)*20,8+(t*0.3)%8)
+				local c=13
+				if i==cycle.i then c=8+(t*0.3)%8 end
+				print(msg,40+(i-1)*50,60+(i-1)*20,c)
 				
 				if i==1 then 
 				local pulse=(t*0.3)%7
