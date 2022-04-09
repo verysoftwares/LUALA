@@ -37,7 +37,28 @@ function update()
 		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 		shipdraw(j)
 		end
+		
+		for j=1,#ships do
+		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+		UIdraw(j)
+		end
 	
+		for j=#ships,1,-1 do
+				local s=ships[j]
+				if s.gone then 
+				rem(ships,j); rem(cams,j); rem(old_cams,j) 
+				
+				for j2,s2 in ipairs(ships) do
+				local cam=cams[j2]
+				clip(cam.ax,cam.ay,cam.aw,cam.ah)
+				line(cam.ax-cam.x+s.x-cos(s.a)*8,cam.ay-cam.y+s.y-sin(s.a)*8,cam.ax-cam.x+s.x-cos(s.a-2*pi/3-0.3)*11,cam.ay-cam.y+s.y-sin(s.a-2*pi/3-0.3)*11,0)
+				line(cam.ax-cam.x+s.x-cos(s.a-2*pi/3-0.3)*11,cam.ay-cam.y+s.y-sin(s.a-2*pi/3-0.3)*11,cam.ax-cam.x+s.x+cos(s.a)*4,cam.ay-cam.y+s.y+4*sin(s.a),0)
+				line(cam.ax-cam.x+s.x+cos(s.a)*4,cam.ay-cam.y+s.y+4*sin(s.a),cam.ax-cam.x+s.x-cos(s.a+2*pi/3+0.3)*11,cam.ay-cam.y+s.y-sin(s.a+2*pi/3+0.3)*11,0)
+				line(cam.ax-cam.x+s.x-cos(s.a+2*pi/3+0.3)*11,cam.ay-cam.y+s.y-sin(s.a+2*pi/3+0.3)*11,cam.ax-cam.x+s.x-cos(s.a)*8,cam.ay-cam.y+s.y-sin(s.a)*8,0)
+				end
+
+				end
+		end
 	--spr(1+t%60//30*2,x,y,14,3,0,0,2,2)
 	--print("HELLO WORLD!",84,84)
 		--cam.sx=x-240/2; cam.sy=y-136/2
@@ -198,6 +219,14 @@ function clear_ship_trails(j)
 						pix(cam.ax+bx-cam.x,cam.ay+by-cam.y,p)
 				end--else pix(cam.ax+bx-cam.x,cam.ay+by-cam.y,0) end
 		end end
+
+		local rw=s.hp/30*(cam.aw-8)
+		for x=cam.ax+4,cam.ax+4+rw do for y=cam.ay+cam.ah-1-4,cam.ay+cam.ah-1-4+2 do
+				local p=pixels[posstr(x-cam.ax+cam.x,y-cam.ay+cam.y)]
+				if p then
+						pix(x,y,p)
+				else pix(x,y,0) end
+		end end
 		end
 end
 
@@ -208,11 +237,11 @@ function shipprocess(j)
 
 		s.oldx=s.x; s.oldy=s.y		
 		s.dx=0; s.dy=0; s.da=0
-		if btn((j-1)*8) then s.x=s.x-cos(s.a); s.y=s.y-sin(s.a); s.dx=-cos(s.a); s.dy=-sin(s.a) end
-		if btn((j-1)*8+1) then s.x=s.x+cos(s.a); s.y=s.y+sin(s.a); s.dx=cos(s.a); s.dy=sin(s.a) end
-		if btn((j-1)*8+2) then s.a=s.a-0.1; s.da=-0.1 end
-		if btn((j-1)*8+3) then s.a=s.a+0.1; s.da=0.1 end
-		if btnp((j-1)*8+4) then ins(shots,{x=s.x-3,y=s.y-3,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3}) end
+		if btn((s.id-1)*8) then s.x=s.x-cos(s.a); s.y=s.y-sin(s.a); s.dx=-cos(s.a); s.dy=-sin(s.a) end
+		if btn((s.id-1)*8+1) then s.x=s.x+cos(s.a); s.y=s.y+sin(s.a); s.dx=cos(s.a); s.dy=sin(s.a) end
+		if btn((s.id-1)*8+2) then s.a=s.a-0.1; s.da=-0.1 end
+		if btn((s.id-1)*8+3) then s.a=s.a+0.1; s.da=0.1 end
+		if btnp((s.id-1)*8+4) then ins(shots,{x=s.x-3,y=s.y-3,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) end
 	
 		s.y=s.y+grav
 		s.dy=s.dy+grav
@@ -308,7 +337,7 @@ function environprocess()
 										clip()
 								--end
 						end end
-						if oob(sh.oldpos.x,sh.oldpos.y) then
+						if oob(sh.oldpos.x+3,sh.oldpos.y+3) then
 								rem(shots,i)
 						end
 				end
@@ -317,7 +346,7 @@ function environprocess()
 				local sh=shots[i]
 				sh.x=sh.x+sh.dx; sh.y=sh.y+sh.dy
 				sh.oldpos={x=sh.x,y=sh.y}
-				local hits=0
+				local wallhits=0
 				for lx=0,7 do for ly=0,7 do
 						if sprpix(32,lx,ly)~=0 and is_solid(pixels[posstr(sh.x+lx,sh.y+ly)]) then
 
@@ -328,10 +357,10 @@ function environprocess()
 								clip()
 								
 								pixels[posstr(sh.x+lx,sh.y+ly)]=1
-								hits=hits+1
+								wallhits=wallhits+1
 						end
 				end end
-				if hits<=3 then
+				if wallhits<=4 then
 				for j,s in ipairs(ships) do
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 				spr(32,cams[j].ax+sh.x-cams[j].x,cams[j].ay+sh.y-cams[j].y,0)
@@ -340,6 +369,36 @@ function environprocess()
 				else rem(shots,i) end
 		end
 		
+		for i=#shots,1,-1 do
+				local sh=shots[i]
+				for j,s in ipairs(ships) do
+				if sh.owner~=s then
+				local points={{x=s.x-cos(s.a)*8,y=s.y-sin(s.a)*8},
+	         								{x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
+																		{x=s.x+cos(s.a)*4,y=s.y+4*sin(s.a)},
+																		{x=s.x-cos(s.a+2*pi/3+0.3)*11,y=s.y-sin(s.a+2*pi/3+0.3)*11}}
+				if PointWithinShape(points,sh.x+3,sh.y+3) then
+						for j2,s2 in ipairs(ships) do
+								clip(cams[j2].ax,cams[j2].ay,cams[j2].aw,cams[j2].ah)
+								for lx=0,7 do for ly=0,7 do
+										if sprpix(32,lx,ly)~=0 then
+												pix(cams[j2].ax-cams[j2].x+sh.x+lx,cams[j2].ay-cams[j2].y+sh.y+ly,0) 
+										end
+								end end
+						end
+						clip()
+						dmg(j,s)
+						rem(shots,i)
+						break
+				end
+				end
+				end
+		end
+end
+
+function dmg(j,s)
+		s.hp=s.hp-3
+		if s.hp<=0 then s.gone=true end
 end
 
 function shipdraw(j)
@@ -366,6 +425,16 @@ function shipdraw(j)
 		end
 		
 		end
+end
+
+function UIdraw(j)
+		
+		local s=ships[j]
+		local cam=cams[j]
+
+		local rw=s.hp/30*(cam.aw-8)
+		rect(cam.ax+4,cam.ay+cam.ah-1-4,rw,2,6)
+		
 end
 
 pixels={}
@@ -449,7 +518,7 @@ function create_base(j,minx,maxx,miny,maxy)
 		end
 		end end
 		--cams[j].sx=minx; cams[j].sy=miny
-		local newship={x=rx,y=ry-16,a=pi/2,oldx=rx,oldy=ry}
+		local newship={x=rx,y=ry-16,a=pi/2,oldx=rx,oldy=ry-16,hp=30,id=j}
 		return newship
 end
 
@@ -627,6 +696,160 @@ function sprpix(sprno,px,py)
 		return byte
 end
 
+-- from https://love2d.org/wiki/PointWithinShape
+
+		function PointWithinShape(shape, tx, ty)
+		  if #shape == 0 then 
+		    return false
+		  elseif #shape == 1 then 
+		    return shape[1].x == tx and shape[1].y == ty
+		  elseif #shape == 2 then 
+		    return PointWithinLine(shape, tx, ty)
+		  else 
+		    return CrossingsMultiplyTest(shape, tx, ty)
+		  end
+		end
+		 
+		function BoundingBox(box, tx, ty)
+		  return  (box[2].x >= tx and box[2].y >= ty)
+		    and (box[1].x <= tx and box[1].y <= ty)
+		    or  (box[1].x >= tx and box[2].y >= ty)
+		    and (box[2].x <= tx and box[1].y <= ty)
+		end
+		 
+		function colinear(line, x, y, e)
+		  e = e or 0.1
+		  m = (line[2].y - line[1].y) / (line[2].x - line[1].x)
+		  local function f(x) return line[1].y + m*(x - line[1].x) end
+		  return math.abs(y - f(x)) <= e
+		end
+		 
+		function PointWithinLine(line, tx, ty, e)
+		  e = e or 0.66
+		  if BoundingBox(line, tx, ty) then
+		    return colinear(line, tx, ty, e)
+		  else
+		    return false
+		  end
+		end
+		 
+		-------------------------------------------------------------------------
+		-- The following function is based off code from
+		-- [ http://erich.realtimerendering.com/ptinpoly/ ]
+		--
+		--[[
+		 ======= Crossings Multiply algorithm ===================================
+		 * This version is usually somewhat faster than the original published in
+		 * Graphics Gems IV; by turning the division for testing the X axis crossing
+		 * into a tricky multiplication test this part of the test became faster,
+		 * which had the additional effect of making the test for "both to left or
+		 * both to right" a bit slower for triangles than simply computing the
+		 * intersection each time.  The main increase is in triangle testing speed,
+		 * which was about 15% faster; all other polygon complexities were pretty much
+		 * the same as before.  On machines where division is very expensive (not the
+		 * case on the HP 9000 series on which I tested) this test should be much
+		 * faster overall than the old code.  Your mileage may (in fact, will) vary,
+		 * depending on the machine and the test data, but in general I believe this
+		 * code is both shorter and faster.  This test was inspired by unpublished
+		 * Graphics Gems submitted by Joseph Samosky and Mark Haigh-Hutchinson.
+		 * Related work by Samosky is in:
+		 *
+		 * Samosky, Joseph, "SectionView: A system for interactively specifying and
+		 * visualizing sections through three-dimensional medical image data",
+		 * M.S. Thesis, Department of Electrical Engineering and Computer Science,
+		 * Massachusetts Institute of Technology, 1993.
+		 *
+		 --]]
+		 
+		--[[ Shoot a test ray along +X axis.  The strategy is to compare vertex Y values
+		 * to the testing point's Y and quickly discard edges which are entirely to one
+		 * side of the test ray.  Note that CONVEX and WINDING code can be added as
+		 * for the CrossingsTest() code; it is left out here for clarity.
+		 *
+		 * Input 2D polygon _pgon_ with _numverts_ number of vertices and test point
+		 * _point_, returns 1 if inside, 0 if outside.
+		 --]]
+		function CrossingsMultiplyTest(pgon, tx, ty)
+		  local i, yflag0, yflag1, inside_flag
+		  local vtx0, vtx1
+		 
+		  local numverts = #pgon
+		 
+		  vtx0 = pgon[numverts]
+		  vtx1 = pgon[1]
+		
+		  -- get test bit for above/below X axis
+		  yflag0 = ( vtx0.y >= ty )
+		  inside_flag = false
+		 
+		  for i=2,numverts+1 do
+		    yflag1 = ( vtx1.y >= ty )
+		 
+		    --[[ Check if endpoints straddle (are on opposite sides) of X axis
+		     * (i.e. the Y's differ); if so, +X ray could intersect this edge.
+		     * The old test also checked whether the endpoints are both to the
+		     * right or to the left of the test point.  However, given the faster
+		     * intersection point computation used below, this test was found to
+		     * be a break-even proposition for most polygons and a loser for
+		     * triangles (where 50% or more of the edges which survive this test
+		     * will cross quadrants and so have to have the X intersection computed
+		     * anyway).  I credit Joseph Samosky with inspiring me to try dropping
+		     * the "both left or both right" part of my code.
+		     --]]
+		    if ( yflag0 ~= yflag1 ) then
+		      --[[ Check intersection of pgon segment with +X ray.
+		       * Note if >= point's X; if so, the ray hits it.
+		       * The division operation is avoided for the ">=" test by checking
+		       * the sign of the first vertex wrto the test point; idea inspired
+		       * by Joseph Samosky's and Mark Haigh-Hutchinson's different
+		       * polygon inclusion tests.
+		       --]]
+		      if ( ((vtx1.y - ty) * (vtx0.x - vtx1.x) >= (vtx1.x - tx) * (vtx0.y - vtx1.y)) == yflag1 ) then
+		        inside_flag =  not inside_flag
+		      end
+		    end
+		 
+		    -- Move to the next pair of vertices, retaining info as possible.
+		    yflag0  = yflag1
+		    vtx0    = vtx1
+		    vtx1    = pgon[i]
+		  end
+		 
+		  return  inside_flag
+		end
+		 
+		function GetIntersect( points )
+		  local g1 = points[1].x
+		  local h1 = points[1].y
+		 
+		  local g2 = points[2].x
+		  local h2 = points[2].y
+		 
+		  local i1 = points[3].x
+		  local j1 = points[3].y
+		 
+		  local i2 = points[4].x
+		  local j2 = points[4].y
+		 
+		  local xk = 0
+		  local yk = 0
+		 
+		  if checkIntersect({x=g1, y=h1}, {x=g2, y=h2}, {x=i1, y=j1}, {x=i2, y=j2}) then
+		    local a = h2-h1
+		    local b = (g2-g1)
+		    local v = ((h2-h1)*g1) - ((g2-g1)*h1)
+		 
+		    local d = i2-i1
+		    local c = (j2-j1)
+		    local w = ((j2-j1)*i1) - ((i2-i1)*j1)
+		 
+		    xk = (1/((a*d)-(b*c))) * ((d*v)-(b*w))
+		    yk = (-1/((a*d)-(b*c))) * ((a*w)-(c*v))
+		  else
+		    xk,yk = 0,0
+		  end
+		  return xk, yk
+		end
 -- <TILES>
 -- 001:eccccccccc888888caaaaaaaca888888cacccccccacc0ccccacc0ccccacc0ccc
 -- 002:ccccceee8888cceeaaaa0cee888a0ceeccca0ccc0cca0c0c0cca0c0c0cca0c0c
