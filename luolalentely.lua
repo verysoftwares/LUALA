@@ -22,10 +22,16 @@ function update()
 		for j=1,#ships do
 		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 		clear_ship_trails(j)
+		end
+		for j=1,#ships do
+		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 		shipprocess(j)
 		--renderwindow(j)
 		cam_nudge(j)
+		end
 		--environprocess(j)		
+		for j=1,#ships do
+		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 		shipdraw(j)
 		end
 	
@@ -178,16 +184,16 @@ function clear_ship_trails(j)
 		for k,s in ipairs(ships) do
 
 		if not s.trans then
-		--line(cam.ax-cam.x+s.x-cos(s.a)*8,cam.ay-cam.y+s.y-sin(s.a)*8,cam.ax-cam.x+s.x-cos(s.a-2*pi/3-0.3)*11,cam.ay-cam.y+s.y-sin(s.a-2*pi/3-0.3)*11,0)
-		--line(cam.ax-cam.x+s.x-cos(s.a-2*pi/3-0.3)*11,cam.ay-cam.y+s.y-sin(s.a-2*pi/3-0.3)*11,cam.ax-cam.x+s.x+cos(s.a)*4,cam.ay-cam.y+s.y+4*sin(s.a),0)
-		--line(cam.ax-cam.x+s.x+cos(s.a)*4,cam.ay-cam.y+s.y+4*sin(s.a),cam.ax-cam.x+s.x-cos(s.a+2*pi/3+0.3)*11,cam.ay-cam.y+s.y-sin(s.a+2*pi/3+0.3)*11,0)
-		--line(cam.ax-cam.x+s.x-cos(s.a+2*pi/3+0.3)*11,cam.ay-cam.y+s.y-sin(s.a+2*pi/3+0.3)*11,cam.ax-cam.x+s.x-cos(s.a)*8,cam.ay-cam.y+s.y-sin(s.a)*8,0)
+		line(cam.ax-cam.x+s.x-cos(s.a)*8,cam.ay-cam.y+s.y-sin(s.a)*8,cam.ax-cam.x+s.x-cos(s.a-2*pi/3-0.3)*11,cam.ay-cam.y+s.y-sin(s.a-2*pi/3-0.3)*11,0)
+		line(cam.ax-cam.x+s.x-cos(s.a-2*pi/3-0.3)*11,cam.ay-cam.y+s.y-sin(s.a-2*pi/3-0.3)*11,cam.ax-cam.x+s.x+cos(s.a)*4,cam.ay-cam.y+s.y+4*sin(s.a),0)
+		line(cam.ax-cam.x+s.x+cos(s.a)*4,cam.ay-cam.y+s.y+4*sin(s.a),cam.ax-cam.x+s.x-cos(s.a+2*pi/3+0.3)*11,cam.ay-cam.y+s.y-sin(s.a+2*pi/3+0.3)*11,0)
+		line(cam.ax-cam.x+s.x-cos(s.a+2*pi/3+0.3)*11,cam.ay-cam.y+s.y-sin(s.a+2*pi/3+0.3)*11,cam.ax-cam.x+s.x-cos(s.a)*8,cam.ay-cam.y+s.y-sin(s.a)*8,0)
 		else s.trans=nil end
 		for bx=math.floor(s.x-12),math.floor(s.x+12) do for by=math.floor(s.y-12),math.floor(s.y+12) do
 				local p=pixels[posstr(bx,by)]
 				if p then
 						pix(cam.ax+bx-cam.x,cam.ay+by-cam.y,p)
-				else pix(cam.ax+bx-cam.x,cam.ay+by-cam.y,0) end
+				end--else pix(cam.ax+bx-cam.x,cam.ay+by-cam.y,0) end
 		end end
 		end
 end
