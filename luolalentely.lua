@@ -173,9 +173,9 @@ end
 ships={}
 
 function clear_ship_trails(j)
-		for k,s in ipairs(ships) do
-		local cam=cams[j]
 		local old_cam=old_cams[j]
+		local cam=cams[j]
+		for k,s in ipairs(ships) do
 
 		if not s.trans then
 		line(cam.ax-cam.x+s.x-cos(s.a)*8,cam.ay-cam.y+s.y-sin(s.a)*8,cam.ax-cam.x+s.x-cos(s.a-2*pi/3-0.3)*11,cam.ay-cam.y+s.y-sin(s.a-2*pi/3-0.3)*11,0)
@@ -280,8 +280,8 @@ function environprocess(j)
 end
 
 function shipdraw(j)
-		for k,s in ipairs(ships) do
 		local cam=cams[j]
+		for k,s in ipairs(ships) do
 		points={{s.x-cos(s.a)*8,s.y-sin(s.a)*8},
 	         {s.x-cos(s.a-2*pi/3-0.3)*11,s.y-sin(s.a-2*pi/3-0.3)*11},
 										{s.x+cos(s.a)*4,s.y+4*sin(s.a)},
@@ -295,9 +295,9 @@ function shipdraw(j)
 		if not s.trans then
 		for i,v in ipairs(points) do
 				if i<#points then
-				line(cams[j].ax+v[1]-cams[j].x,cams[j].ay+v[2]-cams[j].y,cams[j].ax+points[i+1][1]-cams[j].x,cams[j].ay+points[i+1][2]-cams[j].y,13)
+				line(cam.ax+v[1]-cam.x,cam.ay+v[2]-cam.y,cam.ax+points[i+1][1]-cam.x,cam.ay+points[i+1][2]-cam.y,13)
 				else
-				line(cams[j].ax+v[1]-cams[j].x,cams[j].ay+v[2]-cams[j].y,cams[j].ax+points[1][1]-cams[j].x,cams[j].ay+points[1][2]-cams[j].y,13)
+				line(cam.ax+v[1]-cam.x,cam.ay+v[2]-cam.y,cam.ax+points[1][1]-cam.x,cam.ay+points[1][2]-cam.y,13)
 				end
 		end
 		end
