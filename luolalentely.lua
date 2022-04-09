@@ -541,8 +541,10 @@ cycle={i=1}
 
 function mainmenu()
 		cls(0)
-		print('LUALA',180-40-40,40-20,3,false,4,false)
-		print('Version 1c',180-40-40+40+2,40+4*6-20,13,false,1,true)
+		for i=1,4 do
+		print('LUALA',180-40-40+16-(i*4),40-20+16-(i*4),i,false,4,false)
+		end
+		print('Version 1c',180-40-40+40+2,40+4*6-20+10,13,false,1,true)
 
 		if btnp(0) or btnp(2) then cycle.i=cycle.i-1; if cycle.i<1 then cycle.i=4 end end
 		if btnp(1) or btnp(3) then cycle.i=cycle.i+1; if cycle.i>4 then cycle.i=1 end end
