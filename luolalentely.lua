@@ -44,38 +44,8 @@ function update()
 		UIdraw(j)
 		end
 	
-		for j=#ships,1,-1 do
-				local s=ships[j]
-				if s.gone then 
-				ins(fadeouts,cams[j])
-				fadeouts[#fadeouts].prog=0
-				rem(ships,j); rem(cams,j); rem(old_cams,j) 
-				
-				for j2,s2 in ipairs(ships) do
-				local cam=cams[j2]
-				clip(cam.ax,cam.ay,cam.aw,cam.ah)
-				line(cam.ax-cam.x+s.x-cos(s.a)*8,cam.ay-cam.y+s.y-sin(s.a)*8,cam.ax-cam.x+s.x-cos(s.a-2*pi/3-0.3)*11,cam.ay-cam.y+s.y-sin(s.a-2*pi/3-0.3)*11,0)
-				line(cam.ax-cam.x+s.x-cos(s.a-2*pi/3-0.3)*11,cam.ay-cam.y+s.y-sin(s.a-2*pi/3-0.3)*11,cam.ax-cam.x+s.x+cos(s.a)*4,cam.ay-cam.y+s.y+4*sin(s.a),0)
-				line(cam.ax-cam.x+s.x+cos(s.a)*4,cam.ay-cam.y+s.y+4*sin(s.a),cam.ax-cam.x+s.x-cos(s.a+2*pi/3+0.3)*11,cam.ay-cam.y+s.y-sin(s.a+2*pi/3+0.3)*11,0)
-				line(cam.ax-cam.x+s.x-cos(s.a+2*pi/3+0.3)*11,cam.ay-cam.y+s.y-sin(s.a+2*pi/3+0.3)*11,cam.ax-cam.x+s.x-cos(s.a)*8,cam.ay-cam.y+s.y-sin(s.a)*8,0)
-				end
-
-				end
-		end
+		handle_kills()
 		
-		for i=#fadeouts,1,-1 do
-				local f=fadeouts[i]
-				clip(f.ax,f.ay,f.aw,f.ah)
-				for x=0,f.aw-1 do for y=math.max(f.ah-f.prog-20,0),f.ah-f.prog do
-						if pix(f.ax+x,f.ay+y)==0 then
-								pix(f.ax+x,f.ay+y,2)
-						end
-				end end
-				if f.prog>f.ah then
-						rem(fadeouts,i)
-				end
-				f.prog=f.prog+20
-		end
 	--spr(1+t%60//30*2,x,y,14,3,0,0,2,2)
 	--print("HELLO WORLD!",84,84)
 		--cam.sx=x-240/2; cam.sy=y-136/2
@@ -214,6 +184,45 @@ function camerafollow(j,dir)
 		if cams[j].y>=cams[j].sy+136-cams[j].ah then
 				cams[j].y=cams[j].sy+136-cams[j].ah
 		end
+		end
+end
+
+function handle_kills()
+		for j=#ships,1,-1 do
+				local s=ships[j]
+				if s.gone then 
+				ins(fadeouts,cams[j])
+				fadeouts[#fadeouts].prog=0
+				rem(ships,j); rem(cams,j); rem(old_cams,j) 
+				
+				for j2,s2 in ipairs(ships) do
+				local cam=cams[j2]
+				clip(cam.ax,cam.ay,cam.aw,cam.ah)
+				line(cam.ax-cam.x+s.x-cos(s.a)*8,cam.ay-cam.y+s.y-sin(s.a)*8,cam.ax-cam.x+s.x-cos(s.a-2*pi/3-0.3)*11,cam.ay-cam.y+s.y-sin(s.a-2*pi/3-0.3)*11,0)
+				line(cam.ax-cam.x+s.x-cos(s.a-2*pi/3-0.3)*11,cam.ay-cam.y+s.y-sin(s.a-2*pi/3-0.3)*11,cam.ax-cam.x+s.x+cos(s.a)*4,cam.ay-cam.y+s.y+4*sin(s.a),0)
+				line(cam.ax-cam.x+s.x+cos(s.a)*4,cam.ay-cam.y+s.y+4*sin(s.a),cam.ax-cam.x+s.x-cos(s.a+2*pi/3+0.3)*11,cam.ay-cam.y+s.y-sin(s.a+2*pi/3+0.3)*11,0)
+				line(cam.ax-cam.x+s.x-cos(s.a+2*pi/3+0.3)*11,cam.ay-cam.y+s.y-sin(s.a+2*pi/3+0.3)*11,cam.ax-cam.x+s.x-cos(s.a)*8,cam.ay-cam.y+s.y-sin(s.a)*8,0)
+				end
+
+				end
+		end
+		
+		redfade()
+end
+
+function redfade()
+		for i=#fadeouts,1,-1 do
+				local f=fadeouts[i]
+				clip(f.ax,f.ay,f.aw,f.ah)
+				for x=0,f.aw-1 do for y=math.max(f.ah-f.prog-20,0),f.ah-f.prog do
+						if pix(f.ax+x,f.ay+y)==0 then
+								pix(f.ax+x,f.ay+y,2)
+						end
+				end end
+				if f.prog>f.ah then
+						rem(fadeouts,i)
+				end
+				f.prog=f.prog+20
 		end
 end
 
@@ -503,24 +512,22 @@ function load()
 		
 		for x=px,math.min(px+64,240*2-1) do for y=py,math.min(py+64,136*2-1) do 
 			if (y>=134 and y<138) or (x>=238 and x<242) then pixels[posstr(x,y)]=2 end
-			if perlin(x*0.015,y*0.015,seed)>0.45 then
-					pixels[posstr(x,y)]=15
-			end
-			if perlin(x*0.015,y*0.015,seed)>0.475 then
+			local p=perlin(x*0.015,y*0.015,seed)
+			if p>0.55 then
+					pixels[posstr(x,y)]=13
+					--pix(x,y,14)
+			elseif p>0.5 then
+					pixels[posstr(x,y)]=14
+			elseif p>0.475 then
 					if (x+y)%2==0 then pixels[posstr(x,y)]=15
 					else pixels[posstr(x,y)]=14 end
-			end
-			if perlin(x*0.015,y*0.015,seed)>0.5 then
-					pixels[posstr(x,y)]=14
+			elseif p>0.45 then
+					pixels[posstr(x,y)]=15
 			end
 			--[[if perlin(x*0.015,y*0.015,seed)>0.525 then
 					if (x+y)%2==0 then pixels[posstr(x,y)]=14
 					else pixels[posstr(x,y)]=13 end
 			end]]
-			if perlin(x*0.015,y*0.015,seed)>0.55 then
-					pixels[posstr(x,y)]=13
-					--pix(x,y,14)
-			end		
 			--trace(fmt('x:%d y:%d px:%d py:%d',x,y,px,py))
 		end 
 		end
