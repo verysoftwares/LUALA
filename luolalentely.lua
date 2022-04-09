@@ -435,6 +435,7 @@ end
 function dmg(j,s)
 		s.hp=s.hp-3
 		if s.hp<=0 then s.gone=true end
+		s.flash=18
 end
 
 function shipdraw(j)
@@ -451,11 +452,13 @@ function shipdraw(j)
 				end
 		end]]
 		if not s.trans then
+		local c=13
+		if s.flash then c=12; s.flash=s.flash-1; if s.flash==0 then s.flash=nil end end
 		for i,v in ipairs(points) do
 				if i<#points then
-				line(cam.ax+v[1]-cam.x,cam.ay+v[2]-cam.y,cam.ax+points[i+1][1]-cam.x,cam.ay+points[i+1][2]-cam.y,13)
+				line(cam.ax+v[1]-cam.x,cam.ay+v[2]-cam.y,cam.ax+points[i+1][1]-cam.x,cam.ay+points[i+1][2]-cam.y,c)
 				else
-				line(cam.ax+v[1]-cam.x,cam.ay+v[2]-cam.y,cam.ax+points[1][1]-cam.x,cam.ay+points[1][2]-cam.y,13)
+				line(cam.ax+v[1]-cam.x,cam.ay+v[2]-cam.y,cam.ax+points[1][1]-cam.x,cam.ay+points[1][2]-cam.y,c)
 				end
 		end
 		end
