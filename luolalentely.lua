@@ -134,6 +134,7 @@ function cam_init(j)
 						cams={{sx=0,sy=0,ax=0,ay=0,aw=240/2-2,ah=136/2-2},
 					 	     {sx=240,sy=136,ax=240/2+2,ay=0,aw=240/2-2,ah=136/2-2},
 												{sx=240,sy=0,ax=240/2-2-(240/2-2)/2,ay=136/2+2,aw=240/2-2,ah=136/2-2}}
+												cams[3].ax=cams[3].ax-cams[3].ax%2
 				elseif #ships==4 then
 						cams={{sx=0,sy=0,ax=0,ay=0,aw=240/2-2,ah=136/2-2},
             {sx=240,sy=136,ax=240/2+2,ay=0,aw=240/2-2,ah=136/2-2},
