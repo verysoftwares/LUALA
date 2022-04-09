@@ -258,6 +258,27 @@ function environprocess()
 					end
 				end end
 		end
+		if cams[j].y<=cams[j].sy+1 then
+				for x=cams[j].x,cams[j].x+cams[j].aw-1 do for y=cams[j].y,cams[j].y+1 do
+					if pixels[posstr(x,y)]==2 then
+							pix(cams[j].ax+x-cams[j].x,cams[j].ay+y-cams[j].y,2+(t*0.2)%3)		
+					end
+				end end
+		end
+		if cams[j].x>=cams[j].sx+240-2-cams[j].aw then
+				for x=cams[j].sx+240-2,cams[j].sx+240-1 do for y=cams[j].y,cams[j].y+cams[j].ah-1 do
+					if pixels[posstr(x,y)]==2 then
+							pix(cams[j].ax+x-cams[j].x,cams[j].ay+y-cams[j].y,2+(t*0.2)%3)		
+					end
+				end end
+		end
+		if cams[j].y>=cams[j].sy+136-2-cams[j].ah then
+				for x=cams[j].x,cams[j].x+cams[j].aw-1 do for y=cams[j].sy+136-2,cams[j].sy+136-1 do
+					if pixels[posstr(x,y)]==2 then
+							pix(cams[j].ax+x-cams[j].x,cams[j].ay+y-cams[j].y,2+(t*0.2)%3)		
+					end
+				end end
+		end
 		--[[for x=0,240*2-1 do for y=136-2,136-1+2 do
 			if pixels[posstr(x,y)]==2 then
 				pix(cams[j].ax+x-cams[j].x,cams[j].ay+y-cams[j].y,2+(t*0.2)%3)
