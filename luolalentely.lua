@@ -235,7 +235,7 @@ function shipprocess(j)
 		local cam=cams[j]
 		local old_cam=old_cams[j]
 
-		s.oldx=s.x; s.oldy=s.y		
+		--s.oldx=s.x; s.oldy=s.y		
 		s.dx=0; s.dy=0; s.da=0
 		if btn((s.id-1)*8) then s.x=s.x-cos(s.a); s.y=s.y-sin(s.a); s.dx=-cos(s.a); s.dy=-sin(s.a) end
 		if btn((s.id-1)*8+1) then s.x=s.x+cos(s.a); s.y=s.y+sin(s.a); s.dx=cos(s.a); s.dy=sin(s.a) end
@@ -267,9 +267,23 @@ function shipprocess(j)
 		local hit=pix(cam.ax+v[1]-cam.x,cam.ay+v[2]-cam.y)
 		if hit==5 or hit==6 or hit==7 or hit==12 then
 				s.y=s.y-s.dy; s.x=s.x-s.dx; s.a=s.a-s.da
+				if not s.healing then
+				s.healing=t
+				s.oldx=s.x; s.oldy=s.y
+				end
 				break
 		end
 	
+		end
+		
+		if s.healing then 
+				if (s.healing-t)%12==0 then
+				s.hp=s.hp+1
+				if s.hp>30 then s.hp=30 end
+				end
+				if math.floor(s.oldy)~=math.floor(s.y) then
+						s.healing=nil
+				end
 		end
 
 		--old_cams[j]={sx=cam.sx, sy=cam.sy, x=cam.x, y=cam.y}
