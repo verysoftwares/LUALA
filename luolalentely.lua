@@ -502,12 +502,12 @@ function UIdraw(j)
 		rect(cam.ax+4,cam.ay+cam.ah-1-4,rw,2,6)
 		
 		if alerts[j] then
-				local c=2
-				if alerts[j].t<20 or alerts[j].t>160-20 then c=1 end
+				local c,c2=2,4
+				if alerts[j].t<20 or alerts[j].t>160-20 then c,c2=1,3 end
 
 				rect(cam.ax,cam.ay,cam.aw,6,c)
-				local tw=print(alerts[j].msgs[1],0,-6,4,false,1,true)
-				print(alerts[j].msgs[1],cam.ax+cam.aw/2-tw/2,cam.ay,4,false,1,true)
+				local tw=print(alerts[j].msgs[1],0,-6,c2,false,1,true)
+				print(alerts[j].msgs[1],cam.ax+cam.aw/2-tw/2,cam.ay,c2,false,1,true)
 
 		end
 		
