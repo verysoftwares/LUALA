@@ -353,7 +353,7 @@ end
 
 function is_sprite(x,y)
 		for i,p in ipairs(powerups) do
-				if p.oldpos and math.sqrt((p.oldpos.x-x)^2+(p.oldpos.y+y)^2)<=10 then
+				if p.oldpos and math.sqrt((p.oldpos.x-x)^2+(p.oldpos.y-y)^2)<=8 then
 						return true
 				end
 		end
