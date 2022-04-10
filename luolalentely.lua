@@ -389,15 +389,20 @@ function environprocess()
 				if p.oldpos then
 				for j,s in ipairs(ships) do
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
-				for x=0,16-1 do for y=0,16-1 do
-				  local px= pixels[posstr(p.oldpos.x-8+x,p.oldpos.y-8+y)]
-						if px then pix(cams[j].ax+p.oldpos.x-cams[j].x-8+x,cams[j].ay+p.oldpos.y-cams[j].y-8+y,px)
-						else pix(cams[j].ax+p.oldpos.x-cams[j].x-8+x,cams[j].ay+p.oldpos.y-cams[j].y-8+y,0) end
+				for x=0,16 do for y=0,16 do
+						local pox,poy=p.oldpos.x,p.oldpos.y
+						if pox<0 then pox=math.floor(pox+0.999) end
+						if poy<0 then poy=math.floor(poy+0.999) end
+
+				  local px= pixels[posstr(pox-8+x,poy-8+y)]
+						if px then pix(cams[j].ax+pox-cams[j].x-8+x,cams[j].ay+poy-cams[j].y-8+y,px)
+						else pix(cams[j].ax+pox-cams[j].x-8+x,cams[j].ay+poy-cams[j].y-8+y,0) end				
 				end end
 				end
 				end
 		end
-		for i,p in ipairs(powerups) do
+		for i=#powerups,1,-1 do
+				local p=powerups[i]
 				for j,s in ipairs(ships) do
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 				local id
@@ -407,25 +412,50 @@ function environprocess()
 				if p.type==4 then id=50 end
 				spr(36,cams[j].ax+p.x-8-cams[j].x,cams[j].ay+p.y-8-cams[j].y+sin(t*0.08)*2.5,0,1,0,0,2,2)
 				spr(id,cams[j].ax+p.x-4-cams[j].x,cams[j].ay+p.y-4-cams[j].y+sin(t*0.08)*2.5,0)
-				end		
-				p.oldpos={x=p.x,y=p.y}
+				end
+				p.oldpos={x=p.x,y=p.y+sin(t*0.08)*2.5}
+				for j,s in ipairs(ships) do
+				local points={{x=s.x-cos(s.a)*8,y=s.y-sin(s.a)*8},
+	         								{x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
+																		{x=s.x+cos(s.a)*4,y=s.y+4*sin(s.a)},
+																		{x=s.x-cos(s.a+2*pi/3+0.3)*11,y=s.y-sin(s.a+2*pi/3+0.3)*11}}
+				for k,pt in ipairs(points) do
+				if math.sqrt((pt.x-p.oldpos.x)^2+(pt.y-p.oldpos.y)^2)<=8 then
+				for x=0,16 do for y=0,16 do
+						local pox,poy=p.oldpos.x,p.oldpos.y
+						if pox<0 then pox=math.floor(pox+0.999) end
+						if poy<0 then poy=math.floor(poy+0.999) end
+
+				  local px= pixels[posstr(pox-8+x,poy-8+y)]
+						if px then pix(cams[j].ax+pox-cams[j].x-8+x,cams[j].ay+poy-cams[j].y-8+y,px)
+						else pix(cams[j].ax+pox-cams[j].x-8+x,cams[j].ay+poy-cams[j].y-8+y,0) end
+				end end
+				rem(powerups,i)
+				goto endloop
+				end
+				end
+				end
+				::endloop::
 		end
 		
 		for i=#shots,1,-1 do
 				local sh=shots[i]
 				if sh.oldpos then
 						for lx=0,7 do for ly=0,7 do
-								--if sprpix(32,lx,ly)~=0 then
-										local p=pixels[posstr(sh.oldpos.x+lx,sh.oldpos.y+ly)]
+								if sprpix(32,lx,ly)~=0 then
+										local px,py=sh.oldpos.x,sh.oldpos.y
+										if px<0 then px=math.floor(px+0.999) end
+										if py<0 then py=math.floor(py+0.999) end
+										local p=pixels[posstr(px+lx,py+ly)]
 
 										for j,s in ipairs(ships) do
 										clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 										if not p then
-												pix(cams[j].ax-cams[j].x+math.floor(sh.oldpos.x+lx),cams[j].ay-cams[j].y+math.floor(sh.oldpos.y+ly),0)
-										else pix(cams[j].ax-cams[j].x+sh.oldpos.x+lx,cams[j].ay-cams[j].y+sh.oldpos.y+ly,p) end
+												pix(cams[j].ax-cams[j].x+px+lx,cams[j].ay-cams[j].y+py+ly,0)
+										else pix(cams[j].ax-cams[j].x+px+lx,cams[j].ay-cams[j].y+py+ly,p) end
 										end
 										clip()
-								--end
+								end
 						end end
 						if oob(sh.oldpos.x+3,sh.oldpos.y+3) then
 								rem(shots,i)
@@ -634,7 +664,7 @@ powerups={}
 
 function create_powerups()
 		for i=1,5 do
-		create_powerup(0,240*2-1,0,136*2-1)
+		create_powerup(0,240*2-1,0,0)
 		end
 end
 
