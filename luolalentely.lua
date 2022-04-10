@@ -317,12 +317,14 @@ function shipprocess(j)
 		-- base
 		local hit=pix(cam.ax+v[1]-cam.x,cam.ay+v[2]-cam.y)
 		if hit==5 or hit==6 or hit==7 or hit==12 then
+				if not is_sprite(v[1],v[2]) then
 				s.y=s.y-s.dy; s.x=s.x-s.dx; s.a=s.a-s.da
 				if not s.onbase then
 				s.onbase=t
 				s.oldx=s.x; s.oldy=s.y
 				end
 				break
+				end
 		end
 	
 		end
@@ -339,6 +341,26 @@ function shipprocess(j)
 
 		--old_cams[j]={sx=cam.sx, sy=cam.sy, x=cam.x, y=cam.y}
 end
+
+function is_sprite(x,y)
+		for i,p in ipairs(powerups) do
+				if math.sqrt((p.oldpos.x-x)^2+(p.oldpos.y+y)^2)<=8 then
+						return true
+				end
+		end
+		for i,sh in ipairs(shots) do
+				if AABB(x,y,1,1,sh.oldpos.x,sh.oldpos.y,8,8) then return true end
+		end
+		return false
+end
+
+-- basic AABB collision.
+    function AABB(x1,y1,w1,h1, x2,y2,w2,h2)
+        return (x1 < x2 + w2 and
+                x1 + w1 > x2 and
+                y1 < y2 + h2 and
+                y1 + h1 > y2)
+    end
 
 function environprocess()
 		-- flashing transitions
@@ -596,7 +618,21 @@ function UIdraw(j)
 				inventory[j].i=inventory[j].i or 1
 				for i=0,9-1 do
 						rect(cam.ax+cx-6*9+i*12+2,cam.ay+cy-6+2,8,8,0)
-						spr(68,cam.ax+cx-6*9+i*12,cam.ay+cy-6,0,1,0,0,2,2)
+						local selsp=68
+						if i+1==inventory[j].i then 
+								for x=0,12-1 do for y=0,12-1 do
+										selsp=68 
+										if x>=8 then selsp=selsp+1 end
+										if y>=8 then selsp=selsp+16 end
+										local px=sprpix(selsp,x%8,y%8)
+										if px==12 then 
+												local pulse=(t*0.3)%7
+												if pulse>4 then pulse=7-pulse end
+												px=pulse+1
+										end
+										if px~=0 then pix(cam.ax+cx-6*9+i*12+x,cam.ay+cy-6+y,px) end
+								end end
+						else spr(selsp,cam.ax+cx-6*9+i*12,cam.ay+cy-6,0,1,0,0,2,2) end
 						if inventory[j][i+1] then
 								spr(inventory[j][i+1].id,cam.ax+cx-6*9+i*12+2,cam.ay+cy-6+2,0)
 						end
@@ -1125,16 +1161,12 @@ end
 -- 067:2222222222222222222222222222222222222222222222222222222222222222
 -- 068:0cccc00ccdddd00dcd000000cd000000cd0000000000000000000000cd000000
 -- 069:ccc00000dddc000000dc000000dc000000dc0000000000000000000000dc0000
--- 070:044440044dddd00d4d0000004d0000004d00000000000000000000004d000000
--- 071:44400000ddd4000000d4000000d4000000d40000000000000000000000d40000
 -- 080:2222222222222222222222222222222222222222222222222222222222222222
 -- 081:2222222222222222222222222222222222222222222222222222222222222222
 -- 082:2222222222222222222222222222222222222222222222222222222222222222
 -- 083:2222222222222222222222222222222222222222222222222222222222222222
 -- 084:cd000000cd000000cdddd00d0cccc00c00000000000000000000000000000000
 -- 085:00dc000000dc0000dddc0000ccc0000000000000000000000000000000000000
--- 086:4d0000004d0000004dddd00d0444400400000000000000000000000000000000
--- 087:00d4000000d40000ddd400004440000000000000000000000000000000000000
 -- </TILES>
 
 -- <WAVES>
