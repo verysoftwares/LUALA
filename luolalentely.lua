@@ -399,6 +399,7 @@ function environprocess()
 						if poy<0 then poy=math.floor(poy+0.999) end
 
 				  local px= pixels[posstr(pox-8+x,poy-8+y)]
+						if px==2 then px=trc end
 						if px then pix(cams[j].ax+pox-cams[j].x-8+x,cams[j].ay+poy-cams[j].y-8+y,px)
 						else pix(cams[j].ax+pox-cams[j].x-8+x,cams[j].ay+poy-cams[j].y-8+y,0) end				
 				end end
@@ -427,6 +428,7 @@ function environprocess()
 						if poy<0 then poy=math.floor(poy+0.999) end
 
 				  local px= pixels[posstr(pox-8+x,poy-8+y)]
+						if px==2 then px=trc end
 						if px then pix(cams[j].ax+pox-cams[j].x-8+x,cams[j].ay+poy-cams[j].y-8+y,px)
 						else pix(cams[j].ax+pox-cams[j].x-8+x,cams[j].ay+poy-cams[j].y-8+y,0) end
 				end end
