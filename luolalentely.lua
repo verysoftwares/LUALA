@@ -18,6 +18,15 @@ grav=0.2
 shots={}
 fadeouts={}
 
+function OVR()
+		if TIC==update then
+		for j=1,#ships do
+		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+		UIdraw(j)
+		end
+		end
+end
+
 function update()
 	--cls(0)
 		for j=1,#ships do
@@ -39,11 +48,6 @@ function update()
 		shipdraw(j)
 		end
 		
-		for j=1,#ships do
-		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
-		UIdraw(j)
-		end
-	
 		handle_kills()
 		
 	--spr(1+t%60//30*2,x,y,14,3,0,0,2,2)
@@ -252,24 +256,23 @@ function clear_ship_trails(j)
 				end--else pix(cam.ax+bx-cam.x,cam.ay+by-cam.y,0) end
 		end end
 
-		local rw=s.hp/30*(cam.aw-8)
+		--[[local rw=s.hp/30*(cam.aw-8)
 		for x=cam.ax+4,cam.ax+4+rw do for y=cam.ay+cam.ah-1-4,cam.ay+cam.ah-1-4+2 do
 				local p=pixels[posstr(x-cam.ax+cam.x,y-cam.ay+cam.y)]
 				if p then
 						pix(x,y,p)
 				else pix(x,y,0) end
 		end end
+		]]
 		end
 		
 		if alerts[j] then
-				for x=cam.ax,cam.ax+cam.aw-1 do for y=cam.ay,cam.ay+6-1 do
+				--[[for x=cam.ax,cam.ax+cam.aw-1 do for y=cam.ay,cam.ay+6-1 do
 						local p=pixels[posstr(x-cam.ax+cam.x,y-cam.ay+cam.y)]
 						if p then
 								pix(x,y,p)
 						else pix(x,y,0) end
-				end end
-				alerts[j].t=alerts[j].t-1
-				if alerts[j].t==0 then rem(alerts[j].msgs,1); if #alerts[j].msgs==0 then alerts[j]=nil else alerts[j].t=160 end end
+				end end]]
 		end
 
 end
@@ -509,6 +512,8 @@ function UIdraw(j)
 				local tw=print(alerts[j].msgs[1],0,-6,c2,false,1,true)
 				print(alerts[j].msgs[1],cam.ax+cam.aw/2-tw/2,cam.ay,c2,false,1,true)
 
+				alerts[j].t=alerts[j].t-1
+				if alerts[j].t==0 then rem(alerts[j].msgs,1); if #alerts[j].msgs==0 then alerts[j]=nil else alerts[j].t=160 end end
 		end
 		
 end
@@ -992,6 +997,7 @@ end
 -- 019:cacccccccaaaaaaacaaacaaacaaaaccccaaaaaaac8888888cc000cccecccccec
 -- 020:ccca00ccaaaa0ccecaaa0ceeaaaa0ceeaaaa0cee8888ccee000cceeecccceeee
 -- 032:000c000000ccc0000ccccc00ccccccc00ccccc0000ccc000000c000000000000
+-- 033:000000000001100000211200d322223dd332233d003333000001100000000000
 -- 035:2222222222222222222222222222222222222222222222222222222222222222
 -- 051:2222222222222222222222222222222222222222222222222222222222222222
 -- 064:00000000000000000000765c0065cccc05ccc5605cc56000cc500000c5000000
