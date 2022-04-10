@@ -430,6 +430,12 @@ function environprocess()
 						if px then pix(cams[j].ax+pox-cams[j].x-8+x,cams[j].ay+poy-cams[j].y-8+y,px)
 						else pix(cams[j].ax+pox-cams[j].x-8+x,cams[j].ay+poy-cams[j].y-8+y,0) end
 				end end
+				local id
+				if p.type==1 then id=33 end
+				if p.type==2 then id=34 end
+				if p.type==3 then id=49 end
+				if p.type==4 then id=50 end
+				pick_up(j,id)
 				rem(powerups,i)
 				goto endloop
 				end
@@ -516,6 +522,13 @@ function environprocess()
 				end
 				end
 		end
+end
+
+inventory={}
+
+function pick_up(j,pwrid)
+		if not inventory[j] then inventory[j]={} end
+		ins(inventory[j],{id=id})
 end
 
 function dmg(j,s)
@@ -664,7 +677,7 @@ powerups={}
 
 function create_powerups()
 		for i=1,5 do
-		create_powerup(0,240*2-1,0,0)
+		create_powerup(0,240*2-1,0,136*2-1)
 		end
 end
 
