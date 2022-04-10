@@ -518,7 +518,15 @@ inventory={}
 
 function pick_up(j,pwrid)
 		if not inventory[j] then inventory[j]={} end
-		ins(inventory[j],{id=id})
+		ins(inventory[j],{id=pwrid})
+		alert(j,fmt('Picked up %s.',idtag(pwrid)))
+end
+
+function idtag(id)
+		if id==33 then return 'Drone' end
+		if id==34 then return 'Missile' end
+		if id==49 then return 'Mine' end
+		if id==50 then return 'Plasma' end
 end
 
 function dmg(j,s)
