@@ -353,7 +353,7 @@ end
 
 function is_sprite(x,y)
 		for i,p in ipairs(powerups) do
-				if p.oldpos and math.sqrt((p.oldpos.x-x)^2+(p.oldpos.y-y)^2)<=8 then
+				if p.oldpos and math.sqrt((p.oldpos.x-x)^2+(p.oldpos.y-y)^2)<=10 then
 						return true
 				end
 		end
@@ -372,8 +372,11 @@ end
     end
 
 function environprocess()
-		-- flashing transitions
+		while #powerups<5 do
+				create_powerup(0,240*2-1,0,136*2-1)
+		end
 		
+		-- flashing transitions
 		local trc=2+(t*0.2)%4
 		if trc>=5 then trc=3 end
 		for j,s in ipairs(ships) do
