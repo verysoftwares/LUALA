@@ -256,6 +256,10 @@ function clear_ship_trails(j)
 				end--else pix(cam.ax+bx-cam.x,cam.ay+by-cam.y,0) end
 		end end
 
+		local p=pixels[posstr(s.x,s.y)]
+		if p then pix(cam.ax+s.x-cam.x,cam.ay+s.y-cam.y,p)
+		else pix(cam.ax+s.x-cam.x,cam.ay+s.y-cam.y,0) end
+
 		--[[local rw=s.hp/30*(cam.aw-8)
 		for x=cam.ax+4,cam.ax+4+rw do for y=cam.ay+cam.ah-1-4,cam.ay+cam.ah-1-4+2 do
 				local p=pixels[posstr(x-cam.ax+cam.x,y-cam.ay+cam.y)]
@@ -410,6 +414,7 @@ function environprocess()
 				end
 				p.oldpos={x=p.x,y=p.y+sin(t*0.08)*2.5}
 				for j,s in ipairs(ships) do
+				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 				local points={{x=s.x-cos(s.a)*8,y=s.y-sin(s.a)*8},
 	         								{x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
 																		{x=s.x+cos(s.a)*4,y=s.y+4*sin(s.a)},
@@ -559,7 +564,7 @@ function shipdraw(j)
 				end
 		end
 		end
-		
+		pix(cam.ax+s.x-cam.x,cam.ay+s.y-cam.y,2)
 		end
 end
 
@@ -575,9 +580,9 @@ function UIdraw(j)
 				local c,c2=2,4
 				if alerts[j].t<20 or alerts[j].t>160-20 then c,c2=1,3 end
 
-				rect(cam.ax,cam.ay,cam.aw,6,c)
+				rect(cam.ax,cam.ay,cam.aw,8,c)
 				local tw=print(alerts[j].msgs[1],0,-6,c2,false,1,true)
-				print(alerts[j].msgs[1],cam.ax+cam.aw/2-tw/2,cam.ay,c2,false,1,true)
+				print(alerts[j].msgs[1],cam.ax+cam.aw/2-tw/2,cam.ay+1,c2,false,1,true)
 
 				alerts[j].t=alerts[j].t-1
 				if alerts[j].t==0 then rem(alerts[j].msgs,1); if #alerts[j].msgs==0 then alerts[j]=nil else alerts[j].t=160 end end
