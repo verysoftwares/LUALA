@@ -290,8 +290,8 @@ function shipprocess(j)
 		s.dx=0; s.dy=0; s.da=0
 		if btn((s.id-1)*8) then s.x=s.x-cos(s.a); s.y=s.y-sin(s.a); s.dx=-cos(s.a); s.dy=-sin(s.a) end
 		if btn((s.id-1)*8+1) then s.x=s.x+cos(s.a); s.y=s.y+sin(s.a); s.dx=cos(s.a); s.dy=sin(s.a) end
-		if btn((s.id-1)*8+2) and not s.onbase then s.a=s.a-0.1; s.da=-0.1 end
-		if btn((s.id-1)*8+3) and not s.onbase then s.a=s.a+0.1; s.da=0.1 end
+		if btn((s.id-1)*8+2) and (not s.onbase or btn((s.id-1)*8) or btn((s.id-1)*8+1)) then s.a=s.a-0.1; s.da=-0.1 end
+		if btn((s.id-1)*8+3) and (not s.onbase or btn((s.id-1)*8) or btn((s.id-1)*8+1)) then s.a=s.a+0.1; s.da=0.1 end
 		if btnp((s.id-1)*8+4) and not s.onbase then 
 				if s.shot1 then 
 						if inventory[j][s.shot1].id==32 then ins(shots,{x=s.x-3,y=s.y-3,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) end
@@ -453,6 +453,8 @@ function environprocess()
 																		{x=s.x-cos(s.a+2*pi/3+0.3)*11,y=s.y-sin(s.a+2*pi/3+0.3)*11}}
 				for k,pt in ipairs(points) do
 				if math.sqrt((pt.x-p.oldpos.x)^2+(pt.y-p.oldpos.y)^2)<=8 then
+				for j2,s2 in ipairs(ships) do
+				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 				for x=0,16 do for y=0,16 do
 						local pox,poy=p.oldpos.x,p.oldpos.y
 						if pox<0 then pox=math.floor(pox+0.999) end
@@ -463,6 +465,8 @@ function environprocess()
 						if px then pix(cams[j].ax+pox-cams[j].x-8+x,cams[j].ay+poy-cams[j].y-8+y,px)
 						else pix(cams[j].ax+pox-cams[j].x-8+x,cams[j].ay+poy-cams[j].y-8+y,0) end
 				end end
+				end
+				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 				pick_up(j,p.id)
 				rem(powerups,i)
 				goto endloop
@@ -556,7 +560,12 @@ inventory={}
 
 function pick_up(j,pwrid,silent)
 		if not inventory[j] then inventory[j]={} end
-		ins(inventory[j],{id=pwrid})
+		for i=1,9 do
+				if not inventory[j][i] then
+						inventory[j][i]={id=pwrid}
+						break
+				end
+		end
 		if not silent then alert(j,fmt('Picked up %s.',idtag(pwrid))) end
 end
 
@@ -598,7 +607,7 @@ function shipdraw(j)
 				end
 		end
 		end
-		pix(cam.ax+s.x-cam.x,cam.ay+s.y-cam.y,2)
+		--pix(cam.ax+s.x-cam.x,cam.ay+s.y-cam.y,2)
 		end
 end
 
@@ -627,21 +636,44 @@ function UIdraw(j)
 		if s.onbase then
 				local cx,cy=cam.aw/2,cam.ah/2
 				inventory[j].i=inventory[j].i or 1
-				
+
+				local function actuallen(inv)
+						-- for inventories that contain holes
+						for i=9-1,0,-1 do
+								if inv[i] then return i end
+						end
+						return 0
+				end
+
+				local scrap=false				
 				for i=2,5 do
 						if btn((s.id-1)*8+i) then
+								if not keymap[j] or not (keymap[j][i]==2) then
 								if not keymap[j] then keymap[j]={} end
-								keymap[j][(s.id-1)+i]=true
-						else
-								if keymap[j] and keymap[j][(s.id-1)+i] then
-										if i==2 then inventory[j].i=inventory[j].i-1; if inventory[j].i<1 then inventory[j].i=#inventory[j] end end
-										if i==3 then inventory[j].i=inventory[j].i+1; if inventory[j].i>#inventory[j] then inventory[j].i=1 end end
-										if i==4 then s.shot1=inventory[j].i; if s.shot2==inventory[j].i then s.shot2=nil end end
-										if i==5 then s.shot2=inventory[j].i; if s.shot1==inventory[j].i then s.shot1=nil end end
-										keymap[j][(s.id-1)+i]=nil
+								keymap[j][(s.id-1)+i]=1
 								end
+						else
+								if keymap[j] and keymap[j][(s.id-1)+i]==1 then
+										if i==2 then 
+										if btn((s.id-1)*8+4) then
+										scrap=true; keymap[j][(s.id-1)*8+4]=2
+										else inventory[j].i=inventory[j].i-1; if inventory[j].i<1 then inventory[j].i=actuallen(inventory[j]) end 
+										end
+										end
+										if i==3 then inventory[j].i=inventory[j].i+1; if inventory[j].i>actuallen(inventory[j]) then inventory[j].i=1 end end
+										if i==4 then
+										if btn((s.id-1)*8+2) then
+										scrap=true; keymap[j][(s.id-1)*8+2]=2
+										else if inventory[j][inventory[j].i] then s.shot1=inventory[j].i; if s.shot2==inventory[j].i then s.shot2=nil end end 
+										end
+										end
+										if i==5 then if inventory[j][inventory[j].i] then s.shot2=inventory[j].i; if s.shot1==inventory[j].i then s.shot1=nil end end 
+										end
+								end
+								if keymap[j] then keymap[j][(s.id-1)+i]=nil end
 						end
 				end
+				if scrap then inventory[j][inventory[j].i]=nil; if s.shot1==inventory[j].i then s.shot1=nil end; if s.shot2==inventory[j].i then s.shot2=nil end end
 				
 				for i=0,9-1 do
 						rect(cam.ax+cx-6*9+i*12+2,cam.ay+cy-6+2,8,8,0)
@@ -773,12 +805,13 @@ function create_powerup(minx,maxx,miny,maxy)
 		while pixels[posstr(rx,ry)] do
 		rx,ry=math.random(minx,maxx),math.random(miny,maxy)
 		end
-		local type=math.random(1,4)
+		local type=math.random(1,5)
 		local id
 		if type==1 then id=33 end
 		if type==2 then id=34 end
 		if type==3 then id=49 end
 		if type==4 then id=50 end
+		if type==5 then id=32 end
 		
 		ins(powerups,{x=rx,y=ry,id=id})
 end
