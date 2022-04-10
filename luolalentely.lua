@@ -314,8 +314,8 @@ function shipprocess(j)
 		local hit=pix(cam.ax+v[1]-cam.x,cam.ay+v[2]-cam.y)
 		if hit==5 or hit==6 or hit==7 or hit==12 then
 				s.y=s.y-s.dy; s.x=s.x-s.dx; s.a=s.a-s.da
-				if not s.healing then
-				s.healing=t
+				if not s.onbase then
+				s.onbase=t
 				s.oldx=s.x; s.oldy=s.y
 				end
 				break
@@ -323,13 +323,13 @@ function shipprocess(j)
 	
 		end
 		
-		if s.healing then 
-				if (t-s.healing)%12==0 then
+		if s.onbase then 
+				if (t-s.onbase)%12==0 then
 				s.hp=s.hp+1
 				if s.hp>30 then s.hp=30 end
 				end
 				if math.floor(s.oldy)~=math.floor(s.y) or math.floor(s.oldx)~=math.floor(s.x) then
-						s.healing=nil
+						s.onbase=nil
 				end
 		end
 
@@ -642,19 +642,19 @@ end
 TIC=mainmenu
 
 function transition(j,s,tx,ty)
-		if ty>=134 and ty<136 and s.dy>0 then
+		if ty>=134 and ty<136 and not oob(cams[j].sx,cams[j].sy+136) and s.dy>0 then
 				cams[j].sy=cams[j].sy+136
 				s.trans=true
 		end
-		if ty>=0 and ty<2 and s.dy<0 then
+		if ty>=0 and ty<2 and not oob(cams[j].sx,cams[j].sy-136) and s.dy<0 then
 				cams[j].sy=cams[j].sy-136
 				s.trans=true
 		end
-		if tx>=238 and tx<240 and s.dx>0 then
+		if tx>=238 and tx<240 and not oob(cams[j].sx+240,cams[j].sy) and s.dx>0 then
 				cams[j].sx=cams[j].sx+240
 				s.trans=true
 		end
-		if tx>=0 and tx<2 and s.dx<0 then
+		if tx>=0 and tx<2 and not oob(cams[j].sx-240,cams[j].sy) and s.dx<0 then
 				cams[j].sx=cams[j].sx-240
 				s.trans=true
 		end
