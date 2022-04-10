@@ -405,13 +405,8 @@ function environprocess()
 				local p=powerups[i]
 				for j,s in ipairs(ships) do
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
-				local id
-				if p.type==1 then id=33 end
-				if p.type==2 then id=34 end
-				if p.type==3 then id=49 end
-				if p.type==4 then id=50 end
 				spr(36,cams[j].ax+p.x-8-cams[j].x,cams[j].ay+p.y-8-cams[j].y+sin(t*0.08)*2.5,0,1,0,0,2,2)
-				spr(id,cams[j].ax+p.x-4-cams[j].x,cams[j].ay+p.y-4-cams[j].y+sin(t*0.08)*2.5,0)
+				spr(p.id,cams[j].ax+p.x-4-cams[j].x,cams[j].ay+p.y-4-cams[j].y+sin(t*0.08)*2.5,0)
 				end
 				p.oldpos={x=p.x,y=p.y+sin(t*0.08)*2.5}
 				for j,s in ipairs(ships) do
@@ -430,12 +425,7 @@ function environprocess()
 						if px then pix(cams[j].ax+pox-cams[j].x-8+x,cams[j].ay+poy-cams[j].y-8+y,px)
 						else pix(cams[j].ax+pox-cams[j].x-8+x,cams[j].ay+poy-cams[j].y-8+y,0) end
 				end end
-				local id
-				if p.type==1 then id=33 end
-				if p.type==2 then id=34 end
-				if p.type==3 then id=49 end
-				if p.type==4 then id=50 end
-				pick_up(j,id)
+				pick_up(j,p.id)
 				rem(powerups,i)
 				goto endloop
 				end
@@ -686,7 +676,14 @@ function create_powerup(minx,maxx,miny,maxy)
 		while pixels[posstr(rx,ry)] do
 		rx,ry=math.random(minx,maxx),math.random(miny,maxy)
 		end
-		ins(powerups,{x=rx,y=ry,type=math.random(1,4)})
+		local type=math.random(1,4)
+		local id
+		if type==1 then id=33 end
+		if type==2 then id=34 end
+		if type==3 then id=49 end
+		if type==4 then id=50 end
+		
+		ins(powerups,{x=rx,y=ry,id=id})
 end
 
 cycle={i=1}
