@@ -292,7 +292,9 @@ function shipprocess(j)
 		if btn((s.id-1)*8+1) then s.x=s.x+cos(s.a); s.y=s.y+sin(s.a); s.dx=cos(s.a); s.dy=sin(s.a) end
 		if btn((s.id-1)*8+2) then s.a=s.a-0.1; s.da=-0.1 end
 		if btn((s.id-1)*8+3) then s.a=s.a+0.1; s.da=0.1 end
-		if btnp((s.id-1)*8+4) then ins(shots,{x=s.x-3,y=s.y-3,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) end
+		if btnp((s.id-1)*8+4) and not s.onbase then 
+				ins(shots,{x=s.x-3,y=s.y-3,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) 
+		end
 	
 		s.y=s.y+grav
 		s.dy=s.dy+grav
@@ -344,12 +346,12 @@ end
 
 function is_sprite(x,y)
 		for i,p in ipairs(powerups) do
-				if math.sqrt((p.oldpos.x-x)^2+(p.oldpos.y+y)^2)<=8 then
+				if p.oldpos and math.sqrt((p.oldpos.x-x)^2+(p.oldpos.y+y)^2)<=9 then
 						return true
 				end
 		end
 		for i,sh in ipairs(shots) do
-				if AABB(x,y,1,1,sh.oldpos.x,sh.oldpos.y,8,8) then return true end
+				if sh.oldpos and AABB(x,y,1,1,sh.oldpos.x,sh.oldpos.y,8,8) then return true end
 		end
 		return false
 end
@@ -593,6 +595,8 @@ function shipdraw(j)
 		end
 end
 
+keymap={}
+
 function UIdraw(j)
 		
 		local s=ships[j]
@@ -616,6 +620,22 @@ function UIdraw(j)
 		if s.onbase then
 				local cx,cy=cam.aw/2,cam.ah/2
 				inventory[j].i=inventory[j].i or 1
+				
+				for i=2,5 do
+						if btn((s.id-1)*8+i) then
+								if not keymap[j] then keymap[j]={} end
+								keymap[j][(s.id-1)+i]=true
+						else
+								if keymap[j] and keymap[j][(s.id-1)+i] then
+										if i==2 then inventory[j].i=inventory[j].i-1; if inventory[j].i<1 then inventory[j].i=#inventory[j] end end
+										if i==3 then inventory[j].i=inventory[j].i+1; if inventory[j].i>#inventory[j] then inventory[j].i=1 end end
+										if i==4 then s.shot1=inventory[j][inventory[j].i].id end
+										if i==5 then s.shot2=inventory[j][inventory[j].i].id end
+										keymap[j][(s.id-1)+i]=nil
+								end
+						end
+				end
+				
 				for i=0,9-1 do
 						rect(cam.ax+cx-6*9+i*12+2,cam.ay+cy-6+2,8,8,0)
 						local selsp=68
