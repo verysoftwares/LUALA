@@ -384,7 +384,33 @@ function environprocess()
 		end end]]
 		end
 		clip()
-				
+		
+		for i,p in ipairs(powerups) do
+				if p.oldpos then
+				for j,s in ipairs(ships) do
+				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+				for x=0,16-1 do for y=0,16-1 do
+				  local px= pixels[posstr(p.oldpos.x-8+x,p.oldpos.y-8+y)]
+						if px then pix(cams[j].ax+p.oldpos.x-cams[j].x-8+x,cams[j].ay+p.oldpos.y-cams[j].y-8+y,px)
+						else pix(cams[j].ax+p.oldpos.x-cams[j].x-8+x,cams[j].ay+p.oldpos.y-cams[j].y-8+y,0) end
+				end end
+				end
+				end
+		end
+		for i,p in ipairs(powerups) do
+				for j,s in ipairs(ships) do
+				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+				local id
+				if p.type==1 then id=33 end
+				if p.type==2 then id=34 end
+				if p.type==3 then id=49 end
+				if p.type==4 then id=50 end
+				spr(36,cams[j].ax+p.x-8-cams[j].x,cams[j].ay+p.y-8-cams[j].y+sin(t*0.08)*2.5,0,1,0,0,2,2)
+				spr(id,cams[j].ax+p.x-4-cams[j].x,cams[j].ay+p.y-4-cams[j].y+sin(t*0.08)*2.5,0)
+				end		
+				p.oldpos={x=p.x,y=p.y}
+		end
+		
 		for i=#shots,1,-1 do
 				local sh=shots[i]
 				if sh.oldpos then
@@ -529,6 +555,8 @@ function load()
 		if py==136*2-1 then
 				cls(0)
 
+				create_powerups()
+
 				ships[1]=create_base(1,0,240-1,0,136-1)
 				if players>=2 then ships[2]=create_base(2,240,240*2-1,136,136*2-1) end
 				if players>=3 then ships[3]=create_base(3,240,240*2-1,0,136-1) end
@@ -600,6 +628,22 @@ function create_base(j,minx,maxx,miny,maxy)
 		--cams[j].sx=minx; cams[j].sy=miny
 		local newship={x=rx,y=ry-16,a=pi/2,oldx=rx,oldy=ry-16,hp=30,id=j}
 		return newship
+end
+
+powerups={}
+
+function create_powerups()
+		for i=1,5 do
+		create_powerup(0,240*2-1,0,136*2-1)
+		end
+end
+
+function create_powerup(minx,maxx,miny,maxy)
+		local rx,ry=math.random(minx,maxx),math.random(miny,maxy)
+		while pixels[posstr(rx,ry)] do
+		rx,ry=math.random(minx,maxx),math.random(miny,maxy)
+		end
+		ins(powerups,{x=rx,y=ry,type=math.random(1,4)})
 end
 
 cycle={i=1}
