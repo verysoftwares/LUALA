@@ -290,10 +290,17 @@ function shipprocess(j)
 		s.dx=0; s.dy=0; s.da=0
 		if btn((s.id-1)*8) then s.x=s.x-cos(s.a); s.y=s.y-sin(s.a); s.dx=-cos(s.a); s.dy=-sin(s.a) end
 		if btn((s.id-1)*8+1) then s.x=s.x+cos(s.a); s.y=s.y+sin(s.a); s.dx=cos(s.a); s.dy=sin(s.a) end
-		if btn((s.id-1)*8+2) then s.a=s.a-0.1; s.da=-0.1 end
-		if btn((s.id-1)*8+3) then s.a=s.a+0.1; s.da=0.1 end
+		if btn((s.id-1)*8+2) and not s.onbase then s.a=s.a-0.1; s.da=-0.1 end
+		if btn((s.id-1)*8+3) and not s.onbase then s.a=s.a+0.1; s.da=0.1 end
 		if btnp((s.id-1)*8+4) and not s.onbase then 
-				ins(shots,{x=s.x-3,y=s.y-3,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) 
+				if s.shot1 then 
+						if inventory[j][s.shot1].id==32 then ins(shots,{x=s.x-3,y=s.y-3,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) end
+				else alert(j,'Shot1 not set! Go to base!') end
+		end
+		if btnp((s.id-1)*8+5) and not s.onbase then 
+				if s.shot2 then 
+						if inventory[j][s.shot2].id==32 then ins(shots,{x=s.x-3,y=s.y-3,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) end
+				else alert(j,'Shot2 not set! Go to base!') end
 		end
 	
 		s.y=s.y+grav
@@ -346,7 +353,7 @@ end
 
 function is_sprite(x,y)
 		for i,p in ipairs(powerups) do
-				if p.oldpos and math.sqrt((p.oldpos.x-x)^2+(p.oldpos.y+y)^2)<=9 then
+				if p.oldpos and math.sqrt((p.oldpos.x-x)^2+(p.oldpos.y+y)^2)<=10 then
 						return true
 				end
 		end
@@ -469,10 +476,10 @@ function environprocess()
 				local sh=shots[i]
 				if sh.oldpos then
 						for lx=0,7 do for ly=0,7 do
-								if sprpix(32,lx,ly)~=0 then
+								--if sprpix(32,lx,ly)~=0 then
 										local px,py=sh.oldpos.x,sh.oldpos.y
-										if px<0 then px=math.floor(px+0.999) end
-										if py<0 then py=math.floor(py+0.999) end
+										if px<0 then px=math.floor(px+1) end
+										if py<0 then py=math.floor(py+1) end
 										local p=pixels[posstr(px+lx,py+ly)]
 
 										for j,s in ipairs(ships) do
@@ -482,7 +489,7 @@ function environprocess()
 										else pix(cams[j].ax-cams[j].x+px+lx,cams[j].ay-cams[j].y+py+ly,p) end
 										end
 										clip()
-								end
+								--end
 						end end
 						if oob(sh.oldpos.x+3,sh.oldpos.y+3) then
 								rem(shots,i)
@@ -629,8 +636,8 @@ function UIdraw(j)
 								if keymap[j] and keymap[j][(s.id-1)+i] then
 										if i==2 then inventory[j].i=inventory[j].i-1; if inventory[j].i<1 then inventory[j].i=#inventory[j] end end
 										if i==3 then inventory[j].i=inventory[j].i+1; if inventory[j].i>#inventory[j] then inventory[j].i=1 end end
-										if i==4 then s.shot1=inventory[j][inventory[j].i].id end
-										if i==5 then s.shot2=inventory[j][inventory[j].i].id end
+										if i==4 then s.shot1=inventory[j].i; if s.shot2==inventory[j].i then s.shot2=nil end end
+										if i==5 then s.shot2=inventory[j].i; if s.shot1==inventory[j].i then s.shot1=nil end end
 										keymap[j][(s.id-1)+i]=nil
 								end
 						end
@@ -655,6 +662,12 @@ function UIdraw(j)
 						else spr(selsp,cam.ax+cx-6*9+i*12,cam.ay+cy-6,0,1,0,0,2,2) end
 						if inventory[j][i+1] then
 								spr(inventory[j][i+1].id,cam.ax+cx-6*9+i*12+2,cam.ay+cy-6+2,0)
+						end
+						if i+1==s.shot1 then
+								print('S1',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2,12)
+						end
+						if i+1==s.shot2 then
+								print('S2',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2,12)
 						end
 				end
 		end
