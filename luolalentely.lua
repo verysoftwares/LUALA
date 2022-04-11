@@ -17,6 +17,8 @@ grav=0.2
 
 shots={}
 static={}
+missiles={}
+
 fadeouts={}
 
 function OVR()
@@ -302,6 +304,7 @@ function shipprocess(j)
 						if id==32 then ins(shots,{x=s.x-3,y=s.y-3,id=id,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) end
 						if id==50 then ins(shots,{x=s.x-3,y=s.y-3,id=id,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) end
 						if id==49 then ins(static,{x=s.x-3,y=s.y-3,id=id,dx=0,dy=0,owner=s,iframes=90}) end
+						if id==34 then ins(missiles,{x=s.x-3,y=s.y-3,a=s.a+pi,id=id,dx=cos(s.a+pi)*6,dy=sin(s.a+pi)*6,owner=s}) end
 						s[fmt('shot%d',i)].nrj=s[fmt('shot%d',i)].nrj-1
 						else alert(j,fmt('Shot%d out of ammo. Go to base.',i)) end
 				else alert(j,fmt('Shot%d not set. Go to base.',i)) end
@@ -751,7 +754,7 @@ function pick_up(j,pwrid,silent)
 				end
 				if i==9 then return end
 		end
-		if not silent then alert(j,fmt('Picked up %s.',idtag(pwrid))) end
+		if not silent then alert(j,fmt('Picked up %s.',idtag(pwrid)),true) end
 		if full then alert(j,'Inventory is now full.') end
 end
 
@@ -821,10 +824,14 @@ function UIdraw(j)
 		if alerts[j] then
 				local c,c2=2,4
 				if alerts[j].t<20 or alerts[j].t>160-20 then c,c2=1,3 end
-
+				if alerts[j].msgs[1].goodnews then 
+				c,c2=4,6
+				if alerts[j].t<20 or alerts[j].t>160-20 then c,c2=5,7 end
+				end
+				
 				rect(cam.ax,cam.ay,cam.aw,8,c)
-				local tw=print(alerts[j].msgs[1],0,-6,c2,false,1,true)
-				print(alerts[j].msgs[1],cam.ax+cam.aw/2-tw/2,cam.ay+1,c2,false,1,true)
+				local tw=print(alerts[j].msgs[1][1],0,-6,c2,false,1,true)
+				print(alerts[j].msgs[1][1],cam.ax+cam.aw/2-tw/2,cam.ay+1,c2,false,1,true)
 
 				alerts[j].t=alerts[j].t-1
 				if alerts[j].t==0 then rem(alerts[j].msgs,1); if #alerts[j].msgs==0 then alerts[j]=nil else alerts[j].t=160 end end
@@ -1119,9 +1126,9 @@ end
 
 alerts={}
 
-function alert(j,msg)
-		if alerts[j] then if alerts[j].msgs[#alerts[j].msgs]~=msg then ins(alerts[j].msgs,msg) end
-		else	alerts[j]={msgs={msg},t=160} end
+function alert(j,msg,goodnews)
+		if alerts[j] then if alerts[j].msgs[#alerts[j].msgs][1]~=msg then ins(alerts[j].msgs,{msg,goodnews=goodnews}) end
+		else	alerts[j]={msgs={{msg,goodnews=goodnews}},t=160} end
 end
 
 function oob(x,y)
