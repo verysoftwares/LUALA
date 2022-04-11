@@ -719,10 +719,10 @@ function UIdraw(j)
 										if i==4 then
 										if btn((s.id-1)*8+2) then
 										scrap=true; keymap[j][(s.id-1)*8+2]=2
-										else if inventory[j][inventory[j].i] then local oldshot1=s.shot1; s.shot1={invi=inventory[j].i,nrj=inventory[j][inventory[j].i].nrj or idtags[inventory[j][inventory[j].i].id].nrj}; if oldshot1 then inventory[j][oldshot1.invi].nrj=oldshot1.nrj end; if s.shot2 and s.shot2.invi==inventory[j].i then s.shot2=nil end end 
+										else if inventory[j][inventory[j].i] then local oldshot1=s.shot1; if oldshot1 then inventory[j][oldshot1.invi].nrj=oldshot1.nrj end; s.shot1={invi=inventory[j].i,nrj=inventory[j][inventory[j].i].nrj or idtags[inventory[j][inventory[j].i].id].nrj}; if s.shot2 and s.shot2.invi==inventory[j].i then s.shot2=nil end end 
 										end
 										end
-										if i==5 then if inventory[j][inventory[j].i] then local oldshot2=s.shot2; s.shot2={invi=inventory[j].i,nrj=inventory[j][inventory[j].i].nrj or idtags[inventory[j][inventory[j].i].id].nrj}; if oldshot2 then inventory[j][oldshot2.invi].nrj=oldshot2.nrj end; if s.shot1 and s.shot1.invi==inventory[j].i then s.shot1=nil end end 
+										if i==5 then if inventory[j][inventory[j].i] then local oldshot2=s.shot2; if oldshot2 then inventory[j][oldshot2.invi].nrj=oldshot2.nrj end; s.shot2={invi=inventory[j].i,nrj=inventory[j][inventory[j].i].nrj or idtags[inventory[j][inventory[j].i].id].nrj}; if s.shot1 and s.shot1.invi==inventory[j].i then s.shot1=nil end end 
 										end
 								end
 								if keymap[j] then keymap[j][(s.id-1)+i]=nil end
