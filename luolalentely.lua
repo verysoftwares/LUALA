@@ -892,7 +892,7 @@ function shipdraw(j)
 		end]]
 		if not s.trans then
 		local c=13
-		if s.flash then c=12; s.flash=s.flash-1; if s.flash==0 then s.flash=nil end end
+		if s.flash then c=2; s.flash=s.flash-1; if s.flash==0 then s.flash=nil end end
 		for i,v in ipairs(points) do
 				if i<#points then
 				line(cam.ax+v[1]-cam.x,cam.ay+v[2]-cam.y,cam.ax+points[i+1][1]-cam.x,cam.ay+points[i+1][2]-cam.y,c)
@@ -1138,7 +1138,7 @@ function mainmenu()
 		print('LUALA',180-40-40+16-(i*4),40-20+16-(i*4)-8,i,false,4,false)
 		end
 		--print('Version 1c',180-40-40+40+2,40+4*6-20+10,13,false,1,true)
-		print('Version 1c',2,136-8,13,false,1,true)
+		print('Version 1d',2,136-8,13,false,1,true)
 
 		if btnp(0) or btnp(2) then cycle.i=cycle.i-1; if cycle.i<1 then cycle.i=4 end end
 		if btnp(1) or btnp(3) then cycle.i=cycle.i+1; if cycle.i>4 then cycle.i=1 end end
