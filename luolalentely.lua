@@ -655,17 +655,7 @@ function environprocess()
 																		{x=s.x+cos(s.a)*4,y=s.y+4*sin(s.a)},
 																		{x=s.x-cos(s.a+2*pi/3+0.3)*11,y=s.y-sin(s.a+2*pi/3+0.3)*11}}
 				if PointWithinShape(points,sh.x+3,sh.y+3) then
-						for j2,s2 in ipairs(ships) do
-								clip(cams[j2].ax,cams[j2].ay,cams[j2].aw,cams[j2].ah)
-								for lx=0,7 do for ly=0,7 do
-										if sprpix(32,lx,ly)~=0 then
-												local p=pixels[posstr(sh.x+lx,sh.y+ly)]
-												if p then pix(cams[j2].ax-cams[j2].x+sh.x+lx,cams[j2].ay-cams[j2].y+sh.y+ly,p)
-												else pix(cams[j2].ax-cams[j2].x+sh.x+lx,cams[j2].ay-cams[j2].y+sh.y+ly,0) end
-										end
-								end end
-						end
-						clip()
+						clear_sprite(sh)
 						dmg(s,3)
 						rem(shots,i)
 						break
