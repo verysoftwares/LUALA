@@ -519,24 +519,15 @@ function environprocess()
 		for i=#missiles,1,-1 do
 				local ms=missiles[i]
 				if ms.oldpos then
-						clear_sprite(ms)
+						local hyp=7.5
+						clear_sprite2(ms,hyp)
 				end
 		end
 		for i=#missiles,1,-1 do
 				local ms=missiles[i]
 				ms.x=ms.x+ms.dx; ms.y=ms.y+ms.dy
-				for j,s in ipairs(ships) do
-				--spr(34,cams[j].ax+ms.x-cams[j].x,cams[j].ay+ms.y-cams[j].y,0)
 				local hyp=7.5
-				if ms.oldpos then 
-				for x=ms.oldpos.x-hyp/3-2-6-2,ms.oldpos.x+hyp*2+4+4 do for y=ms.oldpos.y-hyp/3-2-2,ms.oldpos.y+hyp*2+4+4+ms.dy do
-						local px=pixels[posstr(x,y)]
-						if px then 
-						if px==2 then px=trc end
-						pix(cams[j].ax+x-cams[j].x,cams[j].ay+y-cams[j].y,px)
-						else pix(cams[j].ax+x-cams[j].x,cams[j].ay+y-cams[j].y,0) end
-				end end
-				end
+				for j,s in ipairs(ships) do
 				local a={x=cos(ms.a-pi/4)*hyp,y=sin(ms.a-pi/4)*hyp}; local d={x=cos(ms.a+pi/4)*hyp,y=sin(ms.a+pi/4)*hyp}
 				local b={x=cos(ms.a+pi/4)*hyp,y=sin(ms.a+pi/4)*hyp}; local e={x=cos(ms.a-pi+pi/4)*hyp,y=sin(ms.a-pi+pi/4)*hyp}
 				local c={x=cos(ms.a-pi+pi/4)*hyp,y=sin(ms.a-pi+pi/4)*hyp}; local f={x=cos(ms.a-pi-pi/4)*hyp,y=sin(ms.a-pi-pi/4)*hyp}
@@ -561,15 +552,79 @@ function environprocess()
 				end
 				ms.oldpos={x=ms.x,y=ms.y}
 				
-				if oob(ms.x,ms.y) then clear_sprite(ms); rem(missiles,i) end
+				if oob(ms.x,ms.y) then clear_sprite2(ms,hyp); rem(missiles,i) end
 				local p= pixels[posstr(ms.x+4,ms.y+4)]
 				if p and p>2 then
-						clear_sprite(ms); rem(missiles,i) 
+						clear_sprite2(ms,hyp); rem(missiles,i) 
 						explode(ms)
 				end
 		end
+				
+		for i=#shots,1,-1 do
+				local sh=shots[i]
+				if sh.oldpos then
+						clear_sprite(sh)
+						
+						if oob(sh.oldpos.x+3,sh.oldpos.y+3) then
+								rem(shots,i)
+						end
+				end
+		end
+		for i=#shots,1,-1 do
+				local sh=shots[i]
+				sh.x=sh.x+sh.dx; sh.y=sh.y+sh.dy
+				sh.oldpos={x=sh.x,y=sh.y}
+				local wallhits=0
+				for lx=0,7 do for ly=0,7 do
+						if sprpix(32,lx,ly)~=0 and is_solid(pixels[posstr(sh.x+lx,sh.y+ly)]) then
+
+								for j,s in ipairs(ships) do
+								clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+								pix(cams[j].ax-cams[j].x+sh.x+lx,cams[j].ay-cams[j].y+sh.y+ly,1)
+								end
+								clip()
+								
+								pixels[posstr(sh.x+lx,sh.y+ly)]=1
+								wallhits=wallhits+1
+						end
+				end end
+				if wallhits<=4 or sh.id==50 then
+				for j,s in ipairs(ships) do
+				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+				spr(sh.id,cams[j].ax+sh.x-cams[j].x,cams[j].ay+sh.y-cams[j].y,0)
+				end
+				clip()
+				else rem(shots,i) end
 		
-		for i=#static,1,-1 do
+				if sh.id==50 then
+						sh.t=sh.t or 30
+						sh.t=sh.t-1
+						if sh.t==0 then 
+						clear_sprite(sh)
+						rem(shots,i) 
+						end
+				end
+		end
+		
+		for i=#shots,1,-1 do
+				local sh=shots[i]
+				for j,s in ipairs(ships) do
+				if sh.owner~=s then
+				local points={{x=s.x-cos(s.a)*8,y=s.y-sin(s.a)*8},
+	         								{x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
+																		{x=s.x+cos(s.a)*4,y=s.y+4*sin(s.a)},
+																		{x=s.x-cos(s.a+2*pi/3+0.3)*11,y=s.y-sin(s.a+2*pi/3+0.3)*11}}
+				if PointWithinShape(points,sh.x+3,sh.y+3) then
+						clear_sprite(sh)
+						dmg(s,3)
+						rem(shots,i)
+						break
+				end
+				end
+				end
+		end
+
+				for i=#static,1,-1 do
 				local st=static[i]
 				if st.oldpos then
 						for lx=0,7 do for ly=0,7 do
@@ -661,70 +716,6 @@ function environprocess()
 				clip()
 		end
 		
-		for i=#shots,1,-1 do
-				local sh=shots[i]
-				if sh.oldpos then
-						clear_sprite(sh)
-						
-						if oob(sh.oldpos.x+3,sh.oldpos.y+3) then
-								rem(shots,i)
-						end
-				end
-		end
-		for i=#shots,1,-1 do
-				local sh=shots[i]
-				sh.x=sh.x+sh.dx; sh.y=sh.y+sh.dy
-				sh.oldpos={x=sh.x,y=sh.y}
-				local wallhits=0
-				for lx=0,7 do for ly=0,7 do
-						if sprpix(32,lx,ly)~=0 and is_solid(pixels[posstr(sh.x+lx,sh.y+ly)]) then
-
-								for j,s in ipairs(ships) do
-								clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
-								pix(cams[j].ax-cams[j].x+sh.x+lx,cams[j].ay-cams[j].y+sh.y+ly,1)
-								end
-								clip()
-								
-								pixels[posstr(sh.x+lx,sh.y+ly)]=1
-								wallhits=wallhits+1
-						end
-				end end
-				if wallhits<=4 or sh.id==50 then
-				for j,s in ipairs(ships) do
-				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
-				spr(sh.id,cams[j].ax+sh.x-cams[j].x,cams[j].ay+sh.y-cams[j].y,0)
-				end
-				clip()
-				else rem(shots,i) end
-		
-				if sh.id==50 then
-						sh.t=sh.t or 30
-						sh.t=sh.t-1
-						if sh.t==0 then 
-						clear_sprite(sh)
-						rem(shots,i) 
-						end
-				end
-		end
-		
-		for i=#shots,1,-1 do
-				local sh=shots[i]
-				for j,s in ipairs(ships) do
-				if sh.owner~=s then
-				local points={{x=s.x-cos(s.a)*8,y=s.y-sin(s.a)*8},
-	         								{x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
-																		{x=s.x+cos(s.a)*4,y=s.y+4*sin(s.a)},
-																		{x=s.x-cos(s.a+2*pi/3+0.3)*11,y=s.y-sin(s.a+2*pi/3+0.3)*11}}
-				if PointWithinShape(points,sh.x+3,sh.y+3) then
-						clear_sprite(sh)
-						dmg(s,3)
-						rem(shots,i)
-						break
-				end
-				end
-				end
-		end
-
 		for i=#explosions,1,-1 do
 				local exp=explosions[i]
 				for j,s in ipairs(ships) do
@@ -797,6 +788,21 @@ function clear_sprite(sh)
 		end end
 end
 
+-- for textri objects
+function clear_sprite2(ms,hyp)
+		for j,s in ipairs(ships) do
+		if ms.oldpos then 
+		for x=ms.oldpos.x+4-hyp,ms.oldpos.x+4+hyp do for y=ms.oldpos.y+4-hyp,ms.oldpos.y+4+hyp do
+				local px=pixels[posstr(x,y)]
+				if px then 
+				if px==2 then px=trc end
+				pix(cams[j].ax+x-cams[j].x,cams[j].ay+y-cams[j].y,px)
+				else pix(cams[j].ax+x-cams[j].x,cams[j].ay+y-cams[j].y,0) end
+		end end
+		end
+		end
+end
+
 inventory={}
 
 function pick_up(j,pwrid,silent)
@@ -819,8 +825,8 @@ end
 idtags={
 		[32]={'Blaster',nrj=40},
 		[17]={'Drone',nrj=4},
-		[34]={'Missile',nrj=14},
-		[49]={'Mine',nrj=8},
+		[34]={'Missile',nrj=7},
+		[49]={'Mine',nrj=9},
 		[50]={'Plasma',nrj=14},
 }
 
