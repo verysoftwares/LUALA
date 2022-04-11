@@ -451,6 +451,40 @@ function environprocess()
 		end end]]
 		end
 		clip()
+
+		for i=#static,1,-1 do
+				local st=static[i]
+				if st.oldpos then
+						for lx=0,7 do for ly=0,7 do
+								--if sprpix(st.id,lx,ly)~=0 then
+										local px,py=st.oldpos.x,st.oldpos.y
+										local p=pixels[posstr(px+lx,py+ly)]
+				
+										for i,e in ipairs(explosions) do
+												if math.sqrt((e.x-(px+lx))^2+(e.y-(py+ly))^2)<=e.r+1+3 then
+														-- preserve explosions
+														-- so we can have chain reactions
+														p= 4-(60-(e.t+1))*0.2
+														trace(fmt('explosion preserved (%d)',math.floor(p)))
+														break
+												end
+										end
+				
+										for j,s in ipairs(ships) do
+										clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+										if not p then
+												pix(cams[j].ax-cams[j].x+px+lx,cams[j].ay-cams[j].y+py+ly,0)
+												--trace('black pixel')
+										else 
+										if p==2 then p=trc end
+										pix(cams[j].ax-cams[j].x+px+lx,cams[j].ay-cams[j].y+py+ly,p) end
+										--trace('colored pixel')
+										end
+										clip()
+								--end
+						end end
+				end
+		end
 		
 		for i,p in ipairs(powerups) do
 				if p.oldpos then
@@ -552,12 +586,29 @@ function environprocess()
 				end
 				ms.oldpos={x=ms.x,y=ms.y}
 				
-				if oob(ms.x,ms.y) then clear_sprite2(ms,hyp); rem(missiles,i) end
+				if oob(ms.x,ms.y) then clear_sprite2(ms,hyp); rem(missiles,i); goto endmisl end
 				local p= pixels[posstr(ms.x+4,ms.y+4)]
 				if p and p>2 then
 						clear_sprite2(ms,hyp); rem(missiles,i) 
-						explode(ms)
+						explode(ms); goto endmisl
 				end
+				
+				for j,s in ipairs(ships) do
+				if ms.owner~=s then
+				local points={{x=s.x-cos(s.a)*8,y=s.y-sin(s.a)*8},
+	         								{x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
+																		{x=s.x+cos(s.a)*4,y=s.y+4*sin(s.a)},
+																		{x=s.x-cos(s.a+2*pi/3+0.3)*11,y=s.y-sin(s.a+2*pi/3+0.3)*11}}
+				if PointWithinShape(points,ms.x+4,ms.y+4) then
+						dmg(s,3)
+						clear_sprite2(ms,hyp)
+						rem(missiles,i)
+						explode(ms)
+						goto endmisl
+				end
+				end
+				end
+				::endmisl::
 		end
 				
 		for i=#shots,1,-1 do
@@ -615,48 +666,17 @@ function environprocess()
 																		{x=s.x+cos(s.a)*4,y=s.y+4*sin(s.a)},
 																		{x=s.x-cos(s.a+2*pi/3+0.3)*11,y=s.y-sin(s.a+2*pi/3+0.3)*11}}
 				if PointWithinShape(points,sh.x+3,sh.y+3) then
-						clear_sprite(sh)
 						dmg(s,3)
+						if sh.id==32 then
+						clear_sprite(sh)
 						rem(shots,i)
 						break
+						end
 				end
 				end
 				end
 		end
 
-				for i=#static,1,-1 do
-				local st=static[i]
-				if st.oldpos then
-						for lx=0,7 do for ly=0,7 do
-								--if sprpix(st.id,lx,ly)~=0 then
-										local px,py=st.oldpos.x,st.oldpos.y
-										local p=pixels[posstr(px+lx,py+ly)]
-				
-										for i,e in ipairs(explosions) do
-												if math.sqrt((e.x-(px+lx))^2+(e.y-(py+ly))^2)<=e.r+1+3 then
-														-- preserve explosions
-														-- so we can have chain reactions
-														p= 4-(60-(e.t+1))*0.2
-														trace(fmt('explosion preserved (%d)',math.floor(p)))
-														break
-												end
-										end
-				
-										for j,s in ipairs(ships) do
-										clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
-										if not p then
-												pix(cams[j].ax-cams[j].x+px+lx,cams[j].ay-cams[j].y+py+ly,0)
-												--trace('black pixel')
-										else 
-										if p==2 then p=trc end
-										pix(cams[j].ax-cams[j].x+px+lx,cams[j].ay-cams[j].y+py+ly,p) end
-										--trace('colored pixel')
-										end
-										clip()
-								--end
-						end end
-				end
-		end
 		for i=#static,1,-1 do
 				local st=static[i]
 				for j,s in ipairs(ships) do
