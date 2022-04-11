@@ -846,7 +846,7 @@ function UIdraw(j)
 				local function actuallen(inv)
 						-- for inventories that contain holes
 						for i=9-1,0,-1 do
-								if inv[i] then return i end
+								if inv[i+1] then return i+1 end
 						end
 						return 0
 				end
