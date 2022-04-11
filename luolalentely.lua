@@ -304,7 +304,7 @@ function shipprocess(j)
 						if id==32 then ins(shots,{x=s.x-3,y=s.y-3,id=id,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) end
 						if id==50 then ins(shots,{x=s.x-3,y=s.y-3,id=id,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) end
 						if id==49 then ins(static,{x=s.x-3,y=s.y-3,id=id,dx=0,dy=0,owner=s,iframes=90}) end
-						if id==34 then ins(missiles,{x=s.x-3,y=s.y-3,a=s.a+pi,id=id,dx=cos(s.a+pi)*6,dy=sin(s.a+pi)*6,owner=s}) end
+						if id==34 then ins(missiles,{x=s.x-3,y=s.y-3,a=s.a+pi,id=id,dx=cos(s.a+pi)*5,dy=sin(s.a+pi)*5,owner=s}) end
 						s[fmt('shot%d',i)].nrj=s[fmt('shot%d',i)].nrj-1
 						else alert(j,fmt('Shot%d out of ammo. Go to base.',i)) end
 				else alert(j,fmt('Shot%d not set. Go to base.',i)) end
@@ -376,6 +376,11 @@ function max_nrj(j,shoti)
 end
 
 function is_sprite(x,y)
+		for i,ms in ipairs(missiles) do
+				if ms.oldpos and AABB(x,y,1,1,ms.x,ms.y,8,8) then
+						return true
+				end
+		end
 		for i,p in ipairs(powerups) do
 				if p.oldpos and math.sqrt((p.oldpos.x-x)^2+(p.oldpos.y-y)^2)<=10 then
 						return true
@@ -511,11 +516,64 @@ function environprocess()
 				::endloop::
 		end
 		
+		for i=#missiles,1,-1 do
+				local ms=missiles[i]
+				if ms.oldpos then
+						clear_sprite(ms)
+				end
+		end
+		for i=#missiles,1,-1 do
+				local ms=missiles[i]
+				ms.x=ms.x+ms.dx; ms.y=ms.y+ms.dy
+				for j,s in ipairs(ships) do
+				--spr(34,cams[j].ax+ms.x-cams[j].x,cams[j].ay+ms.y-cams[j].y,0)
+				local hyp=7.5
+				if ms.oldpos then 
+				for x=ms.oldpos.x-hyp/3-2-6-2,ms.oldpos.x+hyp*2+4+4 do for y=ms.oldpos.y-hyp/3-2-2,ms.oldpos.y+hyp*2+4+4+ms.dy do
+						local px=pixels[posstr(x,y)]
+						if px then 
+						if px==2 then px=trc end
+						pix(cams[j].ax+x-cams[j].x,cams[j].ay+y-cams[j].y,px)
+						else pix(cams[j].ax+x-cams[j].x,cams[j].ay+y-cams[j].y,0) end
+				end end
+				end
+				local a={x=cos(ms.a-pi/4)*hyp,y=sin(ms.a-pi/4)*hyp}; local d={x=cos(ms.a+pi/4)*hyp,y=sin(ms.a+pi/4)*hyp}
+				local b={x=cos(ms.a+pi/4)*hyp,y=sin(ms.a+pi/4)*hyp}; local e={x=cos(ms.a-pi+pi/4)*hyp,y=sin(ms.a-pi+pi/4)*hyp}
+				local c={x=cos(ms.a-pi+pi/4)*hyp,y=sin(ms.a-pi+pi/4)*hyp}; local f={x=cos(ms.a-pi-pi/4)*hyp,y=sin(ms.a-pi-pi/4)*hyp}
+				textri(cams[j].ax-cams[j].x+ms.x+4+a.x,cams[j].ay-cams[j].y+ms.y+4+a.y,
+				       cams[j].ax-cams[j].x+ms.x+4+b.x,cams[j].ay-cams[j].y+ms.y+4+b.y,
+				       cams[j].ax-cams[j].x+ms.x+4+c.x,cams[j].ay-cams[j].y+ms.y+4+c.y,
+
+				       2*8,2*8,
+											2*8+7,2*8,
+											2*8,2*8+7, 
+											
+											false, 0)
+				textri(cams[j].ax-cams[j].x+ms.x+4+d.x,cams[j].ay-cams[j].y+ms.y+4+d.y,
+				       cams[j].ax-cams[j].x+ms.x+4+e.x,cams[j].ay-cams[j].y+ms.y+4+e.y,
+				       cams[j].ax-cams[j].x+ms.x+4+f.x,cams[j].ay-cams[j].y+ms.y+4+f.y,
+
+				       2*8+7,2*8,
+											2*8,2*8+7,
+											2*8+7,2*8+7, 
+											
+											false, 0)
+				end
+				ms.oldpos={x=ms.x,y=ms.y}
+				
+				if oob(ms.x,ms.y) then clear_sprite(ms); rem(missiles,i) end
+				local p= pixels[posstr(ms.x+4,ms.y+4)]
+				if p and p>2 then
+						clear_sprite(ms); rem(missiles,i) 
+						explode(ms)
+				end
+		end
+		
 		for i=#static,1,-1 do
 				local st=static[i]
 				if st.oldpos then
 						for lx=0,7 do for ly=0,7 do
-								if sprpix(st.id,lx,ly)~=0 then
+								--if sprpix(st.id,lx,ly)~=0 then
 										local px,py=st.oldpos.x,st.oldpos.y
 										local p=pixels[posstr(px+lx,py+ly)]
 				
@@ -524,8 +582,8 @@ function environprocess()
 														-- preserve explosions
 														-- so we can have chain reactions
 														p= 4-(60-(e.t+1))*0.2
-														break
 														trace(fmt('explosion preserved (%d)',math.floor(p)))
+														break
 												end
 										end
 				
@@ -540,7 +598,7 @@ function environprocess()
 										--trace('colored pixel')
 										end
 										clip()
-								end
+								--end
 						end end
 				end
 		end
@@ -760,7 +818,7 @@ end
 
 idtags={
 		[32]={'Blaster',nrj=40},
-		[33]={'Drone',nrj=4},
+		[17]={'Drone',nrj=4},
 		[34]={'Missile',nrj=14},
 		[49]={'Mine',nrj=8},
 		[50]={'Plasma',nrj=14},
@@ -825,8 +883,8 @@ function UIdraw(j)
 				local c,c2=2,4
 				if alerts[j].t<20 or alerts[j].t>160-20 then c,c2=1,3 end
 				if alerts[j].msgs[1].goodnews then 
-				c,c2=4,6
-				if alerts[j].t<20 or alerts[j].t>160-20 then c,c2=5,7 end
+				c,c2=6,4
+				if alerts[j].t<20 or alerts[j].t>160-20 then c,c2=7,5 end
 				end
 				
 				rect(cam.ax,cam.ay,cam.aw,8,c)
@@ -1002,6 +1060,7 @@ function create_base(j,minx,maxx,miny,maxy)
 		local newship={x=rx,y=ry-16,a=pi/2,oldx=rx,oldy=ry-16,hp=30,id=j}
 		pick_up(j,32,true) -- starting weapon: Blaster
 		pick_up(j,49,true)
+		pick_up(j,34,true)
 		return newship
 end
 
@@ -1021,7 +1080,7 @@ function create_powerup(minx,maxx,miny,maxy,type)
 		local type=type or math.random(1,5)
 		local id
 		if type==1 then id=32 end
-		if type==2 then id=33 end
+		if type==2 then id=17 end
 		if type==3 then id=34 end
 		if type==4 then id=49 end
 		if type==5 then id=50 end
@@ -1415,16 +1474,16 @@ end
 		  return xk, yk
 		end
 -- <TILES>
--- 001:eccccccccc888888caaaaaaaca888888cacccccccacc0ccccacc0ccccacc0ccc
--- 002:ccccceee8888cceeaaaa0cee888a0ceeccca0ccc0cca0c0c0cca0c0c0cca0c0c
--- 003:eccccccccc888888caaaaaaaca888888cacccccccacccccccacc0ccccacc0ccc
--- 004:ccccceee8888cceeaaaa0cee888a0ceeccca0cccccca0c0c0cca0c0c0cca0c0c
--- 017:cacccccccaaaaaaacaaacaaacaaaaccccaaaaaaac8888888cc000cccecccccec
--- 018:ccca00ccaaaa0ccecaaa0ceeaaaa0ceeaaaa0cee8888ccee000cceeecccceeee
--- 019:cacccccccaaaaaaacaaacaaacaaaaccccaaaaaaac8888888cc000cccecccccec
--- 020:ccca00ccaaaa0ccecaaa0ceeaaaa0ceeaaaa0cee8888ccee000cceeecccceeee
+-- 005:eccccccccc888888caaaaaaaca888888cacccccccacc0ccccacc0ccccacc0ccc
+-- 006:ccccceee8888cceeaaaa0cee888a0ceeccca0ccc0cca0c0c0cca0c0c0cca0c0c
+-- 007:eccccccccc888888caaaaaaaca888888cacccccccacccccccacc0ccccacc0ccc
+-- 008:ccccceee8888cceeaaaa0cee888a0ceeccca0cccccca0c0c0cca0c0c0cca0c0c
+-- 017:000000000001100000211200d322223dd332233d013333100001100000000000
+-- 021:cacccccccaaaaaaacaaacaaacaaaaccccaaaaaaac8888888cc000cccecccccec
+-- 022:ccca00ccaaaa0ccecaaa0ceeaaaa0ceeaaaa0cee8888ccee000cceeecccceeee
+-- 023:cacccccccaaaaaaacaaacaaacaaaaccccaaaaaaac8888888cc000cccecccccec
+-- 024:ccca00ccaaaa0ccecaaa0ceeaaaa0ceeaaaa0cee8888ccee000cceeecccceeee
 -- 032:000c000000ccc0000ccccc00ccccccc00ccccc0000ccc000000c000000000000
--- 033:000000000001100000211200d322223dd332233d013333100001100000000000
 -- 034:0006700000055000000550000075570006566560056556500570075005000050
 -- 035:0002000000131000002320000024200000242000002320000013100000020000
 -- 036:000000cc0000ccdd000cdde000cde0000cde00000cd00000cde00000cd000000
