@@ -503,22 +503,62 @@ function environprocess()
 		for i=#static,1,-1 do
 				local st=static[i]
 				if st.oldpos then
-						clear_sprite(st)
+						for lx=0,7 do for ly=0,7 do
+								if sprpix(st.id,lx,ly)~=0 then
+										local px,py=st.oldpos.x,st.oldpos.y
+										local p=pixels[posstr(px+lx,py+ly)]
+				
+										for i,e in ipairs(explosions) do
+												if math.sqrt((e.x-(px+lx))^2+(e.y-(py+ly))^2)<=e.r+1+3 then
+														-- preserve explosions
+														-- so we can have chain reactions
+														p= 4-(60-(e.t+1))*0.2
+														break
+														trace(fmt('explosion preserved (%d)',math.floor(p)))
+												end
+										end
+				
+										for j,s in ipairs(ships) do
+										clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+										if not p then
+												pix(cams[j].ax-cams[j].x+px+lx,cams[j].ay-cams[j].y+py+ly,0)
+												--trace('black pixel')
+										else 
+										if p==2 then p=trc end
+										pix(cams[j].ax-cams[j].x+px+lx,cams[j].ay-cams[j].y+py+ly,p) end
+										--trace('colored pixel')
+										end
+										clip()
+								end
+						end end
 				end
 		end
 		for i=#static,1,-1 do
 				local st=static[i]
+				for j,s in ipairs(ships) do
+				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 				for lx=0,7 do for ly=0,7 do
 				if sprpix(st.id,lx,ly)~=0 then
-						local p= pixels[posstr(st.x+lx,st.y+ly+(t*0.08)*2.5)]
-						if st.iframes==0 and p and not (p==2 or p==1) then 
+						local p= pix(cams[j].ax+st.x+lx-cams[j].x,cams[j].ay+math.floor(st.y+sin(t*0.08)*2.5)+ly-cams[j].y)
+						--trace(p)
+						--trace(fmt('st.iframes %d',st.iframes))
+						if st.iframes==0 and p>2 then 
+						--trace(fmt('got this far, %d',p))
 						clear_sprite(st)
-						rem(static,i)
-						explode(st)
-						goto blowup
+						st.blownup=true
+						goto cleared
 						end
 				end
 				end end
+				end
+				
+				::cleared::
+				
+				if st.blownup then
+				rem(static,i)
+				explode(st)
+				goto blowup
+				end
 				
 				for j,s in ipairs(ships) do
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
@@ -953,6 +993,7 @@ function create_base(j,minx,maxx,miny,maxy)
 		--cams[j].sx=minx; cams[j].sy=miny
 		local newship={x=rx,y=ry-16,a=pi/2,oldx=rx,oldy=ry-16,hp=30,id=j}
 		pick_up(j,32,true) -- starting weapon: Blaster
+		pick_up(j,49,true)
 		return newship
 end
 
