@@ -749,11 +749,13 @@ inventory={}
 
 function pick_up(j,pwrid,silent)
 		if not inventory[j] then inventory[j]={} end
-		local full=false
+		local full=true
 		for i=1,9 do
 				if not inventory[j][i] then
 						inventory[j][i]={id=pwrid}
-						if i==9 then full=true end
+						for k=1,9 do
+								if not inventory[j][k] then full= false break end
+						end
 						break
 				end
 				if i==9 then return end
