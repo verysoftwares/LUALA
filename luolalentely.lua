@@ -297,6 +297,9 @@ function shipprocess(j)
 		if btnp((s.id-1)*8+4+i-1) and not s.onbase then 
 				if s[fmt('shot%d',i)] then 
 						if s[fmt('shot%d',i)].nrj>0 then
+						local id= inventory[j][s[fmt('shot%d',i)].invi].id
+						if id==32 then ins(shots,{x=s.x-3,y=s.y-3,id=id,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) end
+						if id==50 then ins(shots,{x=s.x-3,y=s.y-3,id=id,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) end
 						if inventory[j][s[fmt('shot%d',i)].invi].id==32 then ins(shots,{x=s.x-3,y=s.y-3,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) end
 						s[fmt('shot%d',i)].nrj=s[fmt('shot%d',i)].nrj-1
 						else alert(j,fmt('Shot%d out of ammo. Go to base.',i)) end
@@ -538,13 +541,35 @@ function environprocess()
 								wallhits=wallhits+1
 						end
 				end end
-				if wallhits<=4 then
+				if wallhits<=4 or sh.id==50 then
 				for j,s in ipairs(ships) do
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
-				spr(32,cams[j].ax+sh.x-cams[j].x,cams[j].ay+sh.y-cams[j].y,0)
+				spr(sh.id,cams[j].ax+sh.x-cams[j].x,cams[j].ay+sh.y-cams[j].y,0)
 				end
 				clip()
 				else rem(shots,i) end
+		
+				if sh.id==50 then
+						sh.t=sh.t or 30
+						sh.t=sh.t-1
+						if sh.t==0 then 
+						for lx=0,7 do for ly=0,7 do
+								--if sprpix(32,lx,ly)~=0 then
+										local px,py=sh.oldpos.x,sh.oldpos.y
+										local p=pixels[posstr(px+lx,py+ly)]
+
+										for j,s in ipairs(ships) do
+										clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+										if not p then
+												pix(cams[j].ax-cams[j].x+px+lx,cams[j].ay-cams[j].y+py+ly,0)
+										else pix(cams[j].ax-cams[j].x+px+lx,cams[j].ay-cams[j].y+py+ly,p) end
+										end
+										clip()
+								--end
+						end end
+						rem(shots,i) 
+						end
+				end
 		end
 		
 		for i=#shots,1,-1 do
@@ -594,7 +619,7 @@ idtags={
 		[33]={'Drone',nrj=4},
 		[34]={'Missile',nrj=16},
 		[49]={'Mine',nrj=8},
-		[50]={'Plasma',nrj=18},
+		[50]={'Plasma',nrj=14},
 }
 
 function idtag(id)
@@ -838,18 +863,18 @@ function create_powerups()
 		end
 end
 
-function create_powerup(minx,maxx,miny,maxy)
+function create_powerup(minx,maxx,miny,maxy,type)
 		local rx,ry=math.random(minx,maxx),math.random(miny,maxy)
 		while pixels[posstr(rx,ry)] do
 		rx,ry=math.random(minx,maxx),math.random(miny,maxy)
 		end
-		local type=math.random(1,5)
+		local type=type or math.random(1,5)
 		local id
-		if type==1 then id=33 end
-		if type==2 then id=34 end
-		if type==3 then id=49 end
-		if type==4 then id=50 end
-		if type==5 then id=32 end
+		if type==1 then id=32 end
+		if type==2 then id=33 end
+		if type==3 then id=34 end
+		if type==4 then id=49 end
+		if type==5 then id=50 end
 		
 		ins(powerups,{x=rx,y=ry,id=id})
 end
