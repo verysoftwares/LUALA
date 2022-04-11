@@ -16,6 +16,7 @@ a=pi/2
 grav=0.2
 
 shots={}
+static={}
 fadeouts={}
 
 function OVR()
@@ -300,7 +301,7 @@ function shipprocess(j)
 						local id= inventory[j][s[fmt('shot%d',i)].invi].id
 						if id==32 then ins(shots,{x=s.x-3,y=s.y-3,id=id,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) end
 						if id==50 then ins(shots,{x=s.x-3,y=s.y-3,id=id,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) end
-						if inventory[j][s[fmt('shot%d',i)].invi].id==32 then ins(shots,{x=s.x-3,y=s.y-3,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) end
+						if id==49 then ins(static,{x=s.x-3,y=s.y-3,id=id,dx=0,dy=0,owner=s,iframes=90}) end
 						s[fmt('shot%d',i)].nrj=s[fmt('shot%d',i)].nrj-1
 						else alert(j,fmt('Shot%d out of ammo. Go to base.',i)) end
 				else alert(j,fmt('Shot%d not set. Go to base.',i)) end
@@ -397,7 +398,7 @@ function environprocess()
 		end
 		
 		-- flashing transitions
-		local trc=2+(t*0.2)%4
+		trc=2+(t*0.2)%4
 		if trc>=5 then trc=3 end
 		for j,s in ipairs(ships) do
 		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
@@ -477,7 +478,7 @@ function environprocess()
 				for k,pt in ipairs(points) do
 				if math.sqrt((pt.x-p.oldpos.x)^2+(pt.y-p.oldpos.y)^2)<=8 then
 				for j2,s2 in ipairs(ships) do
-				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+				clip(cams[j2].ax,cams[j2].ay,cams[j2].aw,cams[j2].ah)
 				for x=0,16 do for y=0,16 do
 						local pox,poy=p.oldpos.x,p.oldpos.y
 						if pox<0 then pox=math.floor(pox+0.999) end
@@ -485,8 +486,8 @@ function environprocess()
 
 				  local px= pixels[posstr(pox-8+x,poy-8+y)]
 						if px==2 then px=trc end
-						if px then pix(cams[j].ax+pox-cams[j].x-8+x,cams[j].ay+poy-cams[j].y-8+y,px)
-						else pix(cams[j].ax+pox-cams[j].x-8+x,cams[j].ay+poy-cams[j].y-8+y,0) end
+						if px then pix(cams[j2].ax+pox-cams[j2].x-8+x,cams[j2].ay+poy-cams[j2].y-8+y,px)
+						else pix(cams[j2].ax+pox-cams[j2].x-8+x,cams[j2].ay+poy-cams[j2].y-8+y,0) end
 				end end
 				end
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
@@ -499,25 +500,63 @@ function environprocess()
 				::endloop::
 		end
 		
+		for i=#static,1,-1 do
+				local st=static[i]
+				if st.oldpos then
+						clear_sprite(st)
+				end
+		end
+		for i=#static,1,-1 do
+				local st=static[i]
+				for lx=0,7 do for ly=0,7 do
+				if sprpix(st.id,lx,ly)~=0 then
+						local p= pixels[posstr(st.x+lx,st.y+ly)]
+						if st.iframes==0 and p and p~=2 then 
+						clear_sprite(st)
+						rem(static,i)
+						explode(st)
+						goto blowup
+						end
+				end
+				end end
+				
+				for j,s in ipairs(ships) do
+				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+				spr(st.id,cams[j].ax+st.x-cams[j].x,cams[j].ay+st.y-cams[j].y+sin(t*0.08)*2.5,0,1,0,0,1,1)
+				end
+
+				st.oldpos={x=st.x,y=st.y+sin(t*0.08)*2.5}
+
+				for j,s in ipairs(ships) do
+				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+				
+				if st.iframes==0 then
+				local points={{x=s.x,y=s.y},
+																		{x=s.x-cos(s.a)*8,y=s.y-sin(s.a)*8},
+	         								{x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
+																		{x=s.x+cos(s.a)*4,y=s.y+4*sin(s.a)},
+																		{x=s.x-cos(s.a+2*pi/3+0.3)*11,y=s.y-sin(s.a+2*pi/3+0.3)*11}}
+				for k,pt in ipairs(points) do
+				if math.sqrt((pt.x-st.oldpos.x)^2+(pt.y-st.oldpos.y)^2)<=4 then
+						clear_sprite(st)
+						dmg(s,6)
+						rem(static,i)
+						explode(st)
+						goto blowup
+				end end
+				end end
+
+				if st.iframes>0 then st.iframes=st.iframes-1 end
+				
+				::blowup::
+				clip()
+		end
+		
 		for i=#shots,1,-1 do
 				local sh=shots[i]
 				if sh.oldpos then
-						for lx=0,7 do for ly=0,7 do
-								--if sprpix(32,lx,ly)~=0 then
-										local px,py=sh.oldpos.x,sh.oldpos.y
-										if px<0 then px=math.floor(px+1) end
-										if py<0 then py=math.floor(py+1) end
-										local p=pixels[posstr(px+lx,py+ly)]
-
-										for j,s in ipairs(ships) do
-										clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
-										if not p then
-												pix(cams[j].ax-cams[j].x+px+lx,cams[j].ay-cams[j].y+py+ly,0)
-										else pix(cams[j].ax-cams[j].x+px+lx,cams[j].ay-cams[j].y+py+ly,p) end
-										end
-										clip()
-								--end
-						end end
+						clear_sprite(sh)
+						
 						if oob(sh.oldpos.x+3,sh.oldpos.y+3) then
 								rem(shots,i)
 						end
@@ -553,20 +592,7 @@ function environprocess()
 						sh.t=sh.t or 30
 						sh.t=sh.t-1
 						if sh.t==0 then 
-						for lx=0,7 do for ly=0,7 do
-								--if sprpix(32,lx,ly)~=0 then
-										local px,py=sh.oldpos.x,sh.oldpos.y
-										local p=pixels[posstr(px+lx,py+ly)]
-
-										for j,s in ipairs(ships) do
-										clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
-										if not p then
-												pix(cams[j].ax-cams[j].x+px+lx,cams[j].ay-cams[j].y+py+ly,0)
-										else pix(cams[j].ax-cams[j].x+px+lx,cams[j].ay-cams[j].y+py+ly,p) end
-										end
-										clip()
-								--end
-						end end
+						clear_sprite(sh)
 						rem(shots,i) 
 						end
 				end
@@ -592,7 +618,7 @@ function environprocess()
 								end end
 						end
 						clip()
-						dmg(j,s)
+						dmg(s,3)
 						rem(shots,i)
 						break
 				end
@@ -601,23 +627,51 @@ function environprocess()
 		end
 end
 
+function explode()
+end
+
+function clear_sprite(sh)
+		for lx=0,7 do for ly=0,7 do
+				if sprpix(sh.id,lx,ly)~=0 then
+						local px,py=sh.oldpos.x,sh.oldpos.y
+						if px<0 then px=math.floor(px+1) end
+						if py<0 then py=math.floor(py+1) end
+						local p=pixels[posstr(px+lx,py+ly)]
+
+						for j,s in ipairs(ships) do
+						clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+						if not p then
+								pix(cams[j].ax-cams[j].x+px+lx,cams[j].ay-cams[j].y+py+ly,0)
+						else 
+						if p==2 then p=trc end
+						pix(cams[j].ax-cams[j].x+px+lx,cams[j].ay-cams[j].y+py+ly,p) end
+						end
+						clip()
+				end
+		end end
+end
+
 inventory={}
 
 function pick_up(j,pwrid,silent)
 		if not inventory[j] then inventory[j]={} end
+		local full=false
 		for i=1,9 do
 				if not inventory[j][i] then
 						inventory[j][i]={id=pwrid}
+						if i==9 then full=true end
 						break
 				end
+				if i==9 then return end
 		end
 		if not silent then alert(j,fmt('Picked up %s.',idtag(pwrid))) end
+		if full then alert(j,'Inventory is now full.') end
 end
 
 idtags={
 		[32]={'Blaster',nrj=40},
 		[33]={'Drone',nrj=4},
-		[34]={'Missile',nrj=16},
+		[34]={'Missile',nrj=14},
 		[49]={'Mine',nrj=8},
 		[50]={'Plasma',nrj=14},
 }
@@ -626,8 +680,9 @@ function idtag(id)
 		return idtags[id][1]
 end
 
-function dmg(j,s)
-		s.hp=s.hp-3
+function dmg(s,n)
+		n=n or 3
+		s.hp=s.hp-n
 		if s.hp<=0 then s.gone=true end
 		s.flash=18
 end
@@ -728,7 +783,7 @@ function UIdraw(j)
 								if keymap[j] then keymap[j][(s.id-1)+i]=nil end
 						end
 				end
-				if scrap then inventory[j][inventory[j].i]=nil; if s.shot1.invi==inventory[j].i then s.shot1=nil end; if s.shot2.invi==inventory[j].i then s.shot2=nil end end
+				if scrap then inventory[j][inventory[j].i]=nil; if s.shot1 and s.shot1.invi==inventory[j].i then s.shot1=nil end; if s.shot2 and s.shot2.invi==inventory[j].i then s.shot2=nil end end
 				
 				for i=0,9-1 do
 						rect(cam.ax+cx-6*9+i*12+2,cam.ay+cy-6+2,8,8,0)
@@ -859,7 +914,7 @@ powerups={}
 
 function create_powerups()
 		for i=1,5 do
-		create_powerup(0,240*2-1,0,136*2-1)
+		create_powerup(0,240*2-1,0,136*2-1,4)
 		end
 end
 
