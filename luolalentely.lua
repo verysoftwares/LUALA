@@ -335,7 +335,7 @@ function shipprocess(j)
 				s.y=s.y-s.dy; s.x=s.x-s.dx; s.a=s.a-s.da
 				if not s.onbase then
 				s.onbase=t
-				s.oldx=s.x; s.oldy=s.y
+				s.oldx=s.x; s.oldy=s.y; s.olda=s.a
 				end
 				break
 				end
@@ -357,7 +357,7 @@ function shipprocess(j)
 				s.hp=s.hp+1
 				if s.hp>30 then s.hp=30 end
 				end
-				if math.floor(s.oldy)~=math.floor(s.y) or math.floor(s.oldx)~=math.floor(s.x) then
+				if math.floor(s.oldy)~=math.floor(s.y) or math.floor(s.oldx)~=math.floor(s.x) or s.a~=s.olda then
 						s.onbase=nil
 				end
 		end
@@ -470,6 +470,12 @@ function environprocess()
 				end
 				p.oldpos={x=p.x,y=p.y+sin(t*0.08)*2.5}
 				for j,s in ipairs(ships) do
+				local inv_full=true
+				for i=1,9 do
+						if not inventory[j][i] then inv_full=false; break end
+				end
+				if not inv_full then 
+
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 				local points={{x=s.x-cos(s.a)*8,y=s.y-sin(s.a)*8},
 	         								{x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
@@ -496,6 +502,8 @@ function environprocess()
 				goto endloop
 				end
 				end
+				end
+				
 				end
 				::endloop::
 		end
