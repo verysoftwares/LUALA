@@ -899,8 +899,8 @@ function UIdraw(j)
 						end
 				end
 				if not s.moved and not (s.shot1 or s.shot2) then
-						local tw= print('Select weapon.',0,-6,12,false,1,true)
-						print('Select weapon.',cam.ax+cx-tw/2,cam.ay+cy-6-8,12,false,1,true)
+						local tw= print('Select weapons.',0,-6,12,false,1,true)
+						print('Select weapons.',cam.ax+cx-tw/2,cam.ay+cy-6-8,12,false,1,true)
 				end
 				if not s.moved and (s.shot1 or s.shot2) then
 						local tw= print('Move up to leave base.',0,-6,12,false,1,true)
