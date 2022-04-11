@@ -600,7 +600,7 @@ function environprocess()
 																		{x=s.x+cos(s.a)*4,y=s.y+4*sin(s.a)},
 																		{x=s.x-cos(s.a+2*pi/3+0.3)*11,y=s.y-sin(s.a+2*pi/3+0.3)*11}}
 				if PointWithinShape(points,ms.x+4,ms.y+4) then
-						dmg(s,3)
+						dmg(s,6)
 						clear_sprite2(ms,hyp)
 						rem(missiles,i)
 						explode(ms)
