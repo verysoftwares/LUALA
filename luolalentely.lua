@@ -630,7 +630,7 @@ function environprocess()
 				local exp=explosions[i]
 				for j,s in ipairs(ships) do
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
-				for x=exp.x-(exp.r+1),exp.x+(exp.r+1) do for y=exp.y-(exp.r+1),exp.y+(exp.r+1) do
+				for x=exp.x-(exp.r+1),exp.x+(exp.r+1) do for y=exp.y-(exp.r+1),exp.y+(exp.r+1)+1 do
 						local p= pixels[posstr(x,y)]
 						if not p then
 								pix(cams[j].ax-cams[j].x+x,cams[j].ay-cams[j].y+y,0)
