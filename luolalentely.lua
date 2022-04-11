@@ -510,8 +510,8 @@ function environprocess()
 				local st=static[i]
 				for lx=0,7 do for ly=0,7 do
 				if sprpix(st.id,lx,ly)~=0 then
-						local p= pixels[posstr(st.x+lx,st.y+ly)]
-						if st.iframes==0 and p and p~=2 then 
+						local p= pixels[posstr(st.x+lx,st.y+ly+(t*0.08)*2.5)]
+						if st.iframes==0 and p and not (p==2 or p==1) then 
 						clear_sprite(st)
 						rem(static,i)
 						explode(st)
@@ -537,7 +537,7 @@ function environprocess()
 																		{x=s.x+cos(s.a)*4,y=s.y+4*sin(s.a)},
 																		{x=s.x-cos(s.a+2*pi/3+0.3)*11,y=s.y-sin(s.a+2*pi/3+0.3)*11}}
 				for k,pt in ipairs(points) do
-				if math.sqrt((pt.x-st.oldpos.x)^2+(pt.y-st.oldpos.y)^2)<=4 then
+				if math.sqrt((pt.x-(st.oldpos.x+4))^2+(pt.y-(st.oldpos.y+4))^2)<=4 then
 						clear_sprite(st)
 						dmg(s,6)
 						rem(static,i)
@@ -625,9 +625,55 @@ function environprocess()
 				end
 				end
 		end
+
+		for i=#explosions,1,-1 do
+				local exp=explosions[i]
+				for j,s in ipairs(ships) do
+				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+				for x=exp.x-(exp.r+1),exp.x+(exp.r+1) do for y=exp.y-(exp.r+1),exp.y+(exp.r+1) do
+						local p= pixels[posstr(x,y)]
+						if not p then
+								pix(cams[j].ax-cams[j].x+x,cams[j].ay-cams[j].y+y,0)
+						else 
+						if p==2 then p=trc end
+						if is_solid(p) and math.sqrt((x-exp.x)^2+(y-exp.y)^2)<=exp.r+1 then p=1; pixels[posstr(x,y)]=1 end
+						pix(cams[j].ax-cams[j].x+x,cams[j].ay-cams[j].y+y,p) end
+				end end
+				end
+				clip()
+		end
+
+		for j,s in ipairs(ships) do
+				s.damaged=nil
+		end
+		for i=#explosions,1,-1 do
+				local exp=explosions[i]
+				for j,s in ipairs(ships) do
+				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+				circ(cams[j].ax-cams[j].x+exp.x,cams[j].ay-cams[j].y+exp.y,exp.r,4-(60-exp.t)*0.2)
+				local points={{x=s.x,y=s.y},
+																		{x=s.x-cos(s.a)*8,y=s.y-sin(s.a)*8},
+	         								{x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
+																		{x=s.x+cos(s.a)*4,y=s.y+4*sin(s.a)},
+																		{x=s.x-cos(s.a+2*pi/3+0.3)*11,y=s.y-sin(s.a+2*pi/3+0.3)*11}}
+				for k,pt in ipairs(points) do
+				if not s.damaged and math.sqrt((exp.x-pt.x)^2+(exp.y-pt.y)^2)<=exp.r then
+						dmg(s,0.5); s.damaged=true; break
+				end end
+				end
+				if exp.r==6 then ins(explosions,{x=exp.x+math.random(-12,12),y=exp.y+math.random(-12,12),t=60,gen=exp.gen+1,r=math.random(12-(exp.gen+1),16-(exp.gen+1))}) end
+				if exp.r==0 then rem(explosions,i) end
+				exp.r=exp.r-1
+				exp.t=exp.t-1
+		end
 end
 
-function explode()
+explosions={}
+
+function explode(e)
+		for i=1,3 do
+		ins(explosions,{x=e.x,y=e.y,t=60,gen=0,r=math.random(12,16)})
+		end
 end
 
 function clear_sprite(sh)
@@ -914,7 +960,7 @@ powerups={}
 
 function create_powerups()
 		for i=1,5 do
-		create_powerup(0,240*2-1,0,136*2-1,4)
+		create_powerup(0,240*2-1,0,136*2-1)
 		end
 end
 
