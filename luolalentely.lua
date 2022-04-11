@@ -288,8 +288,8 @@ function shipprocess(j)
 
 		--s.oldx=s.x; s.oldy=s.y		
 		s.dx=0; s.dy=0; s.da=0
-		if btn((s.id-1)*8) then s.x=s.x-cos(s.a); s.y=s.y-sin(s.a); s.dx=-cos(s.a); s.dy=-sin(s.a) end
-		if btn((s.id-1)*8+1) then s.x=s.x+cos(s.a); s.y=s.y+sin(s.a); s.dx=cos(s.a); s.dy=sin(s.a) end
+		if btn((s.id-1)*8) then s.x=s.x-cos(s.a); s.y=s.y-sin(s.a); s.dx=-cos(s.a); s.dy=-sin(s.a); s.moved=true end
+		if btn((s.id-1)*8+1) then s.x=s.x+cos(s.a); s.y=s.y+sin(s.a); s.dx=cos(s.a); s.dy=sin(s.a); s.moved=true end
 		if btn((s.id-1)*8+2) and (not s.onbase or btn((s.id-1)*8) or btn((s.id-1)*8+1)) then s.a=s.a-0.1; s.da=-0.1 end
 		if btn((s.id-1)*8+3) and (not s.onbase or btn((s.id-1)*8) or btn((s.id-1)*8+1)) then s.a=s.a+0.1; s.da=0.1 end
 		if btnp((s.id-1)*8+4) and not s.onbase then 
@@ -736,6 +736,14 @@ function UIdraw(j)
 						if s.shot2 and i+1==s.shot2.invi then
 								print('S2',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2,12)
 						end
+				end
+				if not s.moved and not (s.shot1 or s.shot2) then
+						local tw= print('Select weapon.',0,-6,12,false,1,true)
+						print('Select weapon.',cam.ax+cx-tw/2,cam.ay+cy-6-8,12,false,1,true)
+				end
+				if not s.moved and (s.shot1 or s.shot2) then
+						local tw= print('Move up to leave base.',0,-6,12,false,1,true)
+						print('Move up to leave base.',cam.ax+cx-tw/2,cam.ay+cy-6-8,12,false,1,true)
 				end
 		end
 end
