@@ -716,14 +716,15 @@ end
 
 function clear_sprite(sh)
 		for lx=0,7 do for ly=0,8 do
-				if ly==8 or sprpix(sh.id,lx,ly)~=0 then
-						local px,py=sh.oldpos.x,sh.oldpos.y
-						if px<0 then px=math.floor(px+1) end
-						if py<0 then py=math.floor(py+1) end
-						local p=pixels[posstr(px+lx,py+ly)]
-
+				--if ly==8 or sprpix(sh.id,lx,ly)~=0 then
 						for j,s in ipairs(ships) do
 						clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+						local px,py=sh.oldpos.x,sh.oldpos.y
+						-- for precision in flooring negatives
+						if px+lx-cams[j].x<0 then px=px+1 end
+						if py+ly-cams[j].y<0 then py=py+1 end
+						local p=pixels[posstr(px+lx,py+ly)]
+
 						if not p then
 								pix(cams[j].ax-cams[j].x+px+lx,cams[j].ay-cams[j].y+py+ly,0)
 						else 
@@ -731,7 +732,7 @@ function clear_sprite(sh)
 						pix(cams[j].ax-cams[j].x+px+lx,cams[j].ay-cams[j].y+py+ly,p) end
 						end
 						clip()
-				end
+				--end
 		end end
 end
 
