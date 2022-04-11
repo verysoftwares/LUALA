@@ -1100,9 +1100,9 @@ function create_base(j,minx,maxx,miny,maxy)
 		end end
 		--cams[j].sx=minx; cams[j].sy=miny
 		local newship={x=rx,y=ry-16,a=pi/2,oldx=rx,oldy=ry-16,hp=30,id=j}
-		pick_up(j,32,true) -- starting weapon: Blaster
-		pick_up(j,49,true)
-		pick_up(j,34,true)
+		pick_up(j,32,true) -- starting weapon 1: Blaster
+		pick_up(j,49,true) -- starting weapon 2: Mine
+		--pick_up(j,34,true)
 		return newship
 end
 
