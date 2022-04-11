@@ -292,21 +292,16 @@ function shipprocess(j)
 		if btn((s.id-1)*8+1) then s.x=s.x+cos(s.a); s.y=s.y+sin(s.a); s.dx=cos(s.a); s.dy=sin(s.a) end
 		if btn((s.id-1)*8+2) and (not s.onbase or btn((s.id-1)*8) or btn((s.id-1)*8+1)) then s.a=s.a-0.1; s.da=-0.1 end
 		if btn((s.id-1)*8+3) and (not s.onbase or btn((s.id-1)*8) or btn((s.id-1)*8+1)) then s.a=s.a+0.1; s.da=0.1 end
-		if btnp((s.id-1)*8+4) and not s.onbase then 
-				if s.shot1 then 
-						if s.shot1.nrj>0 then
-						if inventory[j][s.shot1.invi].id==32 then ins(shots,{x=s.x-3,y=s.y-3,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) end
-						s.shot1.nrj=s.shot1.nrj-1
-						else alert(j,'Shot1 out of ammo. Go to base.') end
-				else alert(j,'Shot1 not set. Go to base.') end
+		-- shot1 and shot2
+		for i=1,2 do
+		if btnp((s.id-1)*8+4+i-1) and not s.onbase then 
+				if s[fmt('shot%d',i)] then 
+						if s[fmt('shot%d',i)].nrj>0 then
+						if inventory[j][s[fmt('shot%d',i)].invi].id==32 then ins(shots,{x=s.x-3,y=s.y-3,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) end
+						s[fmt('shot%d',i)].nrj=s[fmt('shot%d',i)].nrj-1
+						else alert(j,fmt('Shot%d out of ammo. Go to base.',i)) end
+				else alert(j,fmt('Shot%d not set. Go to base.',i)) end
 		end
-		if btnp((s.id-1)*8+5) and not s.onbase then 
-				if s.shot2 then 
-						if s.shot2.nrj>0 then
-						if inventory[j][s.shot2.invi].id==32 then ins(shots,{x=s.x-3,y=s.y-3,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) end
-						s.shot2.nrj=s.shot2.nrj-1
-						else alert(j,'Shot2 out of ammo. Go to base.') end
-				else alert(j,'Shot2 not set. Go to base.') end
 		end
 	
 		s.y=s.y+grav
