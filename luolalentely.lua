@@ -715,8 +715,8 @@ function explode(e)
 end
 
 function clear_sprite(sh)
-		for lx=0,7 do for ly=0,7 do
-				if sprpix(sh.id,lx,ly)~=0 then
+		for lx=0,7 do for ly=0,8 do
+				if ly==8 or sprpix(sh.id,lx,ly)~=0 then
 						local px,py=sh.oldpos.x,sh.oldpos.y
 						if px<0 then px=math.floor(px+1) end
 						if py<0 then py=math.floor(py+1) end
