@@ -645,7 +645,7 @@ function environprocess()
 				spr(sh.id,cams[j].ax+sh.x-cams[j].x,cams[j].ay+sh.y-cams[j].y,0)
 				end
 				clip()
-				else rem(shots,i) end
+				else rem(shots,i) end--; clear_sprite(sh) end
 		
 				if sh.id==50 then
 						sh.t=sh.t or 30
@@ -758,6 +758,21 @@ function environprocess()
 		end
 		for i=#explosions,1,-1 do
 				local exp=explosions[i]
+				
+				for k=#shots,1,-1 do
+						local sh=shots[k]
+						if sh.id==32 and math.sqrt((exp.x-(sh.x+3))^2+(exp.y-(sh.y+3))^2)<=exp.r then
+								clear_sprite(sh); rem(shots,k)
+						end
+				end
+
+				for k=#missiles,1,-1 do
+						local ms=missiles[k]
+						if math.sqrt((exp.x-(ms.x+4))^2+(exp.y-(ms.y+4))^2)<=exp.r then
+								clear_sprite2(ms,7.5); explode(ms); rem(missiles,k)
+						end
+				end
+				
 				for j,s in ipairs(ships) do
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 				circ(cams[j].ax-cams[j].x+exp.x,cams[j].ay-cams[j].y+exp.y,exp.r,4-(60-exp.t)*0.2)
@@ -771,6 +786,7 @@ function environprocess()
 						dmg(s,0.5); s.damaged=true; break
 				end end
 				end
+
 				if exp.r==6 then ins(explosions,{x=exp.x+math.random(-12,12),y=exp.y+math.random(-12,12),t=60,gen=exp.gen+1,r=math.random(12-(exp.gen+1),16-(exp.gen+1))}) end
 				if exp.r==0 then rem(explosions,i) end
 				exp.r=exp.r-1
