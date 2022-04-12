@@ -1047,37 +1047,32 @@ function UIdraw(j)
 								spr(inventory[j][i+1].id,cam.ax+cx-6*9+i*12+2,cam.ay+cy-6+2,0)
 						end
 						if s.shot1 and i+1==s.shot1.invi then
-								print('S1',cam.ax+cx-6*9+i*12+1-1,cam.ay+cy-6+12+2,0)
-								print('S1',cam.ax+cx-6*9+i*12+1+1,cam.ay+cy-6+12+2,0)
-								print('S1',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2-1,0)
-								print('S1',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2+1,0)
+								dropshadow('S1',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2)
 								print('S1',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2,12)
 						end
 						if s.shot2 and i+1==s.shot2.invi then
-								print('S2',cam.ax+cx-6*9+i*12+1-1,cam.ay+cy-6+12+2,0)
-								print('S2',cam.ax+cx-6*9+i*12+1+1,cam.ay+cy-6+12+2,0)
-								print('S2',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2-1,0)
-								print('S2',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2+1,0)
+								dropshadow('S2',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2)
 								print('S2',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2,12)
 						end
 				end
 				if not s.moved and not (s.shot1 or s.shot2) then
 						local tw= print('Select weapons.',0,-6,12,false,1,true)
-						print('Select weapons.',cam.ax+cx-tw/2-1,cam.ay+cy-6-8,0,false,1,true)
-						print('Select weapons.',cam.ax+cx-tw/2+1,cam.ay+cy-6-8,0,false,1,true)
-						print('Select weapons.',cam.ax+cx-tw/2,cam.ay+cy-6-8-1,0,false,1,true)
-						print('Select weapons.',cam.ax+cx-tw/2,cam.ay+cy-6-8+1,0,false,1,true)
+						dropshadow('Select weapons.',cam.ax+cx-tw/2,cam.ay+cy-6-8,true)
 						print('Select weapons.',cam.ax+cx-tw/2,cam.ay+cy-6-8,12,false,1,true)
 				end
 				if not s.moved and (s.shot1 or s.shot2) then
 						local tw= print('Move up to leave base.',0,-6,12,false,1,true)
-						print('Move up to leave base.',cam.ax+cx-tw/2-1,cam.ay+cy-6-8,0,false,1,true)
-						print('Move up to leave base.',cam.ax+cx-tw/2+1,cam.ay+cy-6-8,0,false,1,true)
-						print('Move up to leave base.',cam.ax+cx-tw/2,cam.ay+cy-6-8-1,0,false,1,true)
-						print('Move up to leave base.',cam.ax+cx-tw/2,cam.ay+cy-6-8+1,0,false,1,true)
+						dropshadow('Move up to leave base.',cam.ax+cx-tw/2,cam.ay+cy-6-8,true)
 						print('Move up to leave base.',cam.ax+cx-tw/2,cam.ay+cy-6-8,12,false,1,true)
 				end
 		end
+end
+
+function dropshadow(msg,x,y,smallfont)
+		print(msg,x-1,y,0,false,1,smallfont)
+		print(msg,x+1,y,0,false,1,smallfont)
+		print(msg,x,y-1,0,false,1,smallfont)
+		print(msg,x,y+1,0,false,1,smallfont)
 end
 
 pixels={}
