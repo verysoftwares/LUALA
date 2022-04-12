@@ -1126,7 +1126,21 @@ function UIdraw(j)
 						end
 				end
 				if scrap then inventory[j][inventory[j].i]=nil; if s.shot1 and s.shot1.invi==inventory[j].i then s.shot1=nil end; if s.shot2 and s.shot2.invi==inventory[j].i then s.shot2=nil end end
-				
+
+				local idtag_tw=nil
+				for i=0,9-1 do
+						if i+1==inventory[j].i then 
+								if inventory[j][i+1] then
+								local tw=print(idtags[inventory[j][i+1].id][1],0,-6,12,false,1,true)
+								idtag_tw=tw
+								local tx=cam.ax+cx-6*9+i*12+6-tw/2+1
+								if tx<cam.ax then tx=cam.ax+1 end
+								if tx>cam.ax+cam.aw-tw then tx=cam.ax+cam.aw-tw end
+								dropshadow(idtags[inventory[j][i+1].id][1],tx,cam.ay+cy+6+2,true)
+								print(idtags[inventory[j][i+1].id][1],tx,cam.ay+cy+6+2,12,false,1,true)
+								end
+						end
+				end
 				for i=0,9-1 do
 						rect(cam.ax+cx-6*9+i*12+2,cam.ay+cy-6+2,8,8,0)
 						local selsp=68
@@ -1144,24 +1158,23 @@ function UIdraw(j)
 										if px~=0 then pix(cam.ax+cx-6*9+i*12+x,cam.ay+cy-6+y,px) end
 								end end
 
-								--[[if inventory[j][i+1] then
-								local tw=print(idtags[inventory[j][i+1].id][1],0,-6,12,false,1,true)
-								idtag_tw=tw
-								dropshadow(idtags[inventory[j][i+1].id][1],cam.ax+cx-6*9+i*12+6-tw/2,cam.ay+cy-6-8,true)
-								print(idtags[inventory[j][i+1].id][1],cam.ax+cx-6*9+i*12+6-tw/2,cam.ay+cy-6-8,12,false,1,true)
-								end]]
-
 						else spr(selsp,cam.ax+cx-6*9+i*12,cam.ay+cy-6,0,1,0,0,2,2) end
 						if inventory[j][i+1] then
 								spr(inventory[j][i+1].id,cam.ax+cx-6*9+i*12+2,cam.ay+cy-6+2,0)
 						end
-						if s.shot1 and i+1==s.shot1.invi then
-								dropshadow('S1',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2)
-								print('S1',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2,12)
-						end
 						if s.shot2 and i+1==s.shot2.invi then
-								dropshadow('S2',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2)
-								print('S2',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2,12)
+								local tw=print('S2',0,-6,12)
+								local th=0
+								if idtag_tw and AABB(cam.ax+cx-6*9+(inventory[j].i-1)*12+6-idtag_tw/2+1,cam.ay+cy+6+2,idtag_tw,5,cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2,tw,5) then th=6+2 end
+								dropshadow('S2',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2+th)
+								print('S2',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2+th,12)
+						end
+						if s.shot1 and i+1==s.shot1.invi then
+								local tw=print('S1',0,-6,12)
+								local th=0
+								if idtag_tw and AABB(cam.ax+cx-6*9+(inventory[j].i-1)*12+6-idtag_tw/2+1,cam.ay+cy+6+2,idtag_tw,5,cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2,tw,5) then th=6+2 end
+								dropshadow('S1',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2+th)
+								print('S1',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2+th,12)
 						end
 				end
 				if not s.moved and not (s.shot1 or s.shot2) then
@@ -1269,7 +1282,7 @@ function create_base(j,minx,maxx,miny,maxy)
 		local newship={x=rx,y=ry-16,a=pi/2,oldx=rx,oldy=ry-16,hp=30,id=j}
 		pick_up(j,32,true) -- starting weapon 1: Blaster
 		pick_up(j,49,true) -- starting weapon 2: Mine
-		pick_up(j,17,true)
+		--pick_up(j,17,true)
 		--pick_up(j,50,true)
 		--pick_up(j,34,true)
 		return newship
