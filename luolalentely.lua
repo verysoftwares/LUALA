@@ -18,6 +18,7 @@ grav=0.2
 shots={}
 static={}
 missiles={}
+lazers={}
 
 fadeouts={}
 
@@ -480,7 +481,7 @@ function environprocess()
 		for i=#static,1,-1 do
 				local st=static[i]
 				if st.oldpos then
-						for lx=0,7 do for ly=0,7 do
+						for lx=0,8 do for ly=0,8 do
 								--if sprpix(st.id,lx,ly)~=0 then
 										local px,py=st.oldpos.x,st.oldpos.y
 										local p=pixels[posstr(px+lx,py+ly)]
@@ -508,6 +509,25 @@ function environprocess()
 										clip()
 								--end
 						end end
+				end
+		end
+		-- special logic for drones
+		for i,st in ipairs(static) do
+				if st.id==17 then
+						if t%6==0 then
+								local distances={}
+								for j,s in ipairs(ships) do
+										if st.owner~=s then
+												ins(distances,{s=s,d=math.sqrt((st.x-s.x)^2+(st.y-s.y)^2)})
+										end
+								end
+								table.sort(distances,function(a,b) return a.d<b.d end)
+								if distances[1] and distances[1].d<=140 then
+										local s=distances[1].s
+										local a=math.atan2(s.y-st.y,s.x-st.x)
+										ins(lazers,{x=st.x,y=st.y,dx=cos(a)*3,dy=sin(a)*3,owner=st})
+								end
+						end
 				end
 		end
 		
@@ -612,7 +632,7 @@ function environprocess()
 				end
 				ms.oldpos={x=ms.x,y=ms.y}
 				
-				if oob(ms.x,ms.y) then clear_sprite2(ms,hyp); rem(missiles,i); goto endmisl end
+				if oob(ms.x+4,ms.y+4) then clear_sprite2(ms,hyp); rem(missiles,i); goto endmisl end
 				local p= pixels[posstr(ms.x+4,ms.y+4)]
 				if p and p>2 then
 						clear_sprite2(ms,hyp); rem(missiles,i) 
@@ -728,6 +748,34 @@ function environprocess()
 				end
 		end
 
+		for i,lz in ipairs(lazers) do
+				if lz.oldpos then clear_sprite2(lz,7.5) end
+				if oob(lz.x+4,lz.y+4) then rem(lazers,i) end
+				local p=pixels[posstr(lz.x+4,lz.y+4)]
+				if p and p>2 then rem(lazers,i) end
+		end
+
+		for i=#lazers,1,-1 do
+				local lz=lazers[i]
+				lz.x=lz.x+lz.dx; lz.y=lz.y+lz.dy
+				for j,s in ipairs(ships) do
+				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+				spr(19,cams[j].ax+lz.x-cams[j].x,cams[j].ay+lz.y-cams[j].y,0)
+				end
+				lz.oldpos={x=lz.x,y=lz.y}
+				for j,s in ipairs(ships) do
+				local points={{x=s.x-cos(s.a)*8,y=s.y-sin(s.a)*8},
+	         								{x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
+																		{x=s.x+cos(s.a)*4,y=s.y+4*sin(s.a)},
+																		{x=s.x-cos(s.a+2*pi/3+0.3)*11,y=s.y-sin(s.a+2*pi/3+0.3)*11}}
+				if PointWithinShape(points,lz.x+4,lz.y+4) then
+						dmg(s,1)
+						clear_sprite2(lz,7.5)
+						rem(lazers,i)
+				end
+				end
+		end
+
 		for i=#static,1,-1 do
 				local st=static[i]
 				for j,s in ipairs(ships) do
@@ -737,7 +785,7 @@ function environprocess()
 						local p= pix(cams[j].ax+st.x+lx-cams[j].x,cams[j].ay+math.floor(st.y+sin(t*0.08)*2.5)+ly-cams[j].y)
 						--trace(p)
 						--trace(fmt('st.iframes %d',st.iframes))
-						if (st.id==17 or st.iframes==0) and p>2 then 
+						if (st.id==49 and st.iframes==0 and p>2) or (st.id==17 and p>4) then
 						--trace(fmt('got this far, %d',p))
 						
 						-- drones may despawn immediately
@@ -803,12 +851,12 @@ function environprocess()
 				::blowup::
 				clip()
 		end
-		
+
 		for i=#explosions,1,-1 do
 				local exp=explosions[i]
 				for j,s in ipairs(ships) do
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
-				for x=exp.x-(exp.r+1),exp.x+(exp.r+1) do for y=exp.y-(exp.r+1),exp.y+(exp.r+1)+1 do
+				for x=exp.x-(exp.r+1),exp.x+(exp.r+1)+1 do for y=exp.y-(exp.r+1),exp.y+(exp.r+1)+1 do
 						local p= pixels[posstr(x,y)]
 						if not p then
 								pix(cams[j].ax-cams[j].x+x,cams[j].ay-cams[j].y+y,0)
@@ -841,6 +889,13 @@ function environprocess()
 						end
 				end
 				
+				for k=#static,1,-1 do
+						local st=static[k]
+						if st.id==17 and math.sqrt((exp.x-(st.x+4))^2+(exp.y-(st.y+4))^2)<=exp.r then
+								clear_sprite(st); rem(static,k)
+						end
+				end
+
 				for j,s in ipairs(ships) do
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 				circ(cams[j].ax-cams[j].x+exp.x,cams[j].ay-cams[j].y+exp.y,exp.r,4-(60-exp.t)*0.2)
@@ -1190,9 +1245,9 @@ function create_base(j,minx,maxx,miny,maxy)
 		local newship={x=rx,y=ry-16,a=pi/2,oldx=rx,oldy=ry-16,hp=30,id=j}
 		pick_up(j,32,true) -- starting weapon 1: Blaster
 		pick_up(j,49,true) -- starting weapon 2: Mine
-		--pick_up(j,17,true)
+		pick_up(j,17,true)
 		--pick_up(j,50,true)
-		pick_up(j,34,true)
+		--pick_up(j,34,true)
 		return newship
 end
 
