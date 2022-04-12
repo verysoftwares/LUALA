@@ -200,6 +200,8 @@ function handle_kills()
 				if s.gone then 
 				ins(fadeouts,cams[j])
 				fadeouts[#fadeouts].prog=0
+				fadeouts[#fadeouts].ship=s
+				
 				rem(ships,j); rem(cams,j); rem(old_cams,j) 
 				
 				for j2,s2 in ipairs(ships) do
@@ -232,6 +234,26 @@ function redfade()
 								pix(f.ax+x,f.ay+y,2)
 						end
 				end end
+				
+				local points={{x=f.ship.x-cos(f.ship.a)*8,y=f.ship.y-sin(f.ship.a)*8},
+	         								{x=f.ship.x-cos(f.ship.a-2*pi/3-0.3)*11,y=f.ship.y-sin(f.ship.a-2*pi/3-0.3)*11},
+																		{x=f.ship.x+cos(f.ship.a)*4,y=f.ship.y+4*sin(f.ship.a)},
+																		{x=f.ship.x-cos(f.ship.a+2*pi/3+0.3)*11,y=f.ship.y-sin(f.ship.a+2*pi/3+0.3)*11}}
+				
+				local silhouette=false
+				for k,pt in ipairs(points) do
+				if f.ay+f.ah-f.prog<f.ay+pt.y-f.y then
+						silhouette=true
+						break
+				end
+				end
+				if silhouette then
+						for k,pt in ipairs(points) do
+								if k<#points then line(f.ax+pt.x-f.x,f.ay+pt.y-f.y,f.ax+points[k+1].x-f.x,f.ay+points[k+1].y-f.y,0)
+								else line(f.ax+pt.x-f.x,f.ay+pt.y-f.y,f.ax+points[1].x-f.x,f.ay+points[1].y-f.y,0) end
+						end
+				end
+				
 				if f.prog>f.ah then
 						rem(fadeouts,i)
 				end
