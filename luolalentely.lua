@@ -525,7 +525,7 @@ function environprocess()
 								if distances[1] and distances[1].d<=140 then
 										local s=distances[1].s
 										local a=math.atan2(s.y-st.y,s.x-st.x)
-										ins(lazers,{x=st.x,y=st.y,dx=cos(a)*3,dy=sin(a)*3,owner=st})
+										ins(lazers,{x=st.x,y=st.y,a=a,dx=cos(a)*3,dy=sin(a)*3,owner=st})
 								end
 						end
 				end
@@ -758,9 +758,33 @@ function environprocess()
 		for i=#lazers,1,-1 do
 				local lz=lazers[i]
 				lz.x=lz.x+lz.dx; lz.y=lz.y+lz.dy
+				
+				local hyp=7.5
 				for j,s in ipairs(ships) do
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
-				spr(19,cams[j].ax+lz.x-cams[j].x,cams[j].ay+lz.y-cams[j].y,0)
+
+				local a={x=cos(lz.a-pi/4)*hyp,y=sin(lz.a-pi/4)*hyp}; local d={x=cos(lz.a+pi/4)*hyp,y=sin(lz.a+pi/4)*hyp}
+				local b={x=cos(lz.a+pi/4)*hyp,y=sin(lz.a+pi/4)*hyp}; local e={x=cos(lz.a-pi+pi/4)*hyp,y=sin(lz.a-pi+pi/4)*hyp}
+				local c={x=cos(lz.a-pi+pi/4)*hyp,y=sin(lz.a-pi+pi/4)*hyp}; local f={x=cos(lz.a-pi-pi/4)*hyp,y=sin(lz.a-pi-pi/4)*hyp}
+				textri(cams[j].ax-cams[j].x+lz.x+4+a.x,cams[j].ay-cams[j].y+lz.y+4+a.y,
+				       cams[j].ax-cams[j].x+lz.x+4+b.x,cams[j].ay-cams[j].y+lz.y+4+b.y,
+				       cams[j].ax-cams[j].x+lz.x+4+c.x,cams[j].ay-cams[j].y+lz.y+4+c.y,
+
+				       3*8,1*8,
+											3*8+7,1*8,
+											3*8,1*8+7, 
+											
+											false, 0)
+				textri(cams[j].ax-cams[j].x+lz.x+4+d.x,cams[j].ay-cams[j].y+lz.y+4+d.y,
+				       cams[j].ax-cams[j].x+lz.x+4+e.x,cams[j].ay-cams[j].y+lz.y+4+e.y,
+				       cams[j].ax-cams[j].x+lz.x+4+f.x,cams[j].ay-cams[j].y+lz.y+4+f.y,
+
+				       3*8+7,1*8,
+											3*8,1*8+7,
+											3*8+7,1*8+7, 
+											
+											false, 0)
+				--spr(19,cams[j].ax+lz.x-cams[j].x,cams[j].ay+lz.y-cams[j].y,0)
 				end
 				lz.oldpos={x=lz.x,y=lz.y}
 				for j,s in ipairs(ships) do
