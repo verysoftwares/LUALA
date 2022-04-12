@@ -205,6 +205,8 @@ function handle_kills()
 				fadeouts[#fadeouts].prog=0
 				fadeouts[#fadeouts].ship=s
 				
+				loot(j)
+		
 				rem(ships,j); rem(cams,j); rem(old_cams,j) 
 				rem(inventory,j)
 				
@@ -225,8 +227,17 @@ function handle_kills()
 
 				end
 		end
-		
+
 		redfade()
+end
+
+function loot(j)
+		local s=ships[j]
+		for i=0,9-1 do
+				if inventory[j][i+1] then
+						create_powerup(math.floor(s.x-24),math.floor(s.x+24),math.floor(s.y-24),math.floor(s.y+24),inventory[j][i+1].id)
+				end
+		end
 end
 
 function redfade()
@@ -612,68 +623,6 @@ function environprocess()
 				end
 				::endloop::
 		end
-		
-		for i=#missiles,1,-1 do
-				local ms=missiles[i]
-				if ms.oldpos then
-						local hyp=7.5
-						clear_sprite2(ms,hyp)
-				end
-		end
-		for i=#missiles,1,-1 do
-				local ms=missiles[i]
-				ms.x=ms.x+ms.dx; ms.y=ms.y+ms.dy
-				local hyp=7.5
-				for j,s in ipairs(ships) do
-				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
-				local a={x=cos(ms.a-pi/4)*hyp,y=sin(ms.a-pi/4)*hyp}; local d={x=cos(ms.a+pi/4)*hyp,y=sin(ms.a+pi/4)*hyp}
-				local b={x=cos(ms.a+pi/4)*hyp,y=sin(ms.a+pi/4)*hyp}; local e={x=cos(ms.a-pi+pi/4)*hyp,y=sin(ms.a-pi+pi/4)*hyp}
-				local c={x=cos(ms.a-pi+pi/4)*hyp,y=sin(ms.a-pi+pi/4)*hyp}; local f={x=cos(ms.a-pi-pi/4)*hyp,y=sin(ms.a-pi-pi/4)*hyp}
-				textri(cams[j].ax-cams[j].x+ms.x+4+a.x,cams[j].ay-cams[j].y+ms.y+4+a.y,
-				       cams[j].ax-cams[j].x+ms.x+4+b.x,cams[j].ay-cams[j].y+ms.y+4+b.y,
-				       cams[j].ax-cams[j].x+ms.x+4+c.x,cams[j].ay-cams[j].y+ms.y+4+c.y,
-
-				       2*8,2*8,
-											2*8+7,2*8,
-											2*8,2*8+7, 
-											
-											false, 0)
-				textri(cams[j].ax-cams[j].x+ms.x+4+d.x,cams[j].ay-cams[j].y+ms.y+4+d.y,
-				       cams[j].ax-cams[j].x+ms.x+4+e.x,cams[j].ay-cams[j].y+ms.y+4+e.y,
-				       cams[j].ax-cams[j].x+ms.x+4+f.x,cams[j].ay-cams[j].y+ms.y+4+f.y,
-
-				       2*8+7,2*8,
-											2*8,2*8+7,
-											2*8+7,2*8+7, 
-											
-											false, 0)
-				end
-				ms.oldpos={x=ms.x,y=ms.y}
-				
-				if oob(ms.x+4,ms.y+4) then clear_sprite2(ms,hyp); rem(missiles,i); goto endmisl end
-				local p= pixels[posstr(ms.x+4,ms.y+4)]
-				if p and p>2 then
-						clear_sprite2(ms,hyp); rem(missiles,i) 
-						explode(ms); goto endmisl
-				end
-				
-				for j,s in ipairs(ships) do
-				if ms.owner~=s then
-				local points={{x=s.x-cos(s.a)*8,y=s.y-sin(s.a)*8},
-	         								{x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
-																		{x=s.x+cos(s.a)*4,y=s.y+4*sin(s.a)},
-																		{x=s.x-cos(s.a+2*pi/3+0.3)*11,y=s.y-sin(s.a+2*pi/3+0.3)*11}}
-				if PointWithinShape(points,ms.x+4,ms.y+4) then
-						dmg(s,6)
-						clear_sprite2(ms,hyp)
-						rem(missiles,i)
-						explode(ms)
-						goto endmisl
-				end
-				end
-				end
-				::endmisl::
-		end
 				
 		for i=#shots,1,-1 do
 				local sh=shots[i]
@@ -821,6 +770,68 @@ function environprocess()
 				end
 		end
 
+		for i=#missiles,1,-1 do
+				local ms=missiles[i]
+				if ms.oldpos then
+						local hyp=7.5
+						clear_sprite2(ms,hyp)
+				end
+		end
+		for i=#missiles,1,-1 do
+				local ms=missiles[i]
+				ms.x=ms.x+ms.dx; ms.y=ms.y+ms.dy
+				local hyp=7.5
+				for j,s in ipairs(ships) do
+				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+				local a={x=cos(ms.a-pi/4)*hyp,y=sin(ms.a-pi/4)*hyp}; local d={x=cos(ms.a+pi/4)*hyp,y=sin(ms.a+pi/4)*hyp}
+				local b={x=cos(ms.a+pi/4)*hyp,y=sin(ms.a+pi/4)*hyp}; local e={x=cos(ms.a-pi+pi/4)*hyp,y=sin(ms.a-pi+pi/4)*hyp}
+				local c={x=cos(ms.a-pi+pi/4)*hyp,y=sin(ms.a-pi+pi/4)*hyp}; local f={x=cos(ms.a-pi-pi/4)*hyp,y=sin(ms.a-pi-pi/4)*hyp}
+				textri(cams[j].ax-cams[j].x+ms.x+4+a.x,cams[j].ay-cams[j].y+ms.y+4+a.y,
+				       cams[j].ax-cams[j].x+ms.x+4+b.x,cams[j].ay-cams[j].y+ms.y+4+b.y,
+				       cams[j].ax-cams[j].x+ms.x+4+c.x,cams[j].ay-cams[j].y+ms.y+4+c.y,
+
+				       2*8,2*8,
+											2*8+7,2*8,
+											2*8,2*8+7, 
+											
+											false, 0)
+				textri(cams[j].ax-cams[j].x+ms.x+4+d.x,cams[j].ay-cams[j].y+ms.y+4+d.y,
+				       cams[j].ax-cams[j].x+ms.x+4+e.x,cams[j].ay-cams[j].y+ms.y+4+e.y,
+				       cams[j].ax-cams[j].x+ms.x+4+f.x,cams[j].ay-cams[j].y+ms.y+4+f.y,
+
+				       2*8+7,2*8,
+											2*8,2*8+7,
+											2*8+7,2*8+7, 
+											
+											false, 0)
+				end
+				ms.oldpos={x=ms.x,y=ms.y}
+				
+				if oob(ms.x+4,ms.y+4) then clear_sprite2(ms,hyp); rem(missiles,i); goto endmisl end
+				local p= pixels[posstr(ms.x+4,ms.y+4)]
+				if p and p>2 then
+						clear_sprite2(ms,hyp); rem(missiles,i) 
+						explode(ms); goto endmisl
+				end
+				
+				for j,s in ipairs(ships) do
+				if ms.owner~=s then
+				local points={{x=s.x-cos(s.a)*8,y=s.y-sin(s.a)*8},
+	         								{x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
+																		{x=s.x+cos(s.a)*4,y=s.y+4*sin(s.a)},
+																		{x=s.x-cos(s.a+2*pi/3+0.3)*11,y=s.y-sin(s.a+2*pi/3+0.3)*11}}
+				if PointWithinShape(points,ms.x+4,ms.y+4) then
+						dmg(s,6)
+						clear_sprite2(ms,hyp)
+						rem(missiles,i)
+						explode(ms)
+						goto endmisl
+				end
+				end
+				end
+				::endmisl::
+		end
+		
 		for i=#static,1,-1 do
 				local st=static[i]
 				for j,s in ipairs(ships) do
@@ -1341,19 +1352,20 @@ function create_powerups()
 		end
 end
 
-function create_powerup(minx,maxx,miny,maxy,type)
+function create_powerup(minx,maxx,miny,maxy,id)
 		local rx,ry=math.random(minx,maxx),math.random(miny,maxy)
 		while pixels[posstr(rx,ry)] do
 		rx,ry=math.random(minx,maxx),math.random(miny,maxy)
 		end
-		local type=type or math.random(1,5)
-		local id
+		if not id then
+		local type=math.random(1,5)
 		if type==1 then id=32 end
 		if type==2 then id=17 end
 		if type==3 then id=34 end
 		if type==4 then id=49 end
 		if type==5 then id=50 end
-		
+		end
+				
 		ins(powerups,{x=rx,y=ry,id=id})
 end
 
