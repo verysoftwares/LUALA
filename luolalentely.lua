@@ -20,6 +20,8 @@ static={}
 missiles={}
 lazers={}
 
+scrap={0,0,0,0}
+
 fadeouts={}
 
 function OVR()
@@ -321,16 +323,32 @@ function shipprocess(j)
 		if btn((s.id-1)*8+3) and (not s.onbase or btn((s.id-1)*8) or btn((s.id-1)*8+1)) then s.a=s.a+0.1; s.da=0.1 end
 		-- shot1 and shot2
 		for i=1,2 do
-		if btnp((s.id-1)*8+4+i-1) and not s.onbase then 
+		local id
+		if s[fmt('shot%d',i)] then id= inventory[j][s[fmt('shot%d',i)].invi].id end
+		if ((btnp((s.id-1)*8+4+i-1) and id~=19) or (id==19 and t%6==0)) and not s.onbase then 
 				if s[fmt('shot%d',i)] then 
 						if s[fmt('shot%d',i)].nrj>0 then
-						local id= inventory[j][s[fmt('shot%d',i)].invi].id
 						if id==32 then ins(shots,{x=s.x-3,y=s.y-3,id=id,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) end
 						if id==50 then ins(shots,{x=s.x-3,y=s.y-3,id=id,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) end
 						if id==49 then ins(static,{x=s.x-3,y=s.y-3,id=id,dx=0,dy=0,owner=s,iframes=90}) end
 						if id==34 then ins(missiles,{x=s.x-4,y=s.y-4,a=s.a+pi,id=id,dx=cos(s.a+pi)*5,dy=sin(s.a+pi)*5,owner=s}) end
 						if id==17 then ins(static,{x=s.x-4,y=s.y-4,id=id,owner=s}) end
+						if id==19 then 
+								local distances={}
+								for j2,s2 in ipairs(ships) do
+										if s2~=s then
+												ins(distances,{s=s2,d=math.sqrt((s.x-s2.x)^2+(s.y-s2.y)^2)})
+										end
+								end
+								table.sort(distances,function(a,b) return a.d<b.d end)
+								if distances[1] and distances[1].d<=140 then
+										local s2=distances[1].s
+										local a=math.atan2(s2.y-s.y,s2.x-s.x)
+										ins(lazers,{x=s.x-4,y=s.y-4,a=a,dx=cos(a)*3,dy=sin(a)*3,owner=s})
+								end
+						end 
 						s[fmt('shot%d',i)].nrj=s[fmt('shot%d',i)].nrj-1
+						if id==19 then s[fmt('shot%d',i)].nrj=max_nrj(j,i) end
 						if s[fmt('shot%d',i)].nrj==0 then alert(j,fmt('Shot%d out of ammo. Go to base.',i)) end
 						else alert(j,fmt('Shot%d out of ammo. Go to base.',i)) end
 				else alert(j,fmt('Shot%d not set. Go to base.',i)) end
@@ -788,6 +806,7 @@ function environprocess()
 				end
 				lz.oldpos={x=lz.x,y=lz.y}
 				for j,s in ipairs(ships) do
+				if lz.owner~=s then
 				local points={{x=s.x-cos(s.a)*8,y=s.y-sin(s.a)*8},
 	         								{x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
 																		{x=s.x+cos(s.a)*4,y=s.y+4*sin(s.a)},
@@ -796,6 +815,8 @@ function environprocess()
 						dmg(s,1)
 						clear_sprite2(lz,7.5)
 						rem(lazers,i)
+						break
+				end
 				end
 				end
 		end
@@ -1012,6 +1033,19 @@ idtags={
 		[34]={'Missile',nrj=7},
 		[49]={'Mine',nrj=9},
 		[50]={'Plasma',nrj=14},
+		[19]={'AutoLazer',nrj=999},
+		[21]={'AutoAim.MOD',nrj=999},
+		[51]={'Thruster',nrj=999},
+}
+scrapvals={
+		[32]={40},
+		[17]={20,spawn=19},
+		[34]={50,spawn=51},
+		[49]={35},
+		[50]={50},
+		[19]={10,spawn=21},		
+		[21]={10},
+		[51]={30},
 }
 
 function idtag(id)
@@ -1097,7 +1131,7 @@ function UIdraw(j)
 						return 0
 				end
 
-				local scrap=false				
+				local scrapping=false				
 				for i=2,5 do
 						if btn((s.id-1)*8+i) then
 								if not keymap[j] or not (keymap[j][i]==2) then
@@ -1108,14 +1142,14 @@ function UIdraw(j)
 								if keymap[j] and keymap[j][(s.id-1)+i]==1 then
 										if i==2 then 
 										if btn((s.id-1)*8+4) then
-										scrap=true; keymap[j][(s.id-1)*8+4]=2
-										else inventory[j].i=inventory[j].i-1; if inventory[j].i<1 then inventory[j].i=actuallen(inventory[j]); if inventory[j].i<1 then inventory[j].i=1 end 
+										scrapping=true; keymap[j][(s.id-1)*8+4]=2
+										else inventory[j].i=inventory[j].i-1; if inventory[j].i<1 then inventory[j].i=actuallen(inventory[j]); if inventory[j].i<1 then inventory[j].i=1 end end 
 										end
 										end
 										if i==3 then inventory[j].i=inventory[j].i+1; if inventory[j].i>actuallen(inventory[j]) then inventory[j].i=1 end end
 										if i==4 then
 										if btn((s.id-1)*8+2) then
-										scrap=true; keymap[j][(s.id-1)*8+2]=2
+										scrapping=true; keymap[j][(s.id-1)*8+2]=2
 										else if inventory[j][inventory[j].i] then local oldshot1=s.shot1; if oldshot1 then inventory[j][oldshot1.invi].nrj=oldshot1.nrj end; s.shot1={invi=inventory[j].i,nrj=inventory[j][inventory[j].i].nrj or idtags[inventory[j][inventory[j].i].id].nrj}; if s.shot2 and s.shot2.invi==inventory[j].i then s.shot2=nil end end 
 										end
 										end
@@ -1125,7 +1159,16 @@ function UIdraw(j)
 								if keymap[j] then keymap[j][(s.id-1)+i]=nil end
 						end
 				end
-				if scrap then inventory[j][inventory[j].i]=nil; if s.shot1 and s.shot1.invi==inventory[j].i then s.shot1=nil end; if s.shot2 and s.shot2.invi==inventory[j].i then s.shot2=nil end end
+				if scrapping then
+				local id=inventory[j][inventory[j].i].id 
+				inventory[j][inventory[j].i]=nil 
+				local scrapres=scrapvals[id]
+				if scrapres.spawn then inventory[j][inventory[j].i]={id=scrapres.spawn}; alert(j,fmt('Got %s!',idtags[scrapres.spawn][1]),true) end
+				scrap[ships[j].id]=scrap[ships[j].id]+scrapres[1]
+				alert(j,fmt('Got %d scrap.',scrapres[1]),true)
+				if s.shot1 and s.shot1.invi==inventory[j].i then s.shot1=nil end
+				if s.shot2 and s.shot2.invi==inventory[j].i then s.shot2=nil end 
+				end
 
 				local idtag_tw=nil
 				local idtag_tx=nil
@@ -1284,9 +1327,9 @@ function create_base(j,minx,maxx,miny,maxy)
 		local newship={x=rx,y=ry-16,a=pi/2,oldx=rx,oldy=ry-16,hp=30,id=j}
 		pick_up(j,32,true) -- starting weapon 1: Blaster
 		pick_up(j,49,true) -- starting weapon 2: Mine
-		--pick_up(j,17,true)
+		pick_up(j,17,true)
 		--pick_up(j,50,true)
-		--pick_up(j,34,true)
+		pick_up(j,34,true)
 		return newship
 end
 
@@ -1700,35 +1743,33 @@ end
 		  return xk, yk
 		end
 -- <TILES>
--- 005:eccccccccc888888caaaaaaaca888888cacccccccacc0ccccacc0ccccacc0ccc
--- 006:ccccceee8888cceeaaaa0cee888a0ceeccca0ccc0cca0c0c0cca0c0c0cca0c0c
--- 007:eccccccccc888888caaaaaaaca888888cacccccccacccccccacc0ccccacc0ccc
--- 008:ccccceee8888cceeaaaa0cee888a0ceeccca0cccccca0c0c0cca0c0c0cca0c0c
+-- 002:00ddd0000fdddf00efeeefe0eedddee0ffeeeff0eedddee00000000000000000
+-- 004:00ddd0000fdddf00efeeefe0eedddee0ffeeeff0eedddee00234320000222000
+-- 007:eccccccccc888888caaaaaaaca888888cacccccccacc0ccccacc0ccccacc0ccc
+-- 008:ccccceee8888cceeaaaa0cee888a0ceeccca0ccc0cca0c0c0cca0c0c0cca0c0c
+-- 009:eccccccccc888888caaaaaaaca888888cacccccccacccccccacc0ccccacc0ccc
+-- 010:ccccceee8888cceeaaaa0cee888a0ceeccca0cccccca0c0c0cca0c0c0cca0c0c
 -- 017:000000000001100000211200d322223dd332233d013333100001100000000000
 -- 019:0002000000131000002320000024200000242000002320000013100000020000
--- 021:cacccccccaaaaaaacaaacaaacaaaaccccaaaaaaac8888888cc000cccecccccec
--- 022:ccca00ccaaaa0ccecaaa0ceeaaaa0ceeaaaa0cee8888ccee000cceeecccceeee
+-- 021:0000000000200200002222000034430000211200002002000010010000000000
 -- 023:cacccccccaaaaaaacaaacaaacaaaaccccaaaaaaac8888888cc000cccecccccec
 -- 024:ccca00ccaaaa0ccecaaa0ceeaaaa0ceeaaaa0cee8888ccee000cceeecccceeee
+-- 025:cacccccccaaaaaaacaaacaaacaaaaccccaaaaaaac8888888cc000cccecccccec
+-- 026:ccca00ccaaaa0ccecaaa0ceeaaaa0ceeaaaa0cee8888ccee000cceeecccceeee
 -- 032:000c000000ccc0000ccccc00ccccccc00ccccc0000ccc000000c000000000000
 -- 034:0006700000055000000550000075570006566560056556500570075005000050
 -- 036:000000cc0000ccdd000cdde000cde0000cde00000cd00000cde00000cd000000
 -- 037:cc000000ddcc00000eddc000000edc000000edc000000dc000000edc000000dc
 -- 049:0000000001011010001231000122231001111110001231000101101000000000
 -- 050:000200000023200002343200234c432002343200002320000002000000000000
--- 051:2222222222222222222222222222222222222222222222222222222222222222
+-- 051:0000000000ddd0000fdddf00efeeefe0eedddee0ffeeeff0eedddee000000000
 -- 052:cd000000cde000000cd000000cde000000cde000000cdde00000ccdd000000cc
 -- 053:000000dc00000edc00000dc00000edc0000edc000eddc000ddcc0000cc000000
 -- 064:00000000000000000000765c0065cccc05ccc5605cc56000cc500000c5000000
 -- 065:0000000000000000cccccccc5670076500000000000000000000000000000000
 -- 066:0000000000000000c5670000cccc5600065ccc5000065cc5000005cc0000005c
--- 067:2222222222222222222222222222222222222222222222222222222222222222
 -- 068:0cccc00ccdddd00dcd000000cd000000cd0000000000000000000000cd000000
 -- 069:ccc00000dddc000000dc000000dc000000dc0000000000000000000000dc0000
--- 080:2222222222222222222222222222222222222222222222222222222222222222
--- 081:2222222222222222222222222222222222222222222222222222222222222222
--- 082:2222222222222222222222222222222222222222222222222222222222222222
--- 083:2222222222222222222222222222222222222222222222222222222222222222
 -- 084:cd000000cd000000cdddd00d0cccc00c00000000000000000000000000000000
 -- 085:00dc000000dc0000dddc0000ccc0000000000000000000000000000000000000
 -- </TILES>
