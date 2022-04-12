@@ -203,6 +203,7 @@ function handle_kills()
 				fadeouts[#fadeouts].ship=s
 				
 				rem(ships,j); rem(cams,j); rem(old_cams,j) 
+				rem(inventory,j)
 				
 				for j2,s2 in ipairs(ships) do
 				local cam=cams[j2]
@@ -1188,7 +1189,7 @@ function create_base(j,minx,maxx,miny,maxy)
 		pick_up(j,49,true) -- starting weapon 2: Mine
 		--pick_up(j,17,true)
 		--pick_up(j,50,true)
-		pick_up(j,34,true)
+		--pick_up(j,34,true)
 		return newship
 end
 
