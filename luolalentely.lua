@@ -1128,6 +1128,7 @@ function UIdraw(j)
 				if scrap then inventory[j][inventory[j].i]=nil; if s.shot1 and s.shot1.invi==inventory[j].i then s.shot1=nil end; if s.shot2 and s.shot2.invi==inventory[j].i then s.shot2=nil end end
 
 				local idtag_tw=nil
+				local idtag_tx=nil
 				for i=0,9-1 do
 						if i+1==inventory[j].i then 
 								if inventory[j][i+1] then
@@ -1136,6 +1137,7 @@ function UIdraw(j)
 								local tx=cam.ax+cx-6*9+i*12+6-tw/2+1
 								if tx<cam.ax then tx=cam.ax+1 end
 								if tx>cam.ax+cam.aw-tw then tx=cam.ax+cam.aw-tw end
+								idtag_tx=tx
 								dropshadow(idtags[inventory[j][i+1].id][1],tx,cam.ay+cy+6+2,true)
 								print(idtags[inventory[j][i+1].id][1],tx,cam.ay+cy+6+2,12,false,1,true)
 								end
@@ -1165,14 +1167,14 @@ function UIdraw(j)
 						if s.shot2 and i+1==s.shot2.invi then
 								local tw=print('S2',0,-6,12)
 								local th=0
-								if idtag_tw and AABB(cam.ax+cx-6*9+(inventory[j].i-1)*12+6-idtag_tw/2+1,cam.ay+cy+6+2,idtag_tw,5,cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2,tw,5) then th=6+2 end
+								if idtag_tw and AABB(idtag_tx,cam.ay+cy+6+2,idtag_tw,5,cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2,tw,5) then th=6+2 end
 								dropshadow('S2',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2+th)
 								print('S2',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2+th,12)
 						end
 						if s.shot1 and i+1==s.shot1.invi then
 								local tw=print('S1',0,-6,12)
 								local th=0
-								if idtag_tw and AABB(cam.ax+cx-6*9+(inventory[j].i-1)*12+6-idtag_tw/2+1,cam.ay+cy+6+2,idtag_tw,5,cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2,tw,5) then th=6+2 end
+								if idtag_tw and AABB(idtag_tx,cam.ay+cy+6+2,idtag_tw,5,cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2,tw,5) then th=6+2 end
 								dropshadow('S1',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2+th)
 								print('S1',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2+th,12)
 						end
