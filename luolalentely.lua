@@ -329,6 +329,7 @@ function shipprocess(j)
 						if id==34 then ins(missiles,{x=s.x-4,y=s.y-4,a=s.a+pi,id=id,dx=cos(s.a+pi)*5,dy=sin(s.a+pi)*5,owner=s}) end
 						if id==17 then ins(static,{x=s.x-4,y=s.y-4,id=id,owner=s}) end
 						s[fmt('shot%d',i)].nrj=s[fmt('shot%d',i)].nrj-1
+						if s[fmt('shot%d',i)].nrj==0 then alert(j,fmt('Shot%d out of ammo. Go to base.',i)) end
 						else alert(j,fmt('Shot%d out of ammo. Go to base.',i)) end
 				else alert(j,fmt('Shot%d not set. Go to base.',i)) end
 		end
