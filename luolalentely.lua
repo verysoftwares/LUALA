@@ -759,7 +759,7 @@ function environprocess()
 				end
 				for j,ms in ipairs(missiles) do
 						if AABB(ms.x,ms.y,8,8,st.x,st.y+sin(t*0.08)*2.5,8,8) then
-								clear_sprite2(ms)
+								clear_sprite2(ms,7.5)
 								rem(missiles,j)
 								break
 						end
@@ -891,6 +891,7 @@ end
 -- for textri objects
 function clear_sprite2(ms,hyp)
 		for j,s in ipairs(ships) do
+		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 		if ms.oldpos then 
 		for x=ms.oldpos.x+4-hyp,ms.oldpos.x+4+hyp do for y=ms.oldpos.y+4-hyp,ms.oldpos.y+4+hyp do
 				local px=pixels[posstr(x,y)]
@@ -1059,6 +1060,14 @@ function UIdraw(j)
 										end
 										if px~=0 then pix(cam.ax+cx-6*9+i*12+x,cam.ay+cy-6+y,px) end
 								end end
+
+								--[[if inventory[j][i+1] then
+								local tw=print(idtags[inventory[j][i+1].id][1],0,-6,12,false,1,true)
+								idtag_tw=tw
+								dropshadow(idtags[inventory[j][i+1].id][1],cam.ax+cx-6*9+i*12+6-tw/2,cam.ay+cy-6-8,true)
+								print(idtags[inventory[j][i+1].id][1],cam.ax+cx-6*9+i*12+6-tw/2,cam.ay+cy-6-8,12,false,1,true)
+								end]]
+
 						else spr(selsp,cam.ax+cx-6*9+i*12,cam.ay+cy-6,0,1,0,0,2,2) end
 						if inventory[j][i+1] then
 								spr(inventory[j][i+1].id,cam.ax+cx-6*9+i*12+2,cam.ay+cy-6+2,0)
@@ -1179,7 +1188,7 @@ function create_base(j,minx,maxx,miny,maxy)
 		pick_up(j,49,true) -- starting weapon 2: Mine
 		--pick_up(j,17,true)
 		--pick_up(j,50,true)
-		--pick_up(j,34,true)
+		pick_up(j,34,true)
 		return newship
 end
 
