@@ -326,7 +326,8 @@ function shipprocess(j)
 						if id==32 then ins(shots,{x=s.x-3,y=s.y-3,id=id,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) end
 						if id==50 then ins(shots,{x=s.x-3,y=s.y-3,id=id,dx=cos(s.a+pi)*3,dy=sin(s.a+pi)*3,owner=s}) end
 						if id==49 then ins(static,{x=s.x-3,y=s.y-3,id=id,dx=0,dy=0,owner=s,iframes=90}) end
-						if id==34 then ins(missiles,{x=s.x-3,y=s.y-3,a=s.a+pi,id=id,dx=cos(s.a+pi)*5,dy=sin(s.a+pi)*5,owner=s}) end
+						if id==34 then ins(missiles,{x=s.x-4,y=s.y-4,a=s.a+pi,id=id,dx=cos(s.a+pi)*5,dy=sin(s.a+pi)*5,owner=s}) end
+						if id==17 then ins(static,{x=s.x-4,y=s.y-4,id=id,owner=s}) end
 						s[fmt('shot%d',i)].nrj=s[fmt('shot%d',i)].nrj-1
 						else alert(j,fmt('Shot%d out of ammo. Go to base.',i)) end
 				else alert(j,fmt('Shot%d not set. Go to base.',i)) end
@@ -487,7 +488,7 @@ function environprocess()
 														-- preserve explosions
 														-- so we can have chain reactions
 														p= 4-(60-(e.t+1))*0.2
-														trace(fmt('explosion preserved (%d)',math.floor(p)))
+														--trace(fmt('explosion preserved (%d)',math.floor(p)))
 														break
 												end
 										end
@@ -734,7 +735,7 @@ function environprocess()
 						local p= pix(cams[j].ax+st.x+lx-cams[j].x,cams[j].ay+math.floor(st.y+sin(t*0.08)*2.5)+ly-cams[j].y)
 						--trace(p)
 						--trace(fmt('st.iframes %d',st.iframes))
-						if st.iframes==0 and p>2 then 
+						if (st.id==17 or st.iframes==0) and p>2 then 
 						--trace(fmt('got this far, %d',p))
 						clear_sprite(st)
 						st.blownup=true
@@ -748,7 +749,21 @@ function environprocess()
 				
 				if st.blownup then
 				rem(static,i)
-				explode(st)
+				for j,sh in ipairs(shots) do
+						if AABB(sh.x,sh.y,7,7,st.x,st.y+sin(t*0.08)*2.5,8,8) then
+								clear_sprite(sh)
+								rem(shots,j)
+								break
+						end
+				end
+				for j,ms in ipairs(missiles) do
+						if AABB(ms.x,ms.y,8,8,st.x,st.y+sin(t*0.08)*2.5,8,8) then
+								clear_sprite2(ms)
+								rem(missiles,j)
+								break
+						end
+				end
+				if st.id==49 then explode(st) end
 				goto blowup
 				end
 				
@@ -760,9 +775,9 @@ function environprocess()
 				st.oldpos={x=st.x,y=st.y+sin(t*0.08)*2.5}
 
 				for j,s in ipairs(ships) do
-				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+				--clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 				
-				if st.iframes==0 then
+				if st.id==49 and st.iframes==0 then
 				local points={{x=s.x,y=s.y},
 																		{x=s.x-cos(s.a)*8,y=s.y-sin(s.a)*8},
 	         								{x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
@@ -778,7 +793,7 @@ function environprocess()
 				end end
 				end end
 
-				if st.iframes>0 then st.iframes=st.iframes-1 end
+				if st.id==49 and st.iframes>0 then st.iframes=st.iframes-1 end
 				
 				::blowup::
 				clip()
@@ -1161,7 +1176,8 @@ function create_base(j,minx,maxx,miny,maxy)
 		local newship={x=rx,y=ry-16,a=pi/2,oldx=rx,oldy=ry-16,hp=30,id=j}
 		pick_up(j,32,true) -- starting weapon 1: Blaster
 		pick_up(j,49,true) -- starting weapon 2: Mine
-		pick_up(j,50,true)
+		pick_up(j,17,true)
+		--pick_up(j,50,true)
 		--pick_up(j,34,true)
 		return newship
 end
@@ -1581,13 +1597,13 @@ end
 -- 007:eccccccccc888888caaaaaaaca888888cacccccccacccccccacc0ccccacc0ccc
 -- 008:ccccceee8888cceeaaaa0cee888a0ceeccca0cccccca0c0c0cca0c0c0cca0c0c
 -- 017:000000000001100000211200d322223dd332233d013333100001100000000000
+-- 019:0002000000131000002320000024200000242000002320000013100000020000
 -- 021:cacccccccaaaaaaacaaacaaacaaaaccccaaaaaaac8888888cc000cccecccccec
 -- 022:ccca00ccaaaa0ccecaaa0ceeaaaa0ceeaaaa0cee8888ccee000cceeecccceeee
 -- 023:cacccccccaaaaaaacaaacaaacaaaaccccaaaaaaac8888888cc000cccecccccec
 -- 024:ccca00ccaaaa0ccecaaa0ceeaaaa0ceeaaaa0cee8888ccee000cceeecccceeee
 -- 032:000c000000ccc0000ccccc00ccccccc00ccccc0000ccc000000c000000000000
 -- 034:0006700000055000000550000075570006566560056556500570075005000050
--- 035:0002000000131000002320000024200000242000002320000013100000020000
 -- 036:000000cc0000ccdd000cdde000cde0000cde00000cd00000cde00000cd000000
 -- 037:cc000000ddcc00000eddc000000edc000000edc000000dc000000edc000000dc
 -- 049:0000000001011010001231000122231001111110001231000101101000000000
