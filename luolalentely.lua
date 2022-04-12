@@ -1086,7 +1086,7 @@ scrapvals={
 		[17]={20,spawn=19},
 		[34]={50,spawn=51},
 		[49]={35},
-		[50]={50},
+		[50]={55},
 		[19]={10,spawn=21},		
 		[21]={10},
 		[51]={30},
@@ -1128,6 +1128,30 @@ function shipdraw(j)
 				end
 		end
 		end
+		
+		local hyp=7.5
+		local a={x=cos(s.a+pi-pi/4)*hyp,y=sin(s.a+pi-pi/4)*hyp}; local d={x=cos(s.a+pi+pi/4)*hyp,y=sin(s.a+pi+pi/4)*hyp}
+		local b={x=cos(s.a+pi+pi/4)*hyp,y=sin(s.a+pi+pi/4)*hyp}; local e={x=cos(s.a+pi-pi+pi/4)*hyp,y=sin(s.a+pi-pi+pi/4)*hyp}
+		local c={x=cos(s.a+pi-pi+pi/4)*hyp,y=sin(s.a+pi-pi+pi/4)*hyp}; local f={x=cos(s.a+pi-pi-pi/4)*hyp,y=sin(s.a+pi-pi-pi/4)*hyp}
+		textri(cams[j].ax-cams[j].x+s.x+a.x,cams[j].ay-cams[j].y+s.y+a.y,
+		       cams[j].ax-cams[j].x+s.x+b.x,cams[j].ay-cams[j].y+s.y+b.y,
+		       cams[j].ax-cams[j].x+s.x+c.x,cams[j].ay-cams[j].y+s.y+c.y,
+
+		       2*8,0*8,
+									2*8+7,0*8,
+									2*8,0*8+7, 
+									
+									false, 0)
+		textri(cams[j].ax-cams[j].x+s.x+d.x,cams[j].ay-cams[j].y+s.y+d.y,
+		       cams[j].ax-cams[j].x+s.x+e.x,cams[j].ay-cams[j].y+s.y+e.y,
+		       cams[j].ax-cams[j].x+s.x+f.x,cams[j].ay-cams[j].y+s.y+f.y,
+
+		       2*8+7,0*8,
+									2*8,0*8+7,
+									2*8+7,0*8+7, 
+									
+									false, 0)
+		
 		--pix(cam.ax+s.x-cam.x,cam.ay+s.y-cam.y,2)
 		end
 end
@@ -1230,7 +1254,7 @@ function UIdraw(j)
 				local scrapres=scrapvals[id]
 				if scrapres.spawn then inventory[j][inventory[j].i]={id=scrapres.spawn}; alert(j,fmt('Got %s!',idtags[scrapres.spawn][1]),true) end
 				scrap[ships[j].id]=scrap[ships[j].id]+scrapres[1]
-				alert(j,fmt('Got %d scrap.',scrapres[1]),true)
+				alert(j,fmt('Got %d scrap (%d total).',scrapres[1],scrap[ships[j].id]),true)
 				if s.shot1 and s.shot1.invi==inventory[j].i then s.shot1=nil end
 				if s.shot2 and s.shot2.invi==inventory[j].i then s.shot2=nil end 
 				end
@@ -1815,6 +1839,10 @@ end
 -- 008:ccccceee8888cceeaaaa0cee888a0ceeccca0ccc0cca0c0c0cca0c0c0cca0c0c
 -- 009:eccccccccc888888caaaaaaaca888888cacccccccacccccccacc0ccccacc0ccc
 -- 010:ccccceee8888cceeaaaa0cee888a0ceeccca0cccccca0c0c0cca0c0c0cca0c0c
+-- 011:0666666066677666667667666676676666777766667667667666666707777770
+-- 012:0222222022111222221221222211122222122122221112221222222101111110
+-- 013:0dddddd0dddddddddddeedddddeeeedddeeeeeedddddddddedddddde0eeeeee0
+-- 014:0dddddd0dddddddddeeeeeedddeeeedddddeedddddddddddedddddde0eeeeee0
 -- 017:000000000001100000211200d322223dd332233d013333100001100000000000
 -- 019:0002000000131000002320000024200000242000002320000013100000020000
 -- 021:0000000000200200002222000034430000211200002002000010010000000000
@@ -1822,6 +1850,10 @@ end
 -- 024:ccca00ccaaaa0ccecaaa0ceeaaaa0ceeaaaa0cee8888ccee000cceeecccceeee
 -- 025:cacccccccaaaaaaacaaacaaacaaaaccccaaaaaaac8888888cc000cccecccccec
 -- 026:ccca00ccaaaa0ccecaaa0ceeaaaa0ceeaaaa0cee8888ccee000cceeecccceeee
+-- 027:0aaaaaa0aa9aa9aaaa9aa9aaaaa99aaaaa9aa9aaaa9aa9aa9aaaaaa909999990
+-- 028:0333333033233233332332333332223333333233333223332333333202222220
+-- 029:0dddddd0ddddeddddddeedddddeeeddddddeedddddddedddedddddde0eeeeee0
+-- 030:0dddddd0dddedddddddeeddddddeeedddddeeddddddeddddedddddde0eeeeee0
 -- 032:000c000000ccc0000ccccc00ccccccc00ccccc0000ccc000000c000000000000
 -- 034:0006700000055000000550000075570006566560056556500570075005000050
 -- 036:000000cc0000ccdd000cdde000cde0000cde00000cd00000cde00000cd000000
