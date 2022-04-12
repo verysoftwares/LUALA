@@ -809,7 +809,7 @@ function environprocess()
 						local p= pix(cams[j].ax+st.x+lx-cams[j].x,cams[j].ay+math.floor(st.y+sin(t*0.08)*2.5)+ly-cams[j].y)
 						--trace(p)
 						--trace(fmt('st.iframes %d',st.iframes))
-						if (st.id==49 and st.iframes==0 and p>2) or (st.id==17 and p>4) then
+						if (st.id==49 and st.iframes==0 and p>2 and p~=12) or (st.id==17 and p>4) then
 						--trace(fmt('got this far, %d',p))
 						
 						-- drones may despawn immediately
