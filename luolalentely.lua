@@ -1109,7 +1109,7 @@ function UIdraw(j)
 										if i==2 then 
 										if btn((s.id-1)*8+4) then
 										scrap=true; keymap[j][(s.id-1)*8+4]=2
-										else inventory[j].i=inventory[j].i-1; if inventory[j].i<1 then inventory[j].i=actuallen(inventory[j]) end 
+										else inventory[j].i=inventory[j].i-1; if inventory[j].i<1 then inventory[j].i=actuallen(inventory[j]); if inventory[j].i<1 then inventory[j].i=1 end 
 										end
 										end
 										if i==3 then inventory[j].i=inventory[j].i+1; if inventory[j].i>actuallen(inventory[j]) then inventory[j].i=1 end end
