@@ -659,6 +659,8 @@ function environprocess()
 		
 		for i=#shots,1,-1 do
 				local sh=shots[i]
+				if sh.id==32 then
+
 				for j,s in ipairs(ships) do
 				if sh.owner~=s then
 				local points={{x=s.x-cos(s.a)*8,y=s.y-sin(s.a)*8},
@@ -674,6 +676,29 @@ function environprocess()
 						end
 				end
 				end
+				end
+
+				elseif sh.id==50 then
+
+				for j,s in ipairs(ships) do
+				if sh.owner~=s then
+				local points={{x=s.x-cos(s.a)*8,y=s.y-sin(s.a)*8},
+	         								{x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
+																		{x=s.x+cos(s.a)*4,y=s.y+4*sin(s.a)},
+																		{x=s.x-cos(s.a+2*pi/3+0.3)*11,y=s.y-sin(s.a+2*pi/3+0.3)*11}}
+				local points2={{x=sh.x+3,y=sh.y},
+	         								 {x=sh.x+6,y=sh.y+3},
+																		 {x=sh.x+3,y=sh.y+6},
+																		 {x=sh.x,y=sh.y+3}}
+				for k,pt in ipairs(points2) do
+				if PointWithinShape(points,pt.x,pt.y) then
+						dmg(s,4)
+						break
+				end
+				end
+				end
+				end
+
 				end
 		end
 
@@ -1102,6 +1127,7 @@ function create_base(j,minx,maxx,miny,maxy)
 		local newship={x=rx,y=ry-16,a=pi/2,oldx=rx,oldy=ry-16,hp=30,id=j}
 		pick_up(j,32,true) -- starting weapon 1: Blaster
 		pick_up(j,49,true) -- starting weapon 2: Mine
+		pick_up(j,50,true)
 		--pick_up(j,34,true)
 		return newship
 end
