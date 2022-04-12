@@ -739,6 +739,9 @@ function environprocess()
 						--trace(fmt('st.iframes %d',st.iframes))
 						if (st.id==17 or st.iframes==0) and p>2 then 
 						--trace(fmt('got this far, %d',p))
+						
+						-- drones may despawn immediately
+						st.oldpos=st.oldpos or {x=st.x,y=st.y+sin(t*0.08)*2.5}
 						clear_sprite(st)
 						st.blownup=true
 						goto cleared
@@ -868,7 +871,7 @@ function explode(e)
 end
 
 function clear_sprite(sh)
-		for lx=0,7 do for ly=0,8 do
+		for lx=0,8 do for ly=0,8 do
 				--if ly==8 or sprpix(sh.id,lx,ly)~=0 then
 						for j,s in ipairs(ships) do
 						clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
@@ -1189,7 +1192,7 @@ function create_base(j,minx,maxx,miny,maxy)
 		pick_up(j,49,true) -- starting weapon 2: Mine
 		--pick_up(j,17,true)
 		--pick_up(j,50,true)
-		--pick_up(j,34,true)
+		pick_up(j,34,true)
 		return newship
 end
 
