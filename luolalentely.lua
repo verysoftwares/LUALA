@@ -584,6 +584,7 @@ function environprocess()
 				ms.x=ms.x+ms.dx; ms.y=ms.y+ms.dy
 				local hyp=7.5
 				for j,s in ipairs(ships) do
+				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 				local a={x=cos(ms.a-pi/4)*hyp,y=sin(ms.a-pi/4)*hyp}; local d={x=cos(ms.a+pi/4)*hyp,y=sin(ms.a+pi/4)*hyp}
 				local b={x=cos(ms.a+pi/4)*hyp,y=sin(ms.a+pi/4)*hyp}; local e={x=cos(ms.a-pi+pi/4)*hyp,y=sin(ms.a-pi+pi/4)*hyp}
 				local c={x=cos(ms.a-pi+pi/4)*hyp,y=sin(ms.a-pi+pi/4)*hyp}; local f={x=cos(ms.a-pi-pi/4)*hyp,y=sin(ms.a-pi-pi/4)*hyp}
