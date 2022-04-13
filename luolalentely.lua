@@ -310,13 +310,21 @@ function clear_ship_trails(j)
 		end end
 		]]
 		if boosted(k) then
+				local points={--{s.x-cos(s.a)*8,s.y-sin(s.a)*8},
+			               {x=s.x+cos(s.a)*4,y=s.y+4*sin(s.a)},
+												      {x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
+												      {x=s.x-cos(s.a+2*pi/3+0.3)*11,y=s.y-sin(s.a+2*pi/3+0.3)*11}}
+				local hyp=math.sqrt(32)
+		
 				for h=0,9-1 do
-						if inventory[k][h+1] and inventory[k][h+1].mod and sub(inventory[k][h+1].mod,1,4)=='core' then
-								if tonumber(sub(inventory[k][h+1].mod,5,5))==1 then
-									 clear_sprite2({oldpos={x=s.x+cos(s.a)*4,y=s.y+sin(s.a)*4}},5.5)
-								end
-						end
-				end
+				if inventory[k][h] and inventory[k][h].mod and sub(inventory[k][h].mod,1,4)=='core' then
+				local core= tonumber(sub(inventory[k][h].mod,5,5))
+				local pt=points[core]
+				
+				clear_sprite2({oldpos={x=pt.x-4+cos(s.a)*4,y=pt.y-4+sin(s.a)*4}},hyp)
+				
+				end end
+				
 		end
 		
 		end
@@ -1131,10 +1139,10 @@ end
 function shipdraw(j)
 		local cam=cams[j]
 		for k,s in ipairs(ships) do
-		points={{s.x-cos(s.a)*8,s.y-sin(s.a)*8},
-	         {s.x-cos(s.a-2*pi/3-0.3)*11,s.y-sin(s.a-2*pi/3-0.3)*11},
-										{s.x+cos(s.a)*4,s.y+4*sin(s.a)},
-										{s.x-cos(s.a+2*pi/3+0.3)*11,s.y-sin(s.a+2*pi/3+0.3)*11}}
+		local points={{s.x-cos(s.a)*8,s.y-sin(s.a)*8},
+	               {s.x-cos(s.a-2*pi/3-0.3)*11,s.y-sin(s.a-2*pi/3-0.3)*11},
+										      {s.x+cos(s.a)*4,s.y+4*sin(s.a)},
+										      {s.x-cos(s.a+2*pi/3+0.3)*11,s.y-sin(s.a+2*pi/3+0.3)*11}}
 		--[[for i,v in ipairs(points) do
 				if pix(v[1],v[2])==2 then
 						transition(v[1],v[2])
@@ -1156,30 +1164,44 @@ function shipdraw(j)
 		
 		if boosted(k) then
 		
-		local hyp=5.5
+		local points={--{s.x-cos(s.a)*8,s.y-sin(s.a)*8},
+	               {x=s.x+cos(s.a)*4,y=s.y+4*sin(s.a)},
+										      {x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
+										      {x=s.x-cos(s.a+2*pi/3+0.3)*11,y=s.y-sin(s.a+2*pi/3+0.3)*11}}
+		local hyp=math.sqrt(32)
+		local dsx=0
+		if math.abs(s.dx)>0.3 or math.abs(s.dy)>0.3 then
+		dsx=2*8
+		end
+
+		for h=0,9-1 do
+		if inventory[k][h] and inventory[k][h].mod and sub(inventory[k][h].mod,1,4)=='core' then
+		local core= tonumber(sub(inventory[k][h].mod,5,5))
+		local pt=points[core]
 		local a={x=cos(s.a+pi-pi/4)*hyp,y=sin(s.a+pi-pi/4)*hyp}; local d={x=cos(s.a+pi+pi/4)*hyp,y=sin(s.a+pi+pi/4)*hyp}
 		local b={x=cos(s.a+pi+pi/4)*hyp,y=sin(s.a+pi+pi/4)*hyp}; local e={x=cos(s.a+pi-pi+pi/4)*hyp,y=sin(s.a+pi-pi+pi/4)*hyp}
 		local c={x=cos(s.a+pi-pi+pi/4)*hyp,y=sin(s.a+pi-pi+pi/4)*hyp}; local f={x=cos(s.a+pi-pi-pi/4)*hyp,y=sin(s.a+pi-pi-pi/4)*hyp}
-		textri(cams[j].ax-cams[j].x+s.x+a.x,cams[j].ay-cams[j].y+s.y+a.y,
-		       cams[j].ax-cams[j].x+s.x+b.x,cams[j].ay-cams[j].y+s.y+b.y,
-		       cams[j].ax-cams[j].x+s.x+c.x,cams[j].ay-cams[j].y+s.y+c.y,
+		textri(cams[j].ax-cams[j].x+pt.x+cos(s.a)*4+a.x,cams[j].ay-cams[j].y+pt.y+sin(s.a)*4+a.y,
+		       cams[j].ax-cams[j].x+pt.x+cos(s.a)*4+b.x,cams[j].ay-cams[j].y+pt.y+sin(s.a)*4+b.y,
+		       cams[j].ax-cams[j].x+pt.x+cos(s.a)*4+c.x,cams[j].ay-cams[j].y+pt.y+sin(s.a)*4+c.y,
 
-		       2*8,0*8,
-									2*8+7,0*8,
-									2*8,0*8+7, 
+		       2*8+dsx,0*8,
+									2*8+dsx+7,0*8,
+									2*8+dsx,0*8+7, 
 									
 									false, 0)
-		textri(cams[j].ax-cams[j].x+s.x+d.x,cams[j].ay-cams[j].y+s.y+d.y,
-		       cams[j].ax-cams[j].x+s.x+e.x,cams[j].ay-cams[j].y+s.y+e.y,
-		       cams[j].ax-cams[j].x+s.x+f.x,cams[j].ay-cams[j].y+s.y+f.y,
+		textri(cams[j].ax-cams[j].x+pt.x+cos(s.a)*4+d.x,cams[j].ay-cams[j].y+pt.y+sin(s.a)*4+d.y,
+		       cams[j].ax-cams[j].x+pt.x+cos(s.a)*4+e.x,cams[j].ay-cams[j].y+pt.y+sin(s.a)*4+e.y,
+		       cams[j].ax-cams[j].x+pt.x+cos(s.a)*4+f.x,cams[j].ay-cams[j].y+pt.y+sin(s.a)*4+f.y,
 
-		       2*8+7,0*8,
-									2*8,0*8+7,
-									2*8+7,0*8+7, 
+		       2*8+dsx+7,0*8,
+									2*8+dsx,0*8+7,
+									2*8+dsx+7,0*8+7, 
 									
 									false, 0)
 		
 		end
+		end end
 		--pix(cam.ax+s.x-cam.x,cam.ay+s.y-cam.y,2)
 		end
 end
@@ -1272,12 +1294,12 @@ function UIdraw(j)
 										elseif inventory[j][inventory[j].i] and inventory[j][inventory[j].i].id==51 then if inventory[j][inventory[j].i].mod and sub(inventory[j][inventory[j].i].mod,1,4)=='core' then inventory[j][inventory[j].i].mod=nil 
 												else 
 												local core=nil
-												for c=1,3 do for k=0,9-1 do
+												for c=1,3 do if not core then for k=0,9-1 do
 														if inventory[j][k+1] and inventory[j][k+1].mod and sub(inventory[j][k+1].mod,1,4)=='core' then
 																if tonumber(sub(inventory[j][k+1].mod,5,5))==c then break end
 														end
 														if k==9-1 then core=c end
-												end end
+												end end end
 												if core then
 														inventory[j][inventory[j].i].mod=fmt('core%d',core)
 												end
@@ -1292,12 +1314,12 @@ function UIdraw(j)
 										elseif inventory[j][inventory[j].i] and inventory[j][inventory[j].i].id==51 then if inventory[j][inventory[j].i].mod and sub(inventory[j][inventory[j].i].mod,1,4)=='core' then inventory[j][inventory[j].i].mod=nil 
 												else 
 												local core=nil
-												for c=1,3 do for k=0,9-1 do
+												for c=1,3 do if not core then for k=0,9-1 do
 														if inventory[j][k+1] and inventory[j][k+1].mod and sub(inventory[j][k+1].mod,1,4)=='core' then
 																if tonumber(sub(inventory[j][k+1].mod,5,5))==c then break end
 														end
 														if k==9-1 then core=c end
-												end end
+												end end end
 												if core then
 														inventory[j][inventory[j].i].mod=fmt('core%d',core)
 												end
@@ -1358,19 +1380,22 @@ function UIdraw(j)
 						if inventory[j][i+1] then
 								spr(inventory[j][i+1].id,cam.ax+cx-6*9+i*12+2,cam.ay+cy-6+2,0)
 						end
-						if (s.shot2 and i+1==s.shot2.invi) or (inventory[j][i+1] and inventory[j][i+1].mod=='shot2') then
-								local tw=print('S2',0,-6,12)
+						for k=1,2 do
+						if (s[fmt('shot%d',k)] and i+1==s[fmt('shot%d',k)].invi) or (inventory[j][i+1] and inventory[j][i+1].mod==fmt('shot%d',k)) then
+								local tw=print(fmt('S%d',k),0,-6,12)
 								local th=0
 								if idtag_tw and AABB(idtag_tx,cam.ay+cy+6+2,idtag_tw,5,cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2,tw,5) then th=6+2 end
-								dropshadow('S2',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2+th)
-								print('S2',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2+th,12)
+								dropshadow(fmt('S%d',k),cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2+th)
+								print(fmt('S%d',k),cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2+th,12)
 						end
-						if (s.shot1 and i+1==s.shot1.invi) or (inventory[j][i+1] and inventory[j][i+1].mod=='shot1') then
-								local tw=print('S1',0,-6,12)
+						end
+						if inventory[j][i+1] and inventory[j][i+1].mod and sub(inventory[j][i+1].mod,1,4)=='core' then
+								local core=tonumber(sub(inventory[j][i+1].mod,5,5))
+								local tw=print(fmt('C%d',core),0,-6,12)
 								local th=0
 								if idtag_tw and AABB(idtag_tx,cam.ay+cy+6+2,idtag_tw,5,cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2,tw,5) then th=6+2 end
-								dropshadow('S1',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2+th)
-								print('S1',cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2+th,12)
+								dropshadow(fmt('C%d',core),cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2+th)
+								print(fmt('C%d',core),cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2+th,12)
 						end
 				end
 				if not s.moved and not (s.shot1 or s.shot2) then
@@ -1480,6 +1505,9 @@ function create_base(j,minx,maxx,miny,maxy)
 		pick_up(j,49,true) -- starting weapon 2: Mine
 		pick_up(j,17,true)
 		--pick_up(j,50,true)
+		pick_up(j,34,true)
+		pick_up(j,34,true)
+		pick_up(j,34,true)
 		pick_up(j,34,true)
 		return newship
 end
