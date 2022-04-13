@@ -9,6 +9,7 @@ pi=math.pi
 fmt=string.format
 ins=table.insert
 rem=table.remove
+sub=string.sub
 t=0
 x=96+10
 y=24+48
@@ -308,6 +309,16 @@ function clear_ship_trails(j)
 				else pix(x,y,0) end
 		end end
 		]]
+		if boosted(k) then
+				for h=0,9-1 do
+						if inventory[k][h+1] and inventory[k][h+1].mod and sub(inventory[k][h+1].mod,1,4)=='core' then
+								if tonumber(sub(inventory[k][h+1].mod,5,5))==1 then
+									 clear_sprite2({oldpos={x=s.x+cos(s.a)*4,y=s.y+sin(s.a)*4}},5.5)
+								end
+						end
+				end
+		end
+		
 		end
 		
 		if alerts[j] then
@@ -339,7 +350,9 @@ function shipprocess(j)
 		s.target2=nil
 		for i=1,2 do
 		local id
-		if s[fmt('shot%d',i)] then id= inventory[j][s[fmt('shot%d',i)].invi].id end
+		if s[fmt('shot%d',i)] then 
+		
+		id= inventory[j][s[fmt('shot%d',i)].invi].id
 
 		local autoaim=nil
 		for k=0,9-1 do
@@ -364,6 +377,8 @@ function shipprocess(j)
 				end
 		end
 
+		end
+
 		if ((btnp((s.id-1)*8+4+i-1) and id~=19) or (id==19 and t%6==0)) and not s.onbase then 
 				if s[fmt('shot%d',i)] then 
 						if s[fmt('shot%d',i)].nrj>0 then
@@ -386,7 +401,7 @@ function shipprocess(j)
 								if distances[1] and distances[1].d<=140 then
 										local s2=distances[1].s
 										local a=math.atan2(s2.y-s.y,s2.x-s.x)
-										ins(lazers,{x=s.x-4,y=s.y-4,a=a,dx=cos(a)*3,dy=sin(a)*3,owner=s})
+										ins(lazers,{x=s.x-4,y=s.y-4,a=a,dx=cos(a)*3,dy=sin(a)*3,id=id,owner=s})
 								end
 						end 
 						
@@ -580,14 +595,14 @@ function environprocess()
 								local distances={}
 								for j,s in ipairs(ships) do
 										if st.owner~=s then
-												ins(distances,{s=s,d=math.sqrt((st.x-s.x)^2+(st.y-s.y)^2)})
+												ins(distances,{s=s,d=math.sqrt((st.x-s.x)^2+(st.y+sin(t*0.08)*2.5-s.y)^2)})
 										end
 								end
 								table.sort(distances,function(a,b) return a.d<b.d end)
 								if distances[1] and distances[1].d<=140 then
 										local s=distances[1].s
-										local a=math.atan2(s.y-st.y,s.x-st.x)
-										ins(lazers,{x=st.x,y=st.y,a=a,dx=cos(a)*3,dy=sin(a)*3,owner=st})
+										local a=math.atan2(s.y-(st.y+sin(t*0.08)*2.5),s.x-st.x)
+										ins(lazers,{x=st.x,y=st.y+sin(t*0.08)*2.5,a=a,dx=cos(a)*3,dy=sin(a)*3,owner=st,id=19})
 								end
 						end
 				end
@@ -673,7 +688,7 @@ function environprocess()
 				sh.oldpos={x=sh.x,y=sh.y}
 				local wallhits=0
 				for lx=0,7 do for ly=0,7 do
-						if sprpix(32,lx,ly)~=0 and is_solid(pixels[posstr(sh.x+lx,sh.y+ly)]) then
+						if sprpix(sh.id,lx,ly)~=0 and is_solid(pixels[posstr(sh.x+lx,sh.y+ly)]) then
 
 								for j,s in ipairs(ships) do
 								clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
@@ -871,11 +886,20 @@ function environprocess()
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 				for lx=0,7 do for ly=0,7 do
 				if sprpix(st.id,lx,ly)~=0 then
-						local p= pix(cams[j].ax+st.x+lx-cams[j].x,cams[j].ay+math.floor(st.y+sin(t*0.08)*2.5)+ly-cams[j].y)
+						local sx,sy=cams[j].ax+st.x+lx-cams[j].x,cams[j].ay+math.floor(st.y+sin(t*0.08)*2.5)+ly-cams[j].y
+						local p
+						
+						if sx<cams[j].ax or sx>=cams[j].ax+cams[j].aw or sy<cams[j].ay or sy>=cams[j].ay+cams[j].ah then
+						p= 0
+						else
+						p= pix(sx,sy)
+						end
 						--trace(p)
 						--trace(fmt('st.iframes %d',st.iframes))
 						if (st.id==49 and st.iframes==0 and p>2 and p~=12) or (st.id==17 and p>4) then
 						--trace(fmt('got this far, %d',p))
+						
+						trace(fmt('static hit %d @ %d,%d (%d,%d)',p,math.floor(cams[j].ax+st.x+lx-cams[j].x),math.floor(cams[j].ay+st.y+sin(t*0.08)*2.5+ly-cams[j].y),math.floor(st.x),math.floor(st.y+sin(t*0.08)*2.5)))
 						
 						-- drones may despawn immediately
 						st.oldpos=st.oldpos or {x=st.x,y=st.y+sin(t*0.08)*2.5}
@@ -902,6 +926,7 @@ function environprocess()
 						if AABB(ms.x,ms.y,8,8,st.x,st.y+sin(t*0.08)*2.5,8,8) then
 								clear_sprite2(ms,7.5)
 								rem(missiles,j)
+								explode(ms)
 								break
 						end
 				end
@@ -1129,7 +1154,9 @@ function shipdraw(j)
 		end
 		end
 		
-		local hyp=7.5
+		if boosted(k) then
+		
+		local hyp=5.5
 		local a={x=cos(s.a+pi-pi/4)*hyp,y=sin(s.a+pi-pi/4)*hyp}; local d={x=cos(s.a+pi+pi/4)*hyp,y=sin(s.a+pi+pi/4)*hyp}
 		local b={x=cos(s.a+pi+pi/4)*hyp,y=sin(s.a+pi+pi/4)*hyp}; local e={x=cos(s.a+pi-pi+pi/4)*hyp,y=sin(s.a+pi-pi+pi/4)*hyp}
 		local c={x=cos(s.a+pi-pi+pi/4)*hyp,y=sin(s.a+pi-pi+pi/4)*hyp}; local f={x=cos(s.a+pi-pi-pi/4)*hyp,y=sin(s.a+pi-pi-pi/4)*hyp}
@@ -1152,7 +1179,16 @@ function shipdraw(j)
 									
 									false, 0)
 		
+		end
 		--pix(cam.ax+s.x-cam.x,cam.ay+s.y-cam.y,2)
+		end
+end
+
+function boosted(j)
+		for i=0,9-1 do
+				if inventory[j][i+1] and inventory[j][i+1].mod and sub(inventory[j][i+1].mod,1,4)=='core' then 
+						return true
+				end
 		end
 end
 
@@ -1233,6 +1269,19 @@ function UIdraw(j)
 										scrapping=true; keymap[j][(s.id-1)*8+2]=2
 										else 
 										if inventory[j][inventory[j].i] and inventory[j][inventory[j].i].id==21 then if inventory[j][inventory[j].i].mod=='shot1' then inventory[j][inventory[j].i].mod=nil else inventory[j][inventory[j].i].mod='shot1' end
+										elseif inventory[j][inventory[j].i] and inventory[j][inventory[j].i].id==51 then if inventory[j][inventory[j].i].mod and sub(inventory[j][inventory[j].i].mod,1,4)=='core' then inventory[j][inventory[j].i].mod=nil 
+												else 
+												local core=nil
+												for c=1,3 do for k=0,9-1 do
+														if inventory[j][k+1] and inventory[j][k+1].mod and sub(inventory[j][k+1].mod,1,4)=='core' then
+																if tonumber(sub(inventory[j][k+1].mod,5,5))==c then break end
+														end
+														if k==9-1 then core=c end
+												end end
+												if core then
+														inventory[j][inventory[j].i].mod=fmt('core%d',core)
+												end
+												end
 										else
 										if inventory[j][inventory[j].i] then local oldshot1=s.shot1; if oldshot1 then inventory[j][oldshot1.invi].nrj=oldshot1.nrj end; s.shot1={invi=inventory[j].i,nrj=inventory[j][inventory[j].i].nrj or idtags[inventory[j][inventory[j].i].id].nrj}; if s.shot2 and s.shot2.invi==inventory[j].i then s.shot2=nil end end 
 										end
@@ -1240,6 +1289,19 @@ function UIdraw(j)
 										end
 										if i==5 then 
 										if inventory[j][inventory[j].i] and inventory[j][inventory[j].i].id==21 then if inventory[j][inventory[j].i].mod=='shot2' then inventory[j][inventory[j].i].mod=nil else inventory[j][inventory[j].i].mod='shot2' end
+										elseif inventory[j][inventory[j].i] and inventory[j][inventory[j].i].id==51 then if inventory[j][inventory[j].i].mod and sub(inventory[j][inventory[j].i].mod,1,4)=='core' then inventory[j][inventory[j].i].mod=nil 
+												else 
+												local core=nil
+												for c=1,3 do for k=0,9-1 do
+														if inventory[j][k+1] and inventory[j][k+1].mod and sub(inventory[j][k+1].mod,1,4)=='core' then
+																if tonumber(sub(inventory[j][k+1].mod,5,5))==c then break end
+														end
+														if k==9-1 then core=c end
+												end end
+												if core then
+														inventory[j][inventory[j].i].mod=fmt('core%d',core)
+												end
+												end
 										else
 										if inventory[j][inventory[j].i] then local oldshot2=s.shot2; if oldshot2 then inventory[j][oldshot2.invi].nrj=oldshot2.nrj end; s.shot2={invi=inventory[j].i,nrj=inventory[j][inventory[j].i].nrj or idtags[inventory[j][inventory[j].i].id].nrj}; if s.shot1 and s.shot1.invi==inventory[j].i then s.shot1=nil end end 
 										end
