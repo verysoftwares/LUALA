@@ -27,9 +27,11 @@ fadeouts={}
 
 function OVR()
 		if TIC==update then
-		for j=1,#ships do
+		for j=1,4 do
+		if ships[j] then
 		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 		UIdraw(j)
+		end
 		end
 		end
 end
@@ -154,7 +156,7 @@ function cam_init(j)
 				old_cams={}
 		end
 		
-		
+				
 		renderwindow(j)		
 
 		old_cams[j]={sx=cams[j].sx,sy=cams[j].sy,x=cams[j].x,y=cams[j].y}
@@ -208,8 +210,8 @@ function handle_kills()
 				
 				loot(j)
 		
-				rem(ships,j); rem(cams,j); rem(old_cams,j) 
-				rem(inventory,j)
+				ships[j]=nil; cams[j]=nil;  
+				inventory[j]=nil; if alerts[j] then alerts[j]=nil end
 				
 				for j2,s2 in ipairs(ships) do
 				local cam=cams[j2]
@@ -271,9 +273,8 @@ function redfade()
 				end
 				
 				if f.prog>f.ah then
-						rem(fadeouts,i)
-				end
-				f.prog=f.prog+20
+						--rem(fadeouts,i)
+				else f.prog=f.prog+20 end
 		end
 end
 
@@ -283,6 +284,11 @@ function clear_ship_trails(j)
 		local old_cam=old_cams[j]
 		local cam=cams[j]
 		for k,s in ipairs(ships) do
+
+		if s.justspawned then
+				renderwindow(k)
+				s.justspawned=nil
+		end
 
 		if not s.trans then
 		line(cam.ax-cam.x+s.x-cos(s.a)*8,cam.ay-cam.y+s.y-sin(s.a)*8,cam.ax-cam.x+s.x-cos(s.a-2*pi/3-0.3)*11,cam.ay-cam.y+s.y-sin(s.a-2*pi/3-0.3)*11,0)
@@ -360,7 +366,7 @@ function shipprocess(j)
 		s.target2=nil
 		for i=1,2 do
 		local id
-		if s[fmt('shot%d',i)] then 
+		if s[fmt('shot%d',i)] and inventory[j] then 
 		
 		id= inventory[j][s[fmt('shot%d',i)].invi].id
 
@@ -1263,6 +1269,23 @@ function UIdraw(j)
 				alerts[j].t=alerts[j].t-1
 				if alerts[j].t==0 then rem(alerts[j].msgs,1); if #alerts[j].msgs==0 then alerts[j]=nil else alerts[j].t=160 end end
 		end
+
+		for i=#fadeouts,1,-1 do
+				local f=fadeouts[i]
+				clip(f.ax,f.ay,f.aw,f.ah)
+				
+				if f.prog>=f.ah then
+						f.t=f.t or 60*10
+						local tw=print('Respawn in',0,-6,12,false,1,true)
+						dropshadow('Respawn in',f.ax+f.aw/2-tw/2,f.ay+f.ah/2-4,true)
+						print('Respawn in',f.ax+f.aw/2-tw/2,f.ay+f.ah/2-4,12,false,1,true)
+						local tw=print(fmt('%d',math.floor((f.t+60)/60)),0,-6,12)
+						dropshadow(fmt('%d',math.floor((f.t+60)/60)),f.ax+f.aw/2-tw/2,f.ay+f.ah/2+4,false)
+						print(fmt('%d',math.floor((f.t+60)/60)),f.ax+f.aw/2-tw/2,f.ay+f.ah/2+4,12)
+						f.t=f.t-1
+						if f.t==0 then rem(fadeouts,i); f.ship.gone=false; f.ship.hp=30; f.ship.x=f.ship.rx; f.ship.y=f.ship.ry; f.ship.a=f.ship.ra; f.flash=nil; ins(ships,f.ship.id,f.ship); ins(cams,f.ship.id,{x=f.x,y=f.y,sx=f.sx,sy=f.sy,ax=f.ax,ay=f.ay,aw=f.aw,ah=f.ah}); f.ship.justspawned=true --[[ins(old_cams,f.ship.id,f.ship);]] f.ship.shot1=nil; f.ship.shot2=nil; inventory[f.ship.id]={{id=32},{id=49}} end--alerts[f.ship.id]={msgs={},t=0} end
+				end
+		end
 		
 		if s.onbase then
 				local cx,cy=cam.aw/2,cam.ah/2
@@ -1506,15 +1529,15 @@ function create_base(j,minx,maxx,miny,maxy)
 		end
 		end end
 		--cams[j].sx=minx; cams[j].sy=miny
-		local newship={x=rx,y=ry-16,a=pi/2,oldx=rx,oldy=ry-16,hp=30,id=j}
+		local newship={x=rx,y=ry-16,a=pi/2,rx=rx,ry=ry,ra=ra,oldx=rx,oldy=ry-16,hp=30,id=j}
 		pick_up(j,32,true) -- starting weapon 1: Blaster
 		pick_up(j,49,true) -- starting weapon 2: Mine
-		pick_up(j,17,true)
+		--pick_up(j,17,true)
 		--pick_up(j,50,true)
-		pick_up(j,34,true)
-		pick_up(j,34,true)
-		pick_up(j,34,true)
-		pick_up(j,34,true)
+		--pick_up(j,34,true)
+
+		newship.bases={{sx=minx,sy=miny}}
+		
 		return newship
 end
 
