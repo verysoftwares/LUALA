@@ -309,21 +309,21 @@ function clear_ship_trails(j)
 				else pix(x,y,0) end
 		end end
 		]]
-		if boosted(k) then
+		if s.wasmod and #s.wasmod>0 then
 				local points={--{s.x-cos(s.a)*8,s.y-sin(s.a)*8},
 			               {x=s.x+cos(s.a)*4,y=s.y+4*sin(s.a)},
 												      {x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
 												      {x=s.x-cos(s.a+2*pi/3+0.3)*11,y=s.y-sin(s.a+2*pi/3+0.3)*11}}
-				local hyp=math.sqrt(32)
+				local hyp=4.5--math.sqrt(32)
 		
-				for h=0,9-1 do
-				if inventory[k][h] and inventory[k][h].mod and sub(inventory[k][h].mod,1,4)=='core' then
-				local core= tonumber(sub(inventory[k][h].mod,5,5))
+				for g,core in ipairs(s.wasmod) do
+				--if inventory[k][h] and inventory[k][h].mod and sub(inventory[k][h].mod,1,4)=='core' then
+				--local core= tonumber(sub(inventory[k][h].mod,5,5))
 				local pt=points[core]
 				
 				clear_sprite2({oldpos={x=pt.x-4+cos(s.a)*4,y=pt.y-4+sin(s.a)*4}},hyp)
 				
-				end end
+				end
 				
 		end
 		
@@ -1117,12 +1117,12 @@ idtags={
 scrapvals={
 		[32]={40},
 		[17]={20,spawn=19},
-		[34]={50,spawn=51},
+		[34]={30,spawn=51},
 		[49]={35},
 		[50]={55},
 		[19]={10,spawn=21},		
 		[21]={10},
-		[51]={30},
+		[51]={20},
 }
 
 function idtag(id)
@@ -1163,12 +1163,13 @@ function shipdraw(j)
 		end
 		
 		if boosted(k) then
+		s.wasmod={}
 		
 		local points={--{s.x-cos(s.a)*8,s.y-sin(s.a)*8},
 	               {x=s.x+cos(s.a)*4,y=s.y+4*sin(s.a)},
 										      {x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
 										      {x=s.x-cos(s.a+2*pi/3+0.3)*11,y=s.y-sin(s.a+2*pi/3+0.3)*11}}
-		local hyp=math.sqrt(32)
+		local hyp=4.5--math.sqrt(32)
 		local dsx=0
 		if math.abs(s.dx)>0.3 or math.abs(s.dy)>0.3 then
 		dsx=2*8
@@ -1177,6 +1178,7 @@ function shipdraw(j)
 		for h=0,9-1 do
 		if inventory[k][h] and inventory[k][h].mod and sub(inventory[k][h].mod,1,4)=='core' then
 		local core= tonumber(sub(inventory[k][h].mod,5,5))
+		ins(s.wasmod,core)
 		local pt=points[core]
 		local a={x=cos(s.a+pi-pi/4)*hyp,y=sin(s.a+pi-pi/4)*hyp}; local d={x=cos(s.a+pi+pi/4)*hyp,y=sin(s.a+pi+pi/4)*hyp}
 		local b={x=cos(s.a+pi+pi/4)*hyp,y=sin(s.a+pi+pi/4)*hyp}; local e={x=cos(s.a+pi-pi+pi/4)*hyp,y=sin(s.a+pi-pi+pi/4)*hyp}
@@ -1336,9 +1338,9 @@ function UIdraw(j)
 				local id=inventory[j][inventory[j].i].id 
 				inventory[j][inventory[j].i]=nil 
 				local scrapres=scrapvals[id]
-				if scrapres.spawn then inventory[j][inventory[j].i]={id=scrapres.spawn}; alert(j,fmt('Got %s!',idtags[scrapres.spawn][1]),true) end
+				if scrapres.spawn then inventory[j][inventory[j].i]={id=scrapres.spawn}; alert(j,fmt('Salvaged %s!',idtags[scrapres.spawn][1]),true) end
 				scrap[ships[j].id]=scrap[ships[j].id]+scrapres[1]
-				alert(j,fmt('Got %d scrap (%d total).',scrapres[1],scrap[ships[j].id]),true)
+				alert(j,fmt('Got %d scrap. (%d total)',scrapres[1],scrap[ships[j].id]),true)
 				if s.shot1 and s.shot1.invi==inventory[j].i then s.shot1=nil end
 				if s.shot2 and s.shot2.invi==inventory[j].i then s.shot2=nil end 
 				end
@@ -1398,12 +1400,12 @@ function UIdraw(j)
 								print(fmt('C%d',core),cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2+th,12)
 						end
 				end
-				if not s.moved and not (s.shot1 or s.shot2) then
+				if not s.moved and not (s.shot1 and s.shot2) then
 						local tw= print('Select weapons.',0,-6,12,false,1,true)
 						dropshadow('Select weapons.',cam.ax+cx-tw/2,cam.ay+cy-6-8,true)
 						print('Select weapons.',cam.ax+cx-tw/2,cam.ay+cy-6-8,12,false,1,true)
 				end
-				if not s.moved and (s.shot1 or s.shot2) then
+				if not s.moved and (s.shot1 and s.shot2) then
 						local tw= print('Move up to leave base.',0,-6,12,false,1,true)
 						dropshadow('Move up to leave base.',cam.ax+cx-tw/2,cam.ay+cy-6-8,true)
 						print('Move up to leave base.',cam.ax+cx-tw/2,cam.ay+cy-6-8,12,false,1,true)
