@@ -1387,9 +1387,9 @@ function UIdraw(j)
 				local id=inventory[j][inventory[j].i].id 
 				inventory[j][inventory[j].i]=nil 
 				local scrapres=scrapvals[id]
-				if scrapres.spawn then inventory[j][inventory[j].i]={id=scrapres.spawn}; alert(j,fmt('Salvaged %s!',idtags[scrapres.spawn][1]),true) end
 				scrap[ships[j].id]=scrap[ships[j].id]+scrapres[1]
-				alert(j,fmt('Got %d scrap. (%d total)',scrapres[1],scrap[ships[j].id]),true)
+				if scrapres.spawn then inventory[j][inventory[j].i]={id=scrapres.spawn}; alert(j,fmt('Salvaged %s and %d scrap!',idtags[scrapres.spawn][1],scrapres[1]),true)
+				else alert(j,fmt('Got %d scrap. (%d total)',scrapres[1],scrap[ships[j].id]),true) end
 				if s.shot1 and s.shot1.invi==inventory[j].i then s.shot1=nil end
 				if s.shot2 and s.shot2.invi==inventory[j].i then s.shot2=nil end 
 				end
@@ -1688,7 +1688,7 @@ alerts={}
 function alert(j,msg,goodnews)
 		if alerts[j] then 
 		if #alerts[j].msgs==1 and alerts[j].msgs[1].goodnews and goodnews then
-		alerts[j].msgs[1].msg=msg; alerts[j].t=160
+		alerts[j].msgs[1][1]=msg; alerts[j].t=160
 		elseif alerts[j].msgs[#alerts[j].msgs][1]~=msg then 
 		ins(alerts[j].msgs,{msg,goodnews=goodnews}) end
 		else	alerts[j]={msgs={{msg,goodnews=goodnews}},t=160} end
