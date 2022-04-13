@@ -1686,7 +1686,11 @@ end
 alerts={}
 
 function alert(j,msg,goodnews)
-		if alerts[j] then if alerts[j].msgs[#alerts[j].msgs][1]~=msg then ins(alerts[j].msgs,{msg,goodnews=goodnews}) end
+		if alerts[j] then 
+		if #alerts[j].msgs==1 and alerts[j].msgs[1].goodnews and goodnews then
+		alerts[j].msgs[1].msg=msg; alerts[j].t=160
+		elseif alerts[j].msgs[#alerts[j].msgs][1]~=msg then 
+		ins(alerts[j].msgs,{msg,goodnews=goodnews}) end
 		else	alerts[j]={msgs={{msg,goodnews=goodnews}},t=160} end
 end
 
