@@ -314,7 +314,7 @@ function clear_ship_trails(j)
 			               {x=s.x+cos(s.a)*4,y=s.y+4*sin(s.a)},
 												      {x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
 												      {x=s.x-cos(s.a+2*pi/3+0.3)*11,y=s.y-sin(s.a+2*pi/3+0.3)*11}}
-				local hyp=4.5--math.sqrt(32)
+				local hyp=math.sqrt(32)
 		
 				for g,core in ipairs(s.wasmod) do
 				--if inventory[k][h] and inventory[k][h].mod and sub(inventory[k][h].mod,1,4)=='core' then
@@ -324,6 +324,8 @@ function clear_ship_trails(j)
 				clear_sprite2({oldpos={x=pt.x-4+cos(s.a)*4,y=pt.y-4+sin(s.a)*4}},hyp)
 				
 				end
+				
+				s.wasmod=nil
 				
 		end
 		
@@ -1169,12 +1171,12 @@ function shipdraw(j)
 	               {x=s.x+cos(s.a)*4,y=s.y+4*sin(s.a)},
 										      {x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
 										      {x=s.x-cos(s.a+2*pi/3+0.3)*11,y=s.y-sin(s.a+2*pi/3+0.3)*11}}
-		local hyp=4.5--math.sqrt(32)
+		local hyp=math.sqrt(32)
 		local dsx=0
-		if math.abs(s.dx)>0.3 or math.abs(s.dy)>0.3 then
+		if math.abs(s.dx)>0.2 or math.abs(s.dy)>0.2 then
 		dsx=2*8
 		end
-
+		
 		for h=0,9-1 do
 		if inventory[k][h] and inventory[k][h].mod and sub(inventory[k][h].mod,1,4)=='core' then
 		local core= tonumber(sub(inventory[k][h].mod,5,5))
@@ -1224,7 +1226,9 @@ function UIdraw(j)
 		local cam=cams[j]
 
 		local rw=s.hp/30*(cam.aw-8)
-		rect(cam.ax+4,cam.ay+3,rw,2,6)
+		local ry=cam.ay+3
+		if alerts[j] and #alerts[j].msgs>0 then ry=ry+8 end
+		rect(cam.ax+4,ry,rw,2,6)
 		for i=1,2 do
 		if s[fmt('shot%d',i)] then
 		rw=s[fmt('shot%d',i)].nrj/max_nrj(j,i)*((cam.aw-4*3)/2)
