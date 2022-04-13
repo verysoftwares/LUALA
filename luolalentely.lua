@@ -38,24 +38,24 @@ end
 
 function update()
 	--cls(0)
-		for j=1,#ships do
+		for j=1,4 do if ships[j] then
 		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 		clear_ship_trails(j)
-		end
-		for j=1,#ships do
+		end end
+		for j=1,4 do if ships[j] then
 		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 		shipprocess(j)
 		--renderwindow(j)
 		cameraprocess(j)
-		end
+		end end
 
 		clip()
 		environprocess()		
 		
-		for j=1,#ships do
+		for j=1,4 do if ships[j] then
 		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 		shipdraw(j)
-		end
+		end end
 		
 		handle_kills()
 		
@@ -201,7 +201,7 @@ function camerafollow(j,dir)
 end
 
 function handle_kills()
-		for j=#ships,1,-1 do
+		for j=4,1,-1 do if ships[j] then
 				local s=ships[j]
 				if s.gone then 
 				ins(fadeouts,cams[j])
@@ -210,10 +210,12 @@ function handle_kills()
 				
 				loot(j)
 		
+				s.onbase=nil
 				ships[j]=nil; cams[j]=nil;  
-				inventory[j]=nil; if alerts[j] then alerts[j]=nil end
+				inventory[j]=nil; alerts[j]=nil
 				
-				for j2,s2 in ipairs(ships) do
+				for j2=1,4 do if ships[j2] then
+				local s2=ships[j2]
 				local cam=cams[j2]
 				clip(cam.ax,cam.ay,cam.aw,cam.ah)
 				line(cam.ax-cam.x+s.x-cos(s.a)*8,cam.ay-cam.y+s.y-sin(s.a)*8,cam.ax-cam.x+s.x-cos(s.a-2*pi/3-0.3)*11,cam.ay-cam.y+s.y-sin(s.a-2*pi/3-0.3)*11,0)
@@ -226,10 +228,10 @@ function handle_kills()
 								pix(cam.ax+bx-cam.x,cam.ay+by-cam.y,p)
 						end--else pix(cam.ax+bx-cam.x,cam.ay+by-cam.y,0) end
 				end end
-				end
+				end end
 
 				end
-		end
+		end end
 
 		redfade()
 end
@@ -283,7 +285,10 @@ ships={}
 function clear_ship_trails(j)
 		local old_cam=old_cams[j]
 		local cam=cams[j]
-		for k,s in ipairs(ships) do
+		for k=4,1,-1 do if ships[k] then
+		clip(cam.ax,cam.ay,cam.aw,cam.ah)
+
+		local s=ships[k]
 
 		if s.justspawned then
 				renderwindow(k)
@@ -335,7 +340,7 @@ function clear_ship_trails(j)
 				
 		end
 		
-		end
+		end end
 		
 		if alerts[j] then
 				--[[for x=cam.ax,cam.ax+cam.aw-1 do for y=cam.ay,cam.ay+6-1 do
@@ -380,8 +385,9 @@ function shipprocess(j)
 		
 		if autoaim then 
 				local distances={}
-				for j2,s2 in ipairs(ships) do
-						if s2~=s then
+				for j2=4,1,-1 do
+						local s2=ships[j2]
+						if s2 and s2~=s then
 								ins(distances,{s=s2,d=math.sqrt((s.x-s2.x)^2+(s.y-s2.y)^2)})
 						end
 				end
@@ -408,8 +414,9 @@ function shipprocess(j)
 						if id==17 then ins(static,{x=s.x-4,y=s.y-4,id=id,owner=s}) end
 						if id==19 then 
 								local distances={}
-								for j2,s2 in ipairs(ships) do
-										if s2~=s then
+								for j2=4,1,-1 do
+										local s2=ships[j2]
+										if s2 and s2~=s then
 												ins(distances,{s=s2,d=math.sqrt((s.x-s2.x)^2+(s.y-s2.y)^2)})
 										end
 								end
@@ -527,7 +534,7 @@ function environprocess()
 		-- flashing transitions
 		trc=2+(t*0.2)%4
 		if trc>=5 then trc=3 end
-		for j,s in ipairs(ships) do
+		for j=4,1,-1 do if ships[j] then
 		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 
 		if cams[j].x==cams[j].sx then
@@ -568,7 +575,7 @@ function environprocess()
 				pix(cams[j].ax+x-cams[j].x,cams[j].ay+y-cams[j].y,2+(t*0.2)%3)
 			end
 		end end]]
-		end
+		end end
 		clip()
 
 		for i=#static,1,-1 do
@@ -589,7 +596,7 @@ function environprocess()
 												end
 										end
 				
-										for j,s in ipairs(ships) do
+										for j=4,1,-1 do if ships[j] then
 										clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 										if not p then
 												pix(cams[j].ax-cams[j].x+px+lx,cams[j].ay-cams[j].y+py+ly,0)
@@ -598,9 +605,9 @@ function environprocess()
 										if p==2 then p=trc end
 										pix(cams[j].ax-cams[j].x+px+lx,cams[j].ay-cams[j].y+py+ly,p) end
 										--trace('colored pixel')
-										end
-										clip()
-								--end
+										end 
+										--clip()
+								  end
 						end end
 				end
 		end
@@ -609,11 +616,12 @@ function environprocess()
 				if st.id==17 then
 						if t%6==0 then
 								local distances={}
-								for j,s in ipairs(ships) do
+								for j=4,1,-1 do if ships[j] then
+										local s=ships[j]
 										if st.owner~=s then
 												ins(distances,{s=s,d=math.sqrt((st.x-s.x)^2+(st.y+sin(t*0.08)*2.5-s.y)^2)})
 										end
-								end
+								end end
 								table.sort(distances,function(a,b) return a.d<b.d end)
 								if distances[1] and distances[1].d<=140 then
 										local s=distances[1].s
@@ -626,7 +634,8 @@ function environprocess()
 		
 		for i,p in ipairs(powerups) do
 				if p.oldpos then
-				for j,s in ipairs(ships) do
+				for j=4,1,-1 do if ships[j] then
+				local s=ships[j]
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 				for x=0,16 do for y=0,16 do
 						local pox,poy=p.oldpos.x,p.oldpos.y
@@ -638,21 +647,23 @@ function environprocess()
 						if px then pix(cams[j].ax+pox-cams[j].x-8+x,cams[j].ay+poy-cams[j].y-8+y,px)
 						else pix(cams[j].ax+pox-cams[j].x-8+x,cams[j].ay+poy-cams[j].y-8+y,0) end				
 				end end
-				end
+				end end
 				end
 		end
 		for i=#powerups,1,-1 do
 				local p=powerups[i]
-				for j,s in ipairs(ships) do
+				for j=4,1,-1 do if ships[j] then
+				local s=ships[j]
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 				spr(36,cams[j].ax+p.x-8-cams[j].x,cams[j].ay+p.y-8-cams[j].y+sin(t*0.08)*2.5,0,1,0,0,2,2)
 				spr(p.id,cams[j].ax+p.x-4-cams[j].x,cams[j].ay+p.y-4-cams[j].y+sin(t*0.08)*2.5,0)
-				end
+				end end
 				p.oldpos={x=p.x,y=p.y+sin(t*0.08)*2.5}
-				for j,s in ipairs(ships) do
+				for j=1,4 do if ships[j] then
+				local s=ships[j]
 				local inv_full=true
 				for i=1,9 do
-						if not inventory[j][i] then inv_full=false; break end
+						if inventory[j] and not inventory[j][i] then inv_full=false; break end
 				end
 				if not inv_full then 
 
@@ -663,7 +674,8 @@ function environprocess()
 																		{x=s.x-cos(s.a+2*pi/3+0.3)*11,y=s.y-sin(s.a+2*pi/3+0.3)*11}}
 				for k,pt in ipairs(points) do
 				if math.sqrt((pt.x-p.oldpos.x)^2+(pt.y-p.oldpos.y)^2)<=8 then
-				for j2,s2 in ipairs(ships) do
+				for j2=4,1,-1 do if ships[j2] then
+				local s2=ships[j2]
 				clip(cams[j2].ax,cams[j2].ay,cams[j2].aw,cams[j2].ah)
 				for x=0,16 do for y=0,16 do
 						local pox,poy=p.oldpos.x,p.oldpos.y
@@ -675,14 +687,14 @@ function environprocess()
 						if px then pix(cams[j2].ax+pox-cams[j2].x-8+x,cams[j2].ay+poy-cams[j2].y-8+y,px)
 						else pix(cams[j2].ax+pox-cams[j2].x-8+x,cams[j2].ay+poy-cams[j2].y-8+y,0) end
 				end end
-				end
+				end end
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 				pick_up(j,p.id)
 				rem(powerups,i)
 				goto endloop
 				end
 				end
-				end
+				end end
 				
 				end
 				::endloop::
@@ -706,10 +718,10 @@ function environprocess()
 				for lx=0,7 do for ly=0,7 do
 						if sprpix(sh.id,lx,ly)~=0 and is_solid(pixels[posstr(sh.x+lx,sh.y+ly)]) then
 
-								for j,s in ipairs(ships) do
+								for j=4,1,-1 do if ships[j] then
 								clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 								pix(cams[j].ax-cams[j].x+sh.x+lx,cams[j].ay-cams[j].y+sh.y+ly,1)
-								end
+								end end
 								clip()
 								
 								pixels[posstr(sh.x+lx,sh.y+ly)]=1
@@ -717,10 +729,10 @@ function environprocess()
 						end
 				end end
 				if wallhits<=4 or sh.id==50 then
-				for j,s in ipairs(ships) do
+				for j=4,1,-1 do if ships[j] then
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 				spr(sh.id,cams[j].ax+sh.x-cams[j].x,cams[j].ay+sh.y-cams[j].y,0)
-				end
+				end end
 				clip()
 				else rem(shots,i) end--; clear_sprite(sh) end
 		
@@ -738,7 +750,8 @@ function environprocess()
 				local sh=shots[i]
 				if sh.id==32 then
 
-				for j,s in ipairs(ships) do
+				for j=4,1,-1 do if ships[j] then
+			 local s=ships[j]
 				if sh.owner~=s then
 				local points={{x=s.x-cos(s.a)*8,y=s.y-sin(s.a)*8},
 	         								{x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
@@ -753,11 +766,12 @@ function environprocess()
 						end
 				end
 				end
-				end
+				end end
 
 				elseif sh.id==50 then
 
-				for j,s in ipairs(ships) do
+				for j=4,1,-1 do if ships[j] then
+				local s=ships[j]
 				if sh.owner~=s then
 				local points={{x=s.x-cos(s.a)*8,y=s.y-sin(s.a)*8},
 	         								{x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
@@ -774,7 +788,7 @@ function environprocess()
 				end
 				end
 				end
-				end
+				end end
 
 				end
 		end
@@ -791,7 +805,7 @@ function environprocess()
 				lz.x=lz.x+lz.dx; lz.y=lz.y+lz.dy
 				
 				local hyp=7.5
-				for j,s in ipairs(ships) do
+				for j=4,1,-1 do if ships[j] then
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 
 				local a={x=cos(lz.a-pi/4)*hyp,y=sin(lz.a-pi/4)*hyp}; local d={x=cos(lz.a+pi/4)*hyp,y=sin(lz.a+pi/4)*hyp}
@@ -816,9 +830,10 @@ function environprocess()
 											
 											false, 0)
 				--spr(19,cams[j].ax+lz.x-cams[j].x,cams[j].ay+lz.y-cams[j].y,0)
-				end
+				end end
 				lz.oldpos={x=lz.x,y=lz.y}
-				for j,s in ipairs(ships) do
+				for j=4,1,-1 do if ships[j] then
+				local s=ships[j]
 				if lz.owner~=s then
 				local points={{x=s.x-cos(s.a)*8,y=s.y-sin(s.a)*8},
 	         								{x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
@@ -831,7 +846,7 @@ function environprocess()
 						break
 				end
 				end
-				end
+				end end
 		end
 
 		for i=#missiles,1,-1 do
@@ -845,7 +860,7 @@ function environprocess()
 				local ms=missiles[i]
 				ms.x=ms.x+ms.dx; ms.y=ms.y+ms.dy
 				local hyp=7.5
-				for j,s in ipairs(ships) do
+				for j=4,1,-1 do if ships[j] then
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 				local a={x=cos(ms.a-pi/4)*hyp,y=sin(ms.a-pi/4)*hyp}; local d={x=cos(ms.a+pi/4)*hyp,y=sin(ms.a+pi/4)*hyp}
 				local b={x=cos(ms.a+pi/4)*hyp,y=sin(ms.a+pi/4)*hyp}; local e={x=cos(ms.a-pi+pi/4)*hyp,y=sin(ms.a-pi+pi/4)*hyp}
@@ -868,7 +883,7 @@ function environprocess()
 											2*8+7,2*8+7, 
 											
 											false, 0)
-				end
+				end end
 				ms.oldpos={x=ms.x,y=ms.y}
 				
 				if oob(ms.x+4,ms.y+4) then clear_sprite2(ms,hyp); rem(missiles,i); goto endmisl end
@@ -878,7 +893,8 @@ function environprocess()
 						explode(ms); goto endmisl
 				end
 				
-				for j,s in ipairs(ships) do
+				for j=4,1,-1 do if ships[j] then
+				local s=ships[j]
 				if ms.owner~=s then
 				local points={{x=s.x-cos(s.a)*8,y=s.y-sin(s.a)*8},
 	         								{x=s.x-cos(s.a-2*pi/3-0.3)*11,y=s.y-sin(s.a-2*pi/3-0.3)*11},
@@ -892,13 +908,13 @@ function environprocess()
 						goto endmisl
 				end
 				end
-				end
+				end end
 				::endmisl::
 		end
 		
 		for i=#static,1,-1 do
 				local st=static[i]
-				for j,s in ipairs(ships) do
+				for j=4,1,-1 do if ships[j] then
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 				for lx=0,7 do for ly=0,7 do
 				if sprpix(st.id,lx,ly)~=0 then
@@ -925,7 +941,7 @@ function environprocess()
 						end
 				end
 				end end
-				end
+				end end
 				
 				::cleared::
 				
@@ -950,14 +966,15 @@ function environprocess()
 				goto blowup
 				end
 				
-				for j,s in ipairs(ships) do
+				for j=4,1,-1 do if ships[j] then
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 				spr(st.id,cams[j].ax+st.x-cams[j].x,cams[j].ay+st.y-cams[j].y+sin(t*0.08)*2.5,0,1,0,0,1,1)
-				end
+				end end
 
 				st.oldpos={x=st.x,y=st.y+sin(t*0.08)*2.5}
 
-				for j,s in ipairs(ships) do
+				for j=4,1,-1 do if ships[j] then
+				local s=ships[j]
 				--clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 				
 				if st.id==49 and st.iframes==0 then
@@ -974,7 +991,7 @@ function environprocess()
 						explode(st)
 						goto blowup
 				end end
-				end end
+				end end end
 
 				if st.id==49 and st.iframes>0 then st.iframes=st.iframes-1 end
 				
@@ -984,7 +1001,7 @@ function environprocess()
 
 		for i=#explosions,1,-1 do
 				local exp=explosions[i]
-				for j,s in ipairs(ships) do
+				for j=4,1,-1 do if ships[j] then
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 				for x=exp.x-(exp.r+1),exp.x+(exp.r+1)+1 do for y=exp.y-(exp.r+1),exp.y+(exp.r+1)+1 do
 						local p= pixels[posstr(x,y)]
@@ -995,13 +1012,14 @@ function environprocess()
 						if is_solid(p) and math.sqrt((x-exp.x)^2+(y-exp.y)^2)<=exp.r+1 then p=1; pixels[posstr(x,y)]=1 end
 						pix(cams[j].ax-cams[j].x+x,cams[j].ay-cams[j].y+y,p) end
 				end end
-				end
+				end end
 				clip()
 		end
 
-		for j,s in ipairs(ships) do
+		for j=4,1,-1 do if ships[j] then
+				local s=ships[j]
 				s.damaged=nil
-		end
+		end end
 		for i=#explosions,1,-1 do
 				local exp=explosions[i]
 				
@@ -1026,7 +1044,8 @@ function environprocess()
 						end
 				end
 
-				for j,s in ipairs(ships) do
+				for j=4,1,-1 do if ships[j] then
+				local s=ships[j]
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 				circ(cams[j].ax-cams[j].x+exp.x,cams[j].ay-cams[j].y+exp.y,exp.r,4-(60-exp.t)*0.2)
 				local points={{x=s.x,y=s.y},
@@ -1038,7 +1057,7 @@ function environprocess()
 				if not s.damaged and math.sqrt((exp.x-pt.x)^2+(exp.y-pt.y)^2)<=exp.r then
 						dmg(s,0.5); s.damaged=true; break
 				end end
-				end
+				end end
 
 				if exp.r==6 then ins(explosions,{x=exp.x+math.random(-12,12),y=exp.y+math.random(-12,12),t=60,gen=exp.gen+1,r=math.random(12-(exp.gen+1),16-(exp.gen+1))}) end
 				if exp.r==0 then rem(explosions,i) end
@@ -1058,7 +1077,8 @@ end
 function clear_sprite(sh)
 		for lx=0,8 do for ly=0,8 do
 				--if ly==8 or sprpix(sh.id,lx,ly)~=0 then
-						for j,s in ipairs(ships) do
+						for j=4,1,-1 do if ships[j] then
+						local s=ships[j]
 						clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 						local px,py=sh.oldpos.x,sh.oldpos.y
 						-- for precision in flooring negatives
@@ -1071,7 +1091,7 @@ function clear_sprite(sh)
 						else 
 						if p==2 then p=trc end
 						pix(cams[j].ax-cams[j].x+px+lx,cams[j].ay-cams[j].y+py+ly,p) end
-						end
+						end end
 						clip()
 				--end
 		end end
@@ -1079,7 +1099,7 @@ end
 
 -- for textri objects
 function clear_sprite2(ms,hyp)
-		for j,s in ipairs(ships) do
+		for j=4,1,-1 do if ships[j] then
 		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 		if ms.oldpos then 
 		for x=ms.oldpos.x+4-hyp,ms.oldpos.x+4+hyp do for y=ms.oldpos.y+4-hyp,ms.oldpos.y+4+hyp do
@@ -1090,7 +1110,7 @@ function clear_sprite2(ms,hyp)
 				else pix(cams[j].ax+x-cams[j].x,cams[j].ay+y-cams[j].y,0) end
 		end end
 		end
-		end
+		end end
 end
 
 inventory={}
@@ -1146,7 +1166,8 @@ end
 
 function shipdraw(j)
 		local cam=cams[j]
-		for k,s in ipairs(ships) do
+		for k=4,1,-1 do if ships[k] then
+		local s=ships[k]
 		local points={{s.x-cos(s.a)*8,s.y-sin(s.a)*8},
 	               {s.x-cos(s.a-2*pi/3-0.3)*11,s.y-sin(s.a-2*pi/3-0.3)*11},
 										      {s.x+cos(s.a)*4,s.y+4*sin(s.a)},
@@ -1213,7 +1234,7 @@ function shipdraw(j)
 		end
 		end end
 		--pix(cam.ax+s.x-cam.x,cam.ay+s.y-cam.y,2)
-		end
+		end end
 end
 
 function boosted(j)
@@ -1236,7 +1257,7 @@ function UIdraw(j)
 		if alerts[j] and #alerts[j].msgs>0 then ry=ry+8 end
 		rect(cam.ax+4,ry,rw,2,6)
 		for i=1,2 do
-		if s[fmt('shot%d',i)] then
+		if s[fmt('shot%d',i)] and inventory[j] then
 		rw=s[fmt('shot%d',i)].nrj/max_nrj(j,i)*((cam.aw-4*3)/2)
 		rect(cam.ax+4+(i-1)*((cam.aw-4*3)/2+4),cam.ay+cam.ah-1-4,rw,2,1)
 		end
@@ -1283,11 +1304,12 @@ function UIdraw(j)
 						dropshadow(fmt('%d',math.floor((f.t+60)/60)),f.ax+f.aw/2-tw/2,f.ay+f.ah/2+4,false)
 						print(fmt('%d',math.floor((f.t+60)/60)),f.ax+f.aw/2-tw/2,f.ay+f.ah/2+4,12)
 						f.t=f.t-1
-						if f.t==0 then rem(fadeouts,i); f.ship.gone=false; f.ship.hp=30; f.ship.x=f.ship.rx; f.ship.y=f.ship.ry; f.ship.a=f.ship.ra; f.flash=nil; ins(ships,f.ship.id,f.ship); ins(cams,f.ship.id,{x=f.x,y=f.y,sx=f.sx,sy=f.sy,ax=f.ax,ay=f.ay,aw=f.aw,ah=f.ah}); f.ship.justspawned=true --[[ins(old_cams,f.ship.id,f.ship);]] f.ship.shot1=nil; f.ship.shot2=nil; inventory[f.ship.id]={{id=32},{id=49}} end--alerts[f.ship.id]={msgs={},t=0} end
+						if f.t==0 then rem(fadeouts,i); f.ship.gone=false; f.ship.hp=30; f.ship.x=f.ship.rx; f.ship.y=f.ship.ry; f.ship.a=f.ship.ra; f.ship.flash=nil; ships[f.ship.id]=f.ship; cams[f.ship.id]=f; f.ship.justspawned=true --[[ins(old_cams,f.ship.id,f.ship);]] f.ship.shot1=nil; f.ship.shot2=nil; inventory[f.ship.id]={{id=32},{id=49}} end--alerts[f.ship.id]={msgs={},t=0} end
 				end
 		end
 		
 		if s.onbase then
+				clip(cam.ax,cam.ay,cam.aw,cam.ah)
 				local cx,cy=cam.aw/2,cam.ah/2
 				inventory[j].i=inventory[j].i or 1
 
@@ -1449,7 +1471,7 @@ end
 
 pixels={}
 local seed=math.random(120948087)--89828907
-trace(seed)
+trace(fmt('seed=%d',seed))
 
 function load()
 		cls(0)
@@ -1529,7 +1551,7 @@ function create_base(j,minx,maxx,miny,maxy)
 		end
 		end end
 		--cams[j].sx=minx; cams[j].sy=miny
-		local newship={x=rx,y=ry-16,a=pi/2,rx=rx,ry=ry,ra=ra,oldx=rx,oldy=ry-16,hp=30,id=j}
+		local newship={x=rx,y=ry-16,a=pi/2,rx=rx,ry=ry-16,ra=pi/2,oldx=rx,oldy=ry-16,hp=30,id=j}
 		pick_up(j,32,true) -- starting weapon 1: Blaster
 		pick_up(j,49,true) -- starting weapon 2: Mine
 		--pick_up(j,17,true)
@@ -1652,13 +1674,13 @@ function forcetransition(j,s,tx,ty)
 end
 
 function transalert(j)
-		for i,s in ipairs(ships) do
+		for i=4,1,-1 do if ships[i] then
 				if i~=j then
 						if cams[j].sx==cams[i].sx and cams[j].sy==cams[i].sy then
 								alert(i,'Enemy detected nearby!')
 						end
 				end
-		end
+		end end
 end
 
 alerts={}
