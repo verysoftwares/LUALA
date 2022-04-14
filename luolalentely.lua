@@ -55,6 +55,7 @@ function OVR()
 						local tw=print('Bases lost - can\'t respawn!',0,-6,12,false,1,true)
 						dropshadow('Bases lost - can\'t respawn!',f.ax+f.aw/2-tw/2,f.ay+f.ah/2,true)
 						print('Bases lost - can\'t respawn!',f.ax+f.aw/2-tw/2,f.ay+f.ah/2,12,false,1,true)
+						f.ship.gameover=true
 						end
 				end
 		end
@@ -502,6 +503,7 @@ function shipprocess(j)
 				s.oldx=s.x; s.oldy=s.y; s.olda=s.a
 				elseif (not s.onbase) and b.owner~=s then
 				b.cap=b.cap or {}
+				if not b.cap[s.id] then alert(b.owner.id,'Your base is being captured!') end
 				s.cap=b
 				if not b.cap[s.id] then b.cap[s.id]=0
 				-- subtracted 1 every frame 
@@ -575,7 +577,7 @@ function environprocess()
 		for i,b in pairs(bases) do
 				if b.cap then
 				for k,c in pairs(b.cap) do
-						if b.cap[k]>0 then b.cap[k]=b.cap[k]-1 end
+						if b.cap[k]>0 then b.cap[k]=b.cap[k]-1; if b.cap[k]==0 then b.cap[k]=nil end end
 				end
 				end
 		end
@@ -1314,6 +1316,7 @@ function UIdraw(j)
 
 		for i=1,2 do
 		if s[fmt('target%d',i)] then
+				clip(cam.ax,cam.ay,cam.aw,cam.ah)
 				local tgt=s[fmt('target%d',i)]
 				local aim=s[fmt('aim%d',i)]
 				line(cam.ax+s.x+math.cos(aim)*12-cam.x,cam.ay+s.y+math.sin(aim)*12-cam.y,
@@ -1325,6 +1328,7 @@ function UIdraw(j)
 		end
 		
 		if alerts[j] then
+				clip(cam.ax,cam.ay,cam.aw,cam.ah)
 				local c,c2=2,4
 				if alerts[j].t<20 or alerts[j].t>160-20 then c,c2=1,3 end
 				if alerts[j].msgs[1].goodnews then 
@@ -1340,7 +1344,38 @@ function UIdraw(j)
 				if alerts[j].t==0 then rem(alerts[j].msgs,1); if #alerts[j].msgs==0 then alerts[j]=nil else alerts[j].t=160 end end
 		end
 		
-		if s.cap then
+		local win
+		if not s.gameover then
+				win=true
+				for j2=4,1,-1 do
+						local s2=orig_ships[j2]
+						if s2 and s2~=s and not s2.gameover then
+						  win=false; break
+						end
+				end
+		end
+		if win then
+				clip(cam.ax,cam.ay,cam.aw,cam.ah)
+				local scale=3.5
+				local points={{x=-cos(pi/2)*8*scale,y=-sin(pi/2)*8*scale},
+												      {x=-cos(pi/2-2*pi/3-0.3)*11*scale*cos(t*0.04),y=-sin(pi/2-2*pi/3-0.3)*11*scale},
+			               {x=cos(pi/2)*4*scale,y=sin(pi/2)*4*scale},
+												      {x=-cos(pi/2+2*pi/3+0.3)*11*scale*cos((t+pi)*0.04),y=-sin(pi/2+2*pi/3+0.3)*11*scale}}
+				for k,pt in ipairs(points) do
+						if k<#points then line(cam.ax+cam.aw/2+pt.x,cam.ay+cam.ah/2+pt.y,cam.ax+cam.aw/2+points[k+1].x,cam.ay+cam.ah/2+points[k+1].y,t*0.4)
+						else line(cam.ax+cam.aw/2+pt.x,cam.ay+cam.ah/2+pt.y,cam.ax+cam.aw/2+points[1].x,cam.ay+cam.ah/2+points[1].y,t*0.4) end
+				end
+				
+				local cx=0
+				local tw=print('Winner!',0,-6)
+				for c=1,#'Winner!' do
+						dropshadow(sub('Winner!',c,c),cam.ax+cam.aw/2-tw/2+cx,cam.ay+cam.ah/2+sin(c*1.5+t*0.12)*2.5,false)
+						local cw=print(sub('Winner!',c,c),cam.ax+cam.aw/2-tw/2+cx,cam.ay+cam.ah/2+sin(c*1.5+t*0.12)*2.5,7.9-(t*0.1)%4)
+						cx=cx+cw
+				end
+		end
+		
+		if s.cap and s.cap.cap[s.id] then
 				clip(cam.ax,cam.ay,cam.aw,cam.ah)
 				
 				local tw=print('Capturing base...',0,-6,12,false,1,true)
@@ -1529,6 +1564,9 @@ function load()
 				if players>=2 then ships[2]=create_base(2,240,240*2-1,136,136*2-1) end
 				if players>=3 then ships[3]=create_base(3,240,240*2-1,0,136-1) end
 				if players>=4 then ships[4]=create_base(4,0,240-1,136,136*2-1) end
+				
+				orig_ships={}
+				for j=1,4 do if ships[j] then orig_ships[j]=ships[j] end end
 
 				for j=1,4 do
 				if j>players then break end
