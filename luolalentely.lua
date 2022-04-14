@@ -25,6 +25,8 @@ scrap={0,0,0,0}
 
 fadeouts={}
 
+tutor={{},{},{},{}}
+
 function OVR()
 		if TIC==update then
 
@@ -394,7 +396,7 @@ function shipprocess(j)
 
 		--s.oldx=s.x; s.oldy=s.y		
 		s.dx=0; s.dy=0; s.da=0
-		if btn((s.id-1)*8) then s.x=s.x-cos(s.a); s.y=s.y-sin(s.a); s.dx=-cos(s.a); s.dy=-sin(s.a); s.moved=true end
+		if btn((s.id-1)*8) then s.x=s.x-cos(s.a); s.y=s.y-sin(s.a); s.dx=-cos(s.a); s.dy=-sin(s.a); tutor[s.id].moved=true end
 		if btn((s.id-1)*8+1) then s.x=s.x+cos(s.a); s.y=s.y+sin(s.a); s.dx=cos(s.a); s.dy=sin(s.a) end
 		if btn((s.id-1)*8+2) and (not s.onbase or btn((s.id-1)*8) or btn((s.id-1)*8+1)) then s.a=s.a-0.1; s.da=-0.1 end
 		if btn((s.id-1)*8+3) and (not s.onbase or btn((s.id-1)*8) or btn((s.id-1)*8+1)) then s.a=s.a+0.1; s.da=0.1 end
@@ -1328,7 +1330,7 @@ function UIdraw(j)
 		end
 
 		local win
-		if not s.gameover then
+		if not s.gameover and players>1 then
 				win=true
 				for j2=4,1,-1 do
 						local s2=orig_ships[j2]
@@ -1408,13 +1410,14 @@ function UIdraw(j)
 								end
 						else
 								if keymap[j] and keymap[j][(s.id-1)+i]==1 then
-										if i==2 then 
+										if i==2 then
+										tutor[s.id].scrolled=true 
 										if btn((s.id-1)*8+4) then
 										scrapping=true; keymap[j][(s.id-1)*8+4]=2
 										else inventory[j].i=inventory[j].i-1; if inventory[j].i<1 then inventory[j].i=actuallen(inventory[j]); if inventory[j].i<1 then inventory[j].i=1 end end 
 										end
 										end
-										if i==3 then inventory[j].i=inventory[j].i+1; if inventory[j].i>actuallen(inventory[j]) then inventory[j].i=1 end end
+										if i==3 then tutor[s.id].scrolled=true; inventory[j].i=inventory[j].i+1; if inventory[j].i>actuallen(inventory[j]) then inventory[j].i=1 end end
 										if i==4 then
 										if btn((s.id-1)*8+2) then
 										scrapping=true; keymap[j][(s.id-1)*8+2]=2
@@ -1462,11 +1465,12 @@ function UIdraw(j)
 						end
 				end
 				if scrapping and inventory[j][inventory[j].i] then
+				tutor[s.id].scrapped=true
 				local id=inventory[j][inventory[j].i].id 
 				inventory[j][inventory[j].i]=nil 
 				local scrapres=scrapvals[id]
 				scrap[ships[j].id]=scrap[ships[j].id]+scrapres[1]
-				if scrapres.spawn then inventory[j][inventory[j].i]={id=scrapres.spawn}; alert(j,fmt('Salvaged %s and %d scrap!',idtags[scrapres.spawn][1],scrapres[1]),true)
+				if scrapres.spawn then inventory[j][inventory[j].i]={id=scrapres.spawn}; alert(j,fmt('Salvaged %s & %d scrap!',idtags[scrapres.spawn][1],scrapres[1]),true)
 				else alert(j,fmt('Got %d scrap. (%d total)',scrapres[1],scrap[ships[j].id]),true) end
 				if s.shot1 and s.shot1.invi==inventory[j].i then s.shot1=nil end
 				if s.shot2 and s.shot2.invi==inventory[j].i then s.shot2=nil end 
@@ -1527,17 +1531,59 @@ function UIdraw(j)
 								print(fmt('C%d',core),cam.ax+cx-6*9+i*12+1,cam.ay+cy-6+12+2+th,12)
 						end
 				end
-				if not s.moved and not (s.shot1 and s.shot2) then
+				if not tutor[s.id].moved and not (s.shot1 and s.shot2) then
 						local tw= print('Select weapons.',0,-6,12,false,1,true)
 						dropshadow('Select weapons.',cam.ax+cx-tw/2,cam.ay+cy-6-8,true)
 						print('Select weapons.',cam.ax+cx-tw/2,cam.ay+cy-6-8,12,false,1,true)
 				end
-				if not s.moved and (s.shot1 and s.shot2) then
+				if not tutor[s.id].moved and (s.shot1 and s.shot2) then
 						local tw= print('Move up to leave base.',0,-6,12,false,1,true)
 						dropshadow('Move up to leave base.',cam.ax+cx-tw/2,cam.ay+cy-6-8,true)
 						print('Move up to leave base.',cam.ax+cx-tw/2,cam.ay+cy-6-8,12,false,1,true)
 				end
+				if not tutor[s.id].moved or (not s.shot1 or not s.shot2) then
+						if not tutor[s.id].scrolled then
+						local tw=gfxprint('{29}/{30}: scroll',0,-7,12,true)
+						gfxprint('{29}/{30}: scroll',cam.ax+cx-tw/2,cam.ay+cy+12+2+8+2,12,true)
+						else
+						local msg=''
+						if not s.shot1 then
+								msg=msg..'{11}: set Shot1'
+								if not s.shot2 then msg=msg..', ' end
+						end
+						if not s.shot2 then
+								msg=msg..'{12}: set Shot2'
+						end
+						local tw=gfxprint(msg,0,-7,12,true)
+						gfxprint(msg,cam.ax+cx-tw/2,cam.ay+cy+12+2+8+2,12,true)
+						end
+				end
+				if not tutor[s.id].scrapped and tutor[s.id].scrolled and s.shot1 and s.shot2 and actuallen(inventory[j])>2 then
+						local tw=gfxprint('{11}+{29}: scrap weapon',0,-7,12,true)
+						gfxprint('{11}+{29}: scrap weapon',cam.ax+cx-tw/2,cam.ay+cy+12+2+8+2,12,true)
+				end
 		end
+end
+
+function gfxprint(msg,x,y,c,smallfont)
+		local i=1
+		local tw=0
+		while i<=#msg do
+				local char=sub(msg,i,i)
+				if char=='{' then
+				local c2=string.find(msg,'}',i)
+				local sp=tonumber(sub(msg,i+1,c2-1))
+				spr(sp,x+tw,y-1,0)
+				tw=tw+8+1
+				i=c2+1
+				else
+				dropshadow(char,x+tw,y,smallfont)
+				print(char,x+tw,y,12,false,1,smallfont)
+				tw=tw+print(char,0,-6,12,false,1,smallfont)
+				i=i+1
+				end
+		end
+		return tw
 end
 
 function dropshadow(msg,x,y,smallfont)
