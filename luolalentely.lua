@@ -523,7 +523,7 @@ function shipprocess(j)
 				s.cap=b
 				if not b.cap[s.id] then b.cap[s.id]=0
 				-- subtracted 1 every frame 
-				else b.cap[s.id]=b.cap[s.id]+2; if b.cap[s.id]>=60*8+1 then alert(j,fmt('Captured! Looted %d scrap.',scrap[b.owner.id]),true); scrap[s.id]=scrap[s.id]+scrap[b.owner.id]; scrap[b.owner.id]=0; b.owner=s; b.cap[s.id]=nil end end
+				else b.cap[s.id]=b.cap[s.id]+2; if b.cap[s.id]>=60*8+1 then if scrap[b.owner.id]>0 then alert(j,fmt('Captured! Looted %d scrap.',scrap[b.owner.id]),true) else alert(j,'Captured!',true) end; scrap[s.id]=scrap[s.id]+scrap[b.owner.id]; scrap[b.owner.id]=0; b.owner=s; b.cap[s.id]=nil end end
 				end
 				end
 				break
@@ -1704,10 +1704,7 @@ function create_base(j,minx,maxx,miny,maxy)
 		pick_up(j,49,true) -- starting weapon 2: Mine
 		--pick_up(j,17,true)
 		--pick_up(j,50,true)
-		pick_up(j,34,true)
-pick_up(j,34,true)
-pick_up(j,34,true)
-pick_up(j,34,true)
+		--pick_up(j,34,true)
 
 		--newship.bases={{sx=minx,sy=miny}}
 		bases[posstr(minx,miny)]={rx=rx,ry=ry-16,owner=newship}
