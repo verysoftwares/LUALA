@@ -1449,6 +1449,7 @@ function UIdraw(j)
 														if k==9-1 then core=c end
 												end end end
 												if core then
+														if core==3 then alert(j,'You now have max Thrusters.') end
 														inventory[j][inventory[j].i].mod=fmt('core%d',core)
 												end
 												end
@@ -1469,6 +1470,7 @@ function UIdraw(j)
 														if k==9-1 then core=c end
 												end end end
 												if core then
+														if core==3 then alert(j,'You now have max Thrusters.') end
 														inventory[j][inventory[j].i].mod=fmt('core%d',core)
 												end
 												end
@@ -1702,7 +1704,10 @@ function create_base(j,minx,maxx,miny,maxy)
 		pick_up(j,49,true) -- starting weapon 2: Mine
 		--pick_up(j,17,true)
 		--pick_up(j,50,true)
-		--pick_up(j,34,true)
+		pick_up(j,34,true)
+pick_up(j,34,true)
+pick_up(j,34,true)
+pick_up(j,34,true)
 
 		--newship.bases={{sx=minx,sy=miny}}
 		bases[posstr(minx,miny)]={rx=rx,ry=ry-16,owner=newship}
