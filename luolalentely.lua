@@ -1537,11 +1537,12 @@ function UIdraw(j)
 						print('Select weapons.',cam.ax+cx-tw/2,cam.ay+cy-6-8,12,false,1,true)
 				end
 				if not tutor[s.id].moved and (s.shot1 and s.shot2) then
+						tutor[s.id].shot=true
 						local tw= print('Move up to leave base.',0,-6,12,false,1,true)
 						dropshadow('Move up to leave base.',cam.ax+cx-tw/2,cam.ay+cy-6-8,true)
 						print('Move up to leave base.',cam.ax+cx-tw/2,cam.ay+cy-6-8,12,false,1,true)
 				end
-				if not tutor[s.id].moved or (not s.shot1 or not s.shot2) then
+				if not tutor[s.id].moved or not tutor[s.id].shot then
 						if not tutor[s.id].scrolled then
 						local tw=gfxprint('{29}/{30}: scroll',0,-7,12,true)
 						gfxprint('{29}/{30}: scroll',cam.ax+cx-tw/2,cam.ay+cy+12+2+8+2,12,true)
