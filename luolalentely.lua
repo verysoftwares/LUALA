@@ -46,9 +46,9 @@ function OVR()
 						local tw=print('Respawn in',0,-6,12,false,1,true)
 						dropshadow('Respawn in',f.ax+f.aw/2-tw/2,f.ay+f.ah/2-4,true)
 						print('Respawn in',f.ax+f.aw/2-tw/2,f.ay+f.ah/2-4,12,false,1,true)
-						local tw=print(fmt('%d',math.floor((f.t+60)/60)),0,-6,12)
-						dropshadow(fmt('%d',math.floor((f.t+60)/60)),f.ax+f.aw/2-tw/2,f.ay+f.ah/2+4,false)
-						print(fmt('%d',math.floor((f.t+60)/60)),f.ax+f.aw/2-tw/2,f.ay+f.ah/2+4,12)
+						local tw=print(fmt('%d',math.floor((f.t+60-1)/60)),0,-6,12)
+						dropshadow(fmt('%d',math.floor((f.t+60-1)/60)),f.ax+f.aw/2-tw/2,f.ay+f.ah/2+4,false)
+						print(fmt('%d',math.floor((f.t+60-1)/60)),f.ax+f.aw/2-tw/2,f.ay+f.ah/2+4,12)
 						f.t=f.t-1
 						if f.t==0 then base=avail[math.random(#avail)]; local bx,by=strpos(base); base=bases[base]; rem(fadeouts,i); f.t=nil; f.ship.gone=false; f.ship.hp=30; f.ship.x=base.rx; f.ship.y=base.ry; f.ship.a=pi/2; f.ship.flash=nil; ships[f.ship.id]=f.ship; cams[f.ship.id]=f; f.ship.justspawned=true; f.sx=bx; f.sy=by --[[ins(old_cams,f.ship.id,f.ship);]] f.ship.shot1=nil; f.ship.shot2=nil; inventory[f.ship.id]={{id=32},{id=49}} end--alerts[f.ship.id]={msgs={},t=0} end
 						else
