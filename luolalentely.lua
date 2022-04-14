@@ -397,7 +397,7 @@ function shipprocess(j)
 		--s.oldx=s.x; s.oldy=s.y
 		local spd=1
 		for i=0,9-1 do 
-				if inventory[j][i] and inventory[j][i].mod and sub(inventory[j][i].mod,1,4)=='core' then
+				if inventory[j][i] and inventory[j][i].id==51 then
 				  spd=spd+0.5
 				end
 		end
