@@ -505,7 +505,15 @@ function shipprocess(j)
 		if hit==5 or hit==6 or hit==7 or hit==12 then
 				if not is_sprite(v[1],v[2]) then
 				s.y=s.y-s.dy; s.x=s.x-s.dx; s.a=s.a-s.da
-				local b=bases[posstr(cam.sx,cam.sy)]
+				--local b=bases[posstr(cam.sx,cam.sy)]
+				--if b and AABB(b.rx-12,b.ry+10,24,6,v[1],v[2],1,1) then
+				local b
+				for k,base in pairs(bases) do
+						if AABB(base.rx-12,base.ry+10,24,6,v[1],v[2],1,1) then
+								b=base; break
+						end
+				end
+				if b then
 				if (not s.onbase) and b.owner==s then
 				s.onbase=t
 				s.oldx=s.x; s.oldy=s.y; s.olda=s.a
@@ -516,6 +524,7 @@ function shipprocess(j)
 				if not b.cap[s.id] then b.cap[s.id]=0
 				-- subtracted 1 every frame 
 				else b.cap[s.id]=b.cap[s.id]+2; if b.cap[s.id]>=60*8+1 then alert(j,fmt('Captured! Looted %d scrap.',scrap[b.owner.id]),true); scrap[s.id]=scrap[s.id]+scrap[b.owner.id]; scrap[b.owner.id]=0; b.owner=s; b.cap[s.id]=nil end end
+				end
 				end
 				break
 				end
