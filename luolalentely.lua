@@ -519,7 +519,7 @@ function shipprocess(j)
 				s.oldx=s.x; s.oldy=s.y; s.olda=s.a
 				elseif (not s.onbase) and b.owner~=s then
 				b.cap=b.cap or {}
-				if not b.cap[s.id] then alert(b.owner.id,'Your base is being captured!') end
+				if not s.lastcap then alert(b.owner.id,'Your base is being captured!') end
 				s.cap=b
 				if not b.cap[s.id] then b.cap[s.id]=0
 				-- subtracted 1 every frame 
@@ -529,8 +529,9 @@ function shipprocess(j)
 				break
 				end
 		end
-	
+
 		end
+		s.lastcap=s.cap	
 		
 		if s.onbase then 
 				if (t-s.onbase)%4==0 then
