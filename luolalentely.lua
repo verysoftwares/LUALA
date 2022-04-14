@@ -115,14 +115,14 @@ function cameraprocess(j)
 end
 
 function nudgewindow(j,dx,dy)
-		if not (dx==-2 or dx==2 or dx==0) or not (dy==1 or dy==-1 or dy==0 or dy==-2) then
-		trace(fmt('%d,%d',dx,dy))
-		end
-		if dx==-2 then
+		--if not (dx==-2 or dx==2 or dx==0) or not (dy==1 or dy==-1 or dy==0 or dy==-2) then
+		--trace(fmt('%d,%d',dx,dy))
+		--end
+		if dx<0 then
 				for i=0,cams[j].ah-1 do
-						memcpy((cams[j].ay+i)*120+cams[j].ax/2,(cams[j].ay+i)*120+cams[j].ax/2+1,cams[j].aw/2-1)
+						memcpy((cams[j].ay+i)*120+cams[j].ax/2,(cams[j].ay+i)*120+cams[j].ax/2-dx/2,cams[j].aw/2+dx/2)
 				end
-				for x=cams[j].aw-2,cams[j].aw-1 do
+				for x=cams[j].aw+dx,cams[j].aw-1 do
 				for y=0,cams[j].ah-1 do
 						local p= pixels[posstr(cams[j].x+x,cams[j].y+y)]
 						if p then pix(cams[j].ax+x,cams[j].ay+y,p)
@@ -130,11 +130,11 @@ function nudgewindow(j,dx,dy)
 				end
 				end
 		end
-		if dx==2 then
+		if dx>0 then
 				for i=0,cams[j].ah-1 do
-						memcpy((cams[j].ay+i)*120+cams[j].ax/2+1,(cams[j].ay+i)*120+cams[j].ax/2,cams[j].aw/2-1)
+						memcpy((cams[j].ay+i)*120+cams[j].ax/2+dx/2,(cams[j].ay+i)*120+cams[j].ax/2,cams[j].aw/2-dx/2)
 				end
-				for x=0,1 do
+				for x=0,dx-1 do
 				for y=0,cams[j].ah-1 do
 						local p= pixels[posstr(cams[j].x+x,cams[j].y+y)]
 						if p then pix(cams[j].ax+x,cams[j].ay+y,p)
@@ -142,7 +142,7 @@ function nudgewindow(j,dx,dy)
 				end
 				end
 		end
-		if dy==-1 or dy==-2 then
+		if dy<0 then
 				for i=-dy,cams[j].ah-1 do
 						memcpy((cams[j].ay+i+dy)*120+cams[j].ax/2,(cams[j].ay+i)*120+cams[j].ax/2,cams[j].aw/2)
 				end
@@ -154,12 +154,12 @@ function nudgewindow(j,dx,dy)
 				end
 				end
 		end
-		if dy==1 then
-				for i=cams[j].ah-2,0,-1 do
-						memcpy((cams[j].ay+i+1)*120+cams[j].ax/2,(cams[j].ay+i)*120+cams[j].ax/2,cams[j].aw/2)
+		if dy>0 then
+				for i=cams[j].ah-1-dy,0,-1 do
+						memcpy((cams[j].ay+i+dy)*120+cams[j].ax/2,(cams[j].ay+i)*120+cams[j].ax/2,cams[j].aw/2)
 				end
 				for x=0,cams[j].aw-1 do
-				for y=0,0 do
+				for y=0,dy-1 do
 						local p= pixels[posstr(cams[j].x+x,cams[j].y+y)]
 						if p then pix(cams[j].ax+x,cams[j].ay+y,p)
 						else pix(cams[j].ax+x,cams[j].ay+y,0) end
@@ -394,10 +394,16 @@ function shipprocess(j)
 		local cam=cams[j]
 		local old_cam=old_cams[j]
 
-		--s.oldx=s.x; s.oldy=s.y		
+		--s.oldx=s.x; s.oldy=s.y
+		local spd=1
+		for i=0,9-1 do 
+				if inventory[j][i] and inventory[j][i].mod and sub(inventory[j][i].mod,1,4)=='core' then
+				  spd=spd+0.5
+				end
+		end
 		s.dx=0; s.dy=0; s.da=0
-		if btn((s.id-1)*8) then s.x=s.x-cos(s.a); s.y=s.y-sin(s.a); s.dx=-cos(s.a); s.dy=-sin(s.a); tutor[s.id].moved=true end
-		if btn((s.id-1)*8+1) then s.x=s.x+cos(s.a); s.y=s.y+sin(s.a); s.dx=cos(s.a); s.dy=sin(s.a) end
+		if btn((s.id-1)*8) then s.x=s.x-cos(s.a)*spd; s.y=s.y-sin(s.a)*spd; s.dx=-cos(s.a)*spd; s.dy=-sin(s.a)*spd; tutor[s.id].moved=true end
+		if btn((s.id-1)*8+1) then s.x=s.x+cos(s.a)*spd; s.y=s.y+sin(s.a)*spd; s.dx=cos(s.a)*spd; s.dy=sin(s.a)*spd end
 		if btn((s.id-1)*8+2) and (not s.onbase or btn((s.id-1)*8) or btn((s.id-1)*8+1)) then s.a=s.a-0.1; s.da=-0.1 end
 		if btn((s.id-1)*8+3) and (not s.onbase or btn((s.id-1)*8) or btn((s.id-1)*8+1)) then s.a=s.a+0.1; s.da=0.1 end
 		-- shot1 and shot2
@@ -1470,7 +1476,7 @@ function UIdraw(j)
 				inventory[j][inventory[j].i]=nil 
 				local scrapres=scrapvals[id]
 				scrap[ships[j].id]=scrap[ships[j].id]+scrapres[1]
-				if scrapres.spawn then inventory[j][inventory[j].i]={id=scrapres.spawn}; alert(j,fmt('Salvaged %s & %d scrap!',idtags[scrapres.spawn][1],scrapres[1]),true)
+				if scrapres.spawn then inventory[j][inventory[j].i]={id=scrapres.spawn}; alert(j,fmt('Salvaged %s + %d scrap!',idtags[scrapres.spawn][1],scrapres[1]),true)
 				else alert(j,fmt('Got %d scrap. (%d total)',scrapres[1],scrap[ships[j].id]),true) end
 				if s.shot1 and s.shot1.invi==inventory[j].i then s.shot1=nil end
 				if s.shot2 and s.shot2.invi==inventory[j].i then s.shot2=nil end 
