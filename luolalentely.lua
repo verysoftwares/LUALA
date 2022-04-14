@@ -27,6 +27,38 @@ fadeouts={}
 
 function OVR()
 		if TIC==update then
+
+		for i=#fadeouts,1,-1 do
+				local f=fadeouts[i]
+				clip(f.ax,f.ay,f.aw,f.ah)
+				
+				if f.prog>=f.ah then
+						f.t=f.t or 60*10
+
+						local base=nil
+						local avail={}
+						for k,b in pairs(bases) do
+								if b.owner==s then
+										ins(avail,b)
+								end
+						end
+						if #avail>0 then 
+						local tw=print('Respawn in',0,-6,12,false,1,true)
+						dropshadow('Respawn in',f.ax+f.aw/2-tw/2,f.ay+f.ah/2-4,true)
+						print('Respawn in',f.ax+f.aw/2-tw/2,f.ay+f.ah/2-4,12,false,1,true)
+						local tw=print(fmt('%d',math.floor((f.t+60)/60)),0,-6,12)
+						dropshadow(fmt('%d',math.floor((f.t+60)/60)),f.ax+f.aw/2-tw/2,f.ay+f.ah/2+4,false)
+						print(fmt('%d',math.floor((f.t+60)/60)),f.ax+f.aw/2-tw/2,f.ay+f.ah/2+4,12)
+						f.t=f.t-1
+						if f.t==0 then base=avail[math.random(#avail)]; rem(fadeouts,i); f.ship.gone=false; f.ship.hp=30; f.ship.x=base.rx; f.ship.y=base.ry; f.ship.a=pi/2; f.ship.flash=nil; ships[f.ship.id]=f.ship; cams[f.ship.id]=f; f.ship.justspawned=true --[[ins(old_cams,f.ship.id,f.ship);]] f.ship.shot1=nil; f.ship.shot2=nil; inventory[f.ship.id]={{id=32},{id=49}} end--alerts[f.ship.id]={msgs={},t=0} end
+						else
+						local tw=print('Bases lost - can\'t respawn!',0,-6,12,false,1,true)
+						dropshadow('Bases lost - can\'t respawn!',f.ax+f.aw/2-tw/2,f.ay+f.ah/2,true)
+						print('Bases lost - can\'t respawn!',f.ax+f.aw/2-tw/2,f.ay+f.ah/2,12,false,1,true)
+						end
+				end
+		end
+
 		for j=1,4 do
 		if ships[j] then
 		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
@@ -285,15 +317,16 @@ ships={}
 function clear_ship_trails(j)
 		local old_cam=old_cams[j]
 		local cam=cams[j]
+
+		if ships[j].justspawned then
+				renderwindow(j)
+				ships[j].justspawned=nil
+		end
+
 		for k=4,1,-1 do if ships[k] then
 		clip(cam.ax,cam.ay,cam.aw,cam.ah)
 
 		local s=ships[k]
-
-		if s.justspawned then
-				renderwindow(k)
-				s.justspawned=nil
-		end
 
 		if not s.trans then
 		line(cam.ax-cam.x+s.x-cos(s.a)*8,cam.ay-cam.y+s.y-sin(s.a)*8,cam.ax-cam.x+s.x-cos(s.a-2*pi/3-0.3)*11,cam.ay-cam.y+s.y-sin(s.a-2*pi/3-0.3)*11,0)
@@ -456,15 +489,23 @@ function shipprocess(j)
 		              {s.x-cos(s.a-2*pi/3-0.3)*11,s.y-sin(s.a-2*pi/3-0.3)*11},
 																--{-cam.sx+x+cos(a)*4,-cam.sy+y+4*sin(a)},
 																{s.x-cos(s.a+2*pi/3+0.3)*11,s.y-sin(s.a+2*pi/3+0.3)*11}}	
+		s.cap=nil
 		for i,v in ipairs(points) do
 		-- base
 		local hit=pix(cam.ax+v[1]-cam.x,cam.ay+v[2]-cam.y)
 		if hit==5 or hit==6 or hit==7 or hit==12 then
 				if not is_sprite(v[1],v[2]) then
 				s.y=s.y-s.dy; s.x=s.x-s.dx; s.a=s.a-s.da
-				if not s.onbase then
+				local b=bases[posstr(cam.sx,cam.sy)]
+				if (not s.onbase) and b.owner==s then
 				s.onbase=t
 				s.oldx=s.x; s.oldy=s.y; s.olda=s.a
+				elseif (not s.onbase) and b.owner~=s then
+				b.cap=b.cap or {}
+				s.cap=b
+				if not b.cap[s.id] then b.cap[s.id]=0
+				-- subtracted 1 every frame 
+				else b.cap[s.id]=b.cap[s.id]+2; if b.cap[s.id]>=60*8+1 then alert(j,fmt('Captured! Looted %d scrap.',scrap[b.owner.id]),true); scrap[s.id]=scrap[s.id]+scrap[b.owner.id]; scrap[b.owner.id]=0; b.owner=s end end
 				end
 				break
 				end
@@ -486,7 +527,7 @@ function shipprocess(j)
 				s.hp=s.hp+1
 				if s.hp>30 then s.hp=30 end
 				end
-				if math.floor(s.oldy)~=math.floor(s.y) or math.floor(s.oldx)~=math.floor(s.x) or s.a~=s.olda then
+				if bases[posstr(cam.sx,cam.sy)].owner~=s or math.floor(s.oldy)~=math.floor(s.y) or math.floor(s.oldx)~=math.floor(s.x) or s.a~=s.olda then
 						s.onbase=nil
 				end
 		end
@@ -529,6 +570,14 @@ end
 function environprocess()
 		while #powerups<5 do
 				create_powerup(0,240*2-1,0,136*2-1)
+		end
+		
+		for i,b in pairs(bases) do
+				if b.cap then
+				for k,c in pairs(b.cap) do
+						if b.cap[k]>0 then b.cap[k]=b.cap[k]-1 end
+				end
+				end
 		end
 		
 		-- flashing transitions
@@ -1290,25 +1339,19 @@ function UIdraw(j)
 				alerts[j].t=alerts[j].t-1
 				if alerts[j].t==0 then rem(alerts[j].msgs,1); if #alerts[j].msgs==0 then alerts[j]=nil else alerts[j].t=160 end end
 		end
-
-		for i=#fadeouts,1,-1 do
-				local f=fadeouts[i]
-				clip(f.ax,f.ay,f.aw,f.ah)
+		
+		if s.cap then
+				clip(cam.ax,cam.ay,cam.aw,cam.ah)
 				
-				if f.prog>=f.ah then
-						f.t=f.t or 60*10
-						local tw=print('Respawn in',0,-6,12,false,1,true)
-						dropshadow('Respawn in',f.ax+f.aw/2-tw/2,f.ay+f.ah/2-4,true)
-						print('Respawn in',f.ax+f.aw/2-tw/2,f.ay+f.ah/2-4,12,false,1,true)
-						local tw=print(fmt('%d',math.floor((f.t+60)/60)),0,-6,12)
-						dropshadow(fmt('%d',math.floor((f.t+60)/60)),f.ax+f.aw/2-tw/2,f.ay+f.ah/2+4,false)
-						print(fmt('%d',math.floor((f.t+60)/60)),f.ax+f.aw/2-tw/2,f.ay+f.ah/2+4,12)
-						f.t=f.t-1
-						if f.t==0 then rem(fadeouts,i); f.ship.gone=false; f.ship.hp=30; f.ship.x=f.ship.rx; f.ship.y=f.ship.ry; f.ship.a=f.ship.ra; f.ship.flash=nil; ships[f.ship.id]=f.ship; cams[f.ship.id]=f; f.ship.justspawned=true --[[ins(old_cams,f.ship.id,f.ship);]] f.ship.shot1=nil; f.ship.shot2=nil; inventory[f.ship.id]={{id=32},{id=49}} end--alerts[f.ship.id]={msgs={},t=0} end
-				end
+				local tw=print('Capturing base...',0,-6,12,false,1,true)
+				dropshadow('Capturing base...',cam.ax+cam.aw/2-tw/2,cam.ay+cam.ah/2-4,true)
+				print('Capturing base...',cam.ax+cam.aw/2-tw/2,cam.ay+cam.ah/2-4,12,false,1,true)
+				
+				rect(cam.ax+4,cam.ay+cam.ah/2+4,s.cap.cap[s.id]/(60*8)*(cam.aw-8),2,9)
 		end
 		
 		if s.onbase then
+		
 				clip(cam.ax,cam.ay,cam.aw,cam.ah)
 				local cx,cy=cam.aw/2,cam.ah/2
 				inventory[j].i=inventory[j].i or 1
@@ -1532,6 +1575,8 @@ function load()
 		rect(10,136/2,py/(136*2-1)*(240-20),8,6)
 end
 
+bases={}
+
 function create_base(j,minx,maxx,miny,maxy)
 		--cls(0)
 		local rx,ry=math.random(minx,maxx),math.random(miny,maxy)
@@ -1551,14 +1596,15 @@ function create_base(j,minx,maxx,miny,maxy)
 		end
 		end end
 		--cams[j].sx=minx; cams[j].sy=miny
-		local newship={x=rx,y=ry-16,a=pi/2,rx=rx,ry=ry-16,ra=pi/2,oldx=rx,oldy=ry-16,hp=30,id=j}
+		local newship={x=rx,y=ry-16,a=pi/2,oldx=rx,oldy=ry-16,hp=30,id=j}
 		pick_up(j,32,true) -- starting weapon 1: Blaster
 		pick_up(j,49,true) -- starting weapon 2: Mine
 		--pick_up(j,17,true)
 		--pick_up(j,50,true)
 		--pick_up(j,34,true)
 
-		newship.bases={{sx=minx,sy=miny}}
+		--newship.bases={{sx=minx,sy=miny}}
+		bases[posstr(minx,miny)]={rx=rx,ry=ry-16,owner=newship}
 		
 		return newship
 end
