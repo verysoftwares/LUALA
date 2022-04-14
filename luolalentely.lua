@@ -1326,24 +1326,7 @@ function UIdraw(j)
 				spr(70,cam.ax+tgt.x-8-cam.x,cam.ay+tgt.y-8-cam.y,0,1,0,0,2,2)
 		end
 		end
-		
-		if alerts[j] then
-				clip(cam.ax,cam.ay,cam.aw,cam.ah)
-				local c,c2=2,4
-				if alerts[j].t<20 or alerts[j].t>160-20 then c,c2=1,3 end
-				if alerts[j].msgs[1].goodnews then 
-				c,c2=6,4
-				if alerts[j].t<20 or alerts[j].t>160-20 then c,c2=7,5 end
-				end
-				
-				rect(cam.ax,cam.ay,cam.aw,8,c)
-				local tw=print(alerts[j].msgs[1][1],0,-6,c2,false,1,true)
-				print(alerts[j].msgs[1][1],cam.ax+cam.aw/2-tw/2,cam.ay+1,c2,false,1,true)
 
-				alerts[j].t=alerts[j].t-1
-				if alerts[j].t==0 then rem(alerts[j].msgs,1); if #alerts[j].msgs==0 then alerts[j]=nil else alerts[j].t=160 end end
-		end
-		
 		local win
 		if not s.gameover then
 				win=true
@@ -1373,6 +1356,23 @@ function UIdraw(j)
 						local cw=print(sub('Winner!',c,c),cam.ax+cam.aw/2-tw/2+cx,cam.ay+cam.ah/2+sin(c*1.5+t*0.12)*2.5,7.9-(t*0.1)%4)
 						cx=cx+cw
 				end
+		end
+		
+		if alerts[j] then
+				clip(cam.ax,cam.ay,cam.aw,cam.ah)
+				local c,c2=2,4
+				if alerts[j].t<20 or alerts[j].t>160-20 then c,c2=1,3 end
+				if alerts[j].msgs[1].goodnews then 
+				c,c2=6,4
+				if alerts[j].t<20 or alerts[j].t>160-20 then c,c2=7,5 end
+				end
+				
+				rect(cam.ax,cam.ay,cam.aw,8,c)
+				local tw=print(alerts[j].msgs[1][1],0,-6,c2,false,1,true)
+				print(alerts[j].msgs[1][1],cam.ax+cam.aw/2-tw/2,cam.ay+1,c2,false,1,true)
+
+				alerts[j].t=alerts[j].t-1
+				if alerts[j].t==0 then rem(alerts[j].msgs,1); if #alerts[j].msgs==0 then alerts[j]=nil else alerts[j].t=160 end end
 		end
 		
 		if s.cap and s.cap.cap[s.id] then
