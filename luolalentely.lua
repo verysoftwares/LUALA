@@ -38,8 +38,8 @@ function OVR()
 						local base=nil
 						local avail={}
 						for k,b in pairs(bases) do
-								if b.owner==s then
-										ins(avail,b)
+								if b.owner==f.ship then
+										ins(avail,k)
 								end
 						end
 						if #avail>0 then 
@@ -50,7 +50,7 @@ function OVR()
 						dropshadow(fmt('%d',math.floor((f.t+60)/60)),f.ax+f.aw/2-tw/2,f.ay+f.ah/2+4,false)
 						print(fmt('%d',math.floor((f.t+60)/60)),f.ax+f.aw/2-tw/2,f.ay+f.ah/2+4,12)
 						f.t=f.t-1
-						if f.t==0 then base=avail[math.random(#avail)]; rem(fadeouts,i); f.ship.gone=false; f.ship.hp=30; f.ship.x=base.rx; f.ship.y=base.ry; f.ship.a=pi/2; f.ship.flash=nil; ships[f.ship.id]=f.ship; cams[f.ship.id]=f; f.ship.justspawned=true --[[ins(old_cams,f.ship.id,f.ship);]] f.ship.shot1=nil; f.ship.shot2=nil; inventory[f.ship.id]={{id=32},{id=49}} end--alerts[f.ship.id]={msgs={},t=0} end
+						if f.t==0 then base=avail[math.random(#avail)]; local bx,by=strpos(base); base=bases[base]; rem(fadeouts,i); f.t=nil; f.ship.gone=false; f.ship.hp=30; f.ship.x=base.rx; f.ship.y=base.ry; f.ship.a=pi/2; f.ship.flash=nil; ships[f.ship.id]=f.ship; cams[f.ship.id]=f; f.ship.justspawned=true; f.sx=bx; f.sy=by --[[ins(old_cams,f.ship.id,f.ship);]] f.ship.shot1=nil; f.ship.shot2=nil; inventory[f.ship.id]={{id=32},{id=49}} end--alerts[f.ship.id]={msgs={},t=0} end
 						else
 						local tw=print('Bases lost - can\'t respawn!',0,-6,12,false,1,true)
 						dropshadow('Bases lost - can\'t respawn!',f.ax+f.aw/2-tw/2,f.ay+f.ah/2,true)
