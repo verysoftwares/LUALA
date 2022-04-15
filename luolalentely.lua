@@ -30,6 +30,28 @@ tutor={{},{},{},{}}
 function OVR()
 		if TIC==update then
 
+		local tt=time()
+		handle_respawns()
+		ins(debugtimer,{time()-tt,'handle_respawns'})
+
+		tt=time()
+		for j=1,4 do
+		if ships[j] then
+		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
+		UIdraw(j)
+		end
+		end
+		ins(debugtimer,{time()-tt,'UIdraw'})
+		end
+		
+		clip()
+		table.sort(debugtimer,function(a,b) return a[1]>b[1] end)
+		for i,v in ipairs(debugtimer) do
+				print(fmt('%s: %d',v[2],math.floor(v[1]*1000)),0,i*6,12)
+		end
+end
+
+function handle_respawns()
 		for i=#fadeouts,1,-1 do
 				local f=fadeouts[i]
 				clip(f.ax,f.ay,f.aw,f.ah)
@@ -61,38 +83,44 @@ function OVR()
 						end
 				end
 		end
-
-		for j=1,4 do
-		if ships[j] then
-		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
-		UIdraw(j)
-		end
-		end
-		end
 end
+
+debugtimer={}
 
 function update()
 	--cls(0)
+		debugtimer={}
+		local tt
+		tt=time()
 		for j=1,4 do if ships[j] then
 		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 		clear_ship_trails(j)
 		end end
+		ins(debugtimer,{time()-tt,'clear_ship_trails'})
+		tt=time()
 		for j=1,4 do if ships[j] then
 		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 		shipprocess(j)
 		--renderwindow(j)
 		cameraprocess(j)
 		end end
+		ins(debugtimer,{time()-tt,'shipprocess'})
 
+		tt=time()
 		clip()
 		environprocess()		
-		
+		ins(debugtimer,{time()-tt,'environprocess'})
+
+		tt=time()		
 		for j=1,4 do if ships[j] then
 		clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 		shipdraw(j)
 		end end
+		ins(debugtimer,{time()-tt,'shipdraw'})
 		
+		tt=time()		
 		handle_kills()
+		ins(debugtimer,{time()-tt,'handle_kills'})
 		
 	--spr(1+t%60//30*2,x,y,14,3,0,0,2,2)
 	--print("HELLO WORLD!",84,84)
@@ -337,16 +365,17 @@ function clear_ship_trails(j)
 		line(cam.ax-cam.x+s.x+cos(s.a)*4,cam.ay-cam.y+s.y+4*sin(s.a),cam.ax-cam.x+s.x-cos(s.a+2*pi/3+0.3)*11,cam.ay-cam.y+s.y-sin(s.a+2*pi/3+0.3)*11,0)
 		line(cam.ax-cam.x+s.x-cos(s.a+2*pi/3+0.3)*11,cam.ay-cam.y+s.y-sin(s.a+2*pi/3+0.3)*11,cam.ax-cam.x+s.x-cos(s.a)*8,cam.ay-cam.y+s.y-sin(s.a)*8,0)
 		else s.trans=nil end
-		for bx=math.floor(s.x-12),math.floor(s.x+12) do for by=math.floor(s.y-12),math.floor(s.y+12) do
-				local p=pixels[posstr(bx,by)]
-				if p then
-						pix(cam.ax+bx-cam.x,cam.ay+by-cam.y,p)
-				end--else pix(cam.ax+bx-cam.x,cam.ay+by-cam.y,0) end
+		local p
+		for by=math.floor(s.y-12),math.floor(s.y+12) do for bx=math.floor(s.x-12),math.floor(s.x+12) do
+				--p=tostring(bx)..':'..tostring(by)
+				--if pix(cam.ax+bx-cam.x,cam.ay+by-cam.y)==0 then
+						--pix(cam.ax+bx-cam.x,cam.ay+by-cam.y,pixels[posstr(bx,by)])
+				--end--else pix(cam.ax+bx-cam.x,cam.ay+by-cam.y,0) end
 		end end
 
-		local p=pixels[posstr(s.x,s.y)]
-		if p then pix(cam.ax+s.x-cam.x,cam.ay+s.y-cam.y,p)
-		else pix(cam.ax+s.x-cam.x,cam.ay+s.y-cam.y,0) end
+		--local p=pixels[posstr(s.x,s.y)]
+		--if p then pix(cam.ax+s.x-cam.x,cam.ay+s.y-cam.y,p)
+		--else pix(cam.ax+s.x-cam.x,cam.ay+s.y-cam.y,0) end
 
 		--[[local rw=s.hp/30*(cam.aw-8)
 		for x=cam.ax+4,cam.ax+4+rw do for y=cam.ay+cam.ah-1-4,cam.ay+cam.ah-1-4+2 do
