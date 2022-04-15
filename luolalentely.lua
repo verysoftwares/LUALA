@@ -745,10 +745,14 @@ function environprocess()
 						if pox<0 then pox=math.floor(pox+0.999) end
 						if poy<0 then poy=math.floor(poy+0.999) end
 
+						local ax=cams[j].ax+pox-cams[j].x-8+x
+						local ay=cams[j].ay+poy-cams[j].y-8+y
+						if ax>=cams[j].ax and ax<cams[j].ax+cams[j].aw and ay>=cams[j].ay and ay<cams[j].ay+cams[j].ah then 
 				  local px= pixels[posstr(pox-8+x,poy-8+y)]
 						if px==2 then px=trc end
 						if px then pix(cams[j].ax+pox-cams[j].x-8+x,cams[j].ay+poy-cams[j].y-8+y,px)
-						else pix(cams[j].ax+pox-cams[j].x-8+x,cams[j].ay+poy-cams[j].y-8+y,0) end				
+						else pix(cams[j].ax+pox-cams[j].x-8+x,cams[j].ay+poy-cams[j].y-8+y,0) end
+						end
 				end end
 				end end
 				end
@@ -1104,16 +1108,23 @@ function environprocess()
 
 		for i=#explosions,1,-1 do
 				local exp=explosions[i]
+				for x=exp.x-(exp.r+1),exp.x+(exp.r+1)+1 do for y=exp.y-(exp.r+1),exp.y+(exp.r+1)+1 do
+						local ps= posstr(x,y)
+						if is_solid(pixels[ps]) and math.sqrt((x-exp.x)^2+(y-exp.y)^2)<=exp.r+1 then pixels[ps]=1 end
+				end end
 				for j=4,1,-1 do if ships[j] then
 				clip(cams[j].ax,cams[j].ay,cams[j].aw,cams[j].ah)
 				for x=exp.x-(exp.r+1),exp.x+(exp.r+1)+1 do for y=exp.y-(exp.r+1),exp.y+(exp.r+1)+1 do
+						local ax=cams[j].ax+x-cams[j].x
+						local ay=cams[j].ay+y-cams[j].y
+						if ax>=cams[j].ax and ax<cams[j].ax+cams[j].aw and ay>cams[j].ay and ay<cams[j].ay+cams[j].ah then
 						local p= pixels[posstr(x,y)]
 						if not p then
 								pix(cams[j].ax-cams[j].x+x,cams[j].ay-cams[j].y+y,0)
 						else 
 						if p==2 then p=trc end
-						if is_solid(p) and math.sqrt((x-exp.x)^2+(y-exp.y)^2)<=exp.r+1 then p=1; pixels[posstr(x,y)]=1 end
 						pix(cams[j].ax-cams[j].x+x,cams[j].ay-cams[j].y+y,p) end
+						end
 				end end
 				end end
 				clip()
@@ -1588,13 +1599,7 @@ function UIdraw(j)
 						dropshadow('Select weapons.',cam.ax+cx-tw/2,cam.ay+cy-6-8,true)
 						print('Select weapons.',cam.ax+cx-tw/2,cam.ay+cy-6-8,12,false,1,true)
 				end
-				if not tutor[s.id].moved and (s.shot1 and s.shot2) then
-						tutor[s.id].shot=true
-						local tw= print('Move up to leave base.',0,-6,12,false,1,true)
-						dropshadow('Move up to leave base.',cam.ax+cx-tw/2,cam.ay+cy-6-8,true)
-						print('Move up to leave base.',cam.ax+cx-tw/2,cam.ay+cy-6-8,12,false,1,true)
-				end
-				if not tutor[s.id].moved or not tutor[s.id].shot then
+				if not tutor[s.id].shot then
 						if not tutor[s.id].scrolled then
 						local tw=gfxprint('{29}/{30}: scroll',0,-7,12,true)
 						gfxprint('{29}/{30}: scroll',cam.ax+cx-tw/2,cam.ay+cy+12+2+8+2,12,true)
@@ -1609,6 +1614,14 @@ function UIdraw(j)
 						end
 						local tw=gfxprint(msg,0,-7,12,true)
 						gfxprint(msg,cam.ax+cx-tw/2,cam.ay+cy+12+2+8+2,12,true)
+						end
+				end
+				if s.shot1 and s.shot2 then
+						tutor[s.id].shot=true
+						if not tutor[s.id].moved then
+						local tw= print('Move up to leave base.',0,-6,12,false,1,true)
+						dropshadow('Move up to leave base.',cam.ax+cx-tw/2,cam.ay+cy-6-8,true)
+						print('Move up to leave base.',cam.ax+cx-tw/2,cam.ay+cy-6-8,12,false,1,true)
 						end
 				end
 				if not tutor[s.id].scrapped and tutor[s.id].scrolled and s.shot1 and s.shot2 and actuallen(inventory[j])>2 then
