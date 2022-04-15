@@ -368,9 +368,14 @@ function clear_ship_trails(j)
 		local p
 		for by=math.floor(s.y-12),math.floor(s.y+12) do for bx=math.floor(s.x-12),math.floor(s.x+12) do
 				--p=tostring(bx)..':'..tostring(by)
-				--if pix(cam.ax+bx-cam.x,cam.ay+by-cam.y)==0 then
-						--pix(cam.ax+bx-cam.x,cam.ay+by-cam.y,pixels[posstr(bx,by)])
-				--end--else pix(cam.ax+bx-cam.x,cam.ay+by-cam.y,0) end
+				local ax=cam.ax+bx-cam.x
+				local ay=cam.ay+by-cam.y
+				if ax>=cam.ax and ax<cam.ax+cam.aw and ay>=cam.ay and ay<cam.ay+cam.ah and pix(ax,ay)==0 then
+						p=pixels[posstr(bx,by)]
+						if p then
+						pix(cam.ax+bx-cam.x,cam.ay+by-cam.y,p)
+						end
+				end--else pix(cam.ax+bx-cam.x,cam.ay+by-cam.y,0) end
 		end end
 
 		--local p=pixels[posstr(s.x,s.y)]
