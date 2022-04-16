@@ -47,7 +47,7 @@ function OVR()
 		clip()
 		table.sort(debugtimer,function(a,b) return a[1]>b[1] end)
 		for i,v in ipairs(debugtimer) do
-				print(fmt('%s: %d',v[2],math.floor(v[1]*1000)),0,i*6,12)
+				--print(fmt('%s: %d',v[2],math.floor(v[1]*1000)),0,i*6,12)
 		end
 end
 
@@ -1624,7 +1624,7 @@ function UIdraw(j)
 						print('Move up to leave base.',cam.ax+cx-tw/2,cam.ay+cy-6-8,12,false,1,true)
 						end
 				end
-				if not tutor[s.id].scrapped and tutor[s.id].scrolled and s.shot1 and s.shot2 and actuallen(inventory[j])>2 then
+				if not tutor[s.id].scrapped and tutor[s.id].scrolled and tutor[s.id].shot and actuallen(inventory[j])>2 then
 						local tw=gfxprint('{11}+{29}: scrap weapon',0,-7,12,true)
 						gfxprint('{11}+{29}: scrap weapon',cam.ax+cx-tw/2,cam.ay+cy+12+2+8+2,12,true)
 				end
