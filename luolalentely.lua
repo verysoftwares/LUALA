@@ -1,5 +1,5 @@
 -- title:  LUALA
--- author: Team Mystery Dungeon
+-- author: Spelcasters
 -- desc:   local multiplayer cave flier
 -- script: lua
 
