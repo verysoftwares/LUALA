@@ -1888,6 +1888,7 @@ end
 alerts={}
 
 function alert(j,msg,goodnews)
+		if not ships[j] then return end
 		if alerts[j] then 
 		if #alerts[j].msgs==1 and alerts[j].msgs[1].goodnews and goodnews then
 		alerts[j].msgs[1][1]=msg; alerts[j].t=160
